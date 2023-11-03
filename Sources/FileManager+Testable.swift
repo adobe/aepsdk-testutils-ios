@@ -13,8 +13,8 @@
 @testable import AEPServices
 import Foundation
 
-extension FileManager {
-    public func clearCache() {
+public extension FileManager {
+    func clearCache() {
         let knownCacheItems: [String] = ["com.adobe.edge", "com.adobe.edge.identity", "com.adobe.edge.consent"]
         guard let url = self.urls(for: .cachesDirectory, in: .userDomainMask).first else {
             return
