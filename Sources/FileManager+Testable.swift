@@ -31,4 +31,40 @@ extension FileManager {
             }
         }
     }
+    
+    /// Removes the Adobe-specific directory within the app's data storage (persistence). This method attempts to locate and delete the 
+    /// `com.adobe.aep.datastore` directory either in the specified app group's container directory or in the default library directory 
+    /// if no app group is provided.
+    ///
+    /// - Parameter appGroup: An optional `String` representing the app group identifier. If provided, the method will look for the Adobe directory within the shared container for that app group. If `nil`, the method will search for the directory in the user's library directory across all domains the app has access to.
+    ///
+    /// - Requires: Before calling this method, ensure that the caller has the appropriate permissions to access and modify the file system, especially if working with app group directories.
+    func removeAdobeDirectory(appGroup: String?) {
+        let LOG_TAG = "FileManager"
+        let adobeDirectory = "com.adobe.aep.datastore"
+        let fileManager = FileManager.default
+
+        // Recreate the directory URL
+        var directoryUrl: URL?
+        if let appGroup = appGroup {
+            directoryUrl = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroup)?
+                .appendingPathComponent(adobeDirectory, isDirectory: true)
+        } else {
+            directoryUrl = fileManager.urls(for: .libraryDirectory, in: .allDomainsMask).first?
+                .appendingPathComponent(adobeDirectory, isDirectory: true)
+        }
+
+        guard let directoryUrl = directoryUrl else {
+            Log.error(label: LOG_TAG, "Could not compute the directory URL for removal.")
+            return
+        }
+        
+        // Remove the directory
+        do {
+            try fileManager.removeItem(at: directoryUrl)
+            Log.debug(label: LOG_TAG, "Successfully removed directory at \(directoryUrl.path).")
+        } catch {
+            Log.warning(label: LOG_TAG, "Failed to remove directory at \(directoryUrl.path) with error: \(error)")
+        }
+    }
 }
