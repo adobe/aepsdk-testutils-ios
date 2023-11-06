@@ -32,26 +32,25 @@ public extension FileManager {
         }
     }
     
-    /// Removes the Adobe-specific directory within the app's data storage (persistence). This method attempts to locate and delete the 
-    /// `com.adobe.aep.datastore` directory either in the specified app group's container directory or in the default library directory 
+    /// Removes the Adobe cache directory within the app's data storage (persistence) from the specified app group's container directory or in the default library directory
     /// if no app group is provided.
     ///
-    /// - Parameter appGroup: An optional `String` representing the app group identifier. If provided, the method will look for the Adobe directory within the shared container for that app group. If `nil`, the method will search for the directory in the user's library directory across all domains the app has access to.
-    ///
+    /// - Parameters:
+    ///   - directoryName: A `String` specifying the name of the directory to remove. Defaults to `"com.adobe.aep.datastore"` if not specified.
+    ///   - appGroup: An optional `String` representing the app group identifier. If provided, the method will look for the directory within the app group container. If `nil`, the method will search in the current application's library directory.
     /// - Requires: Before calling this method, ensure that the caller has the appropriate permissions to access and modify the file system, especially if working with app group directories.
-    func removeAdobeDirectory(appGroup: String?) {
+    func removeAdobeCacheDirectory(_ directoryName: String = "com.adobe.aep.datastore", with appGroup: String? = nil) {
         let LOG_TAG = "FileManager"
-        let adobeDirectory = "com.adobe.aep.datastore"
         let fileManager = FileManager.default
 
         // Recreate the directory URL
         var directoryUrl: URL?
         if let appGroup = appGroup {
             directoryUrl = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroup)?
-                .appendingPathComponent(adobeDirectory, isDirectory: true)
+                .appendingPathComponent(directoryName, isDirectory: true)
         } else {
             directoryUrl = fileManager.urls(for: .libraryDirectory, in: .allDomainsMask).first?
-                .appendingPathComponent(adobeDirectory, isDirectory: true)
+                .appendingPathComponent(directoryName, isDirectory: true)
         }
 
         guard let directoryUrl = directoryUrl else {
