@@ -49,11 +49,12 @@ _archive: pod-update
 	xcodebuild archive -workspace $(PROJECT_NAME).xcworkspace -scheme $(SCHEME_NAME_XCFRAMEWORK) -archivePath "./build/ios_simulator.xcarchive" -sdk iphonesimulator -destination="iOS Simulator" SKIP_INSTALL=NO BUILD_LIBRARIES_FOR_DISTRIBUTION=YES ADB_SKIP_LINT=YES
 	xcodebuild -create-xcframework -framework $(SIMULATOR_ARCHIVE_PATH)$(EXTENSION_NAME).framework -debug-symbols $(SIMULATOR_ARCHIVE_DSYM_PATH)$(EXTENSION_NAME).framework.dSYM -framework $(IOS_ARCHIVE_PATH)$(EXTENSION_NAME).framework -debug-symbols $(IOS_ARCHIVE_DSYM_PATH)$(EXTENSION_NAME).framework.dSYM -output ./build/$(TARGET_NAME_XCFRAMEWORK)
 
-test:
+unit-test-ios:
 	@echo "######################################################################"
-	@echo "### Testing iOS"
+	@echo "### Unit Testing iOS"
 	@echo "######################################################################"
-	xcodebuild test -workspace $(PROJECT_NAME).xcworkspace -scheme $(PROJECT_NAME) -destination 'platform=iOS Simulator,name=iPhone 8' -derivedDataPath build/outn -resultBundlePath results.xcresult -enableCodeCoverage YES ADB_SKIP_LINT=YES
+	rm -rf build/reports/iosUnitResults.xcresult
+	xcodebuild test -workspace $(PROJECT_NAME).xcworkspace -scheme "UnitTests" -destination "platform=iOS Simulator,name=iPhone 14" -derivedDataPath build/out -resultBundlePath build/reports/iosUnitResults.xcresult -enableCodeCoverage YES ADB_SKIP_LINT=YES
 
 install-githook:
 	git config core.hooksPath .githooks
