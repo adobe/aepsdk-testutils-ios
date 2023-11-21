@@ -31,7 +31,7 @@ public extension FileManager {
             }
         }
     }
-    
+
     /// Removes the Adobe cache directory within the app's data storage (persistence) from the specified app group's container directory or in the default library directory
     /// if no app group is provided.
     ///
@@ -57,7 +57,7 @@ public extension FileManager {
             Log.error(label: LOG_TAG, "Could not compute the directory URL for removal.")
             return
         }
-        
+
         // Remove the directory
         do {
             try fileManager.removeItem(at: directoryUrl)

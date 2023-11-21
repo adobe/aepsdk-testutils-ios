@@ -97,7 +97,7 @@ public class TestableExtensionRuntime: ExtensionRuntime {
     public func stopEvents() {}
 
     // MARK: - Helper methods
-    
+
     /// Ignores the events from being dispatched by event hub.
     /// - Parameters:
     ///  - type: `EventType` of the event to be ignored
@@ -171,7 +171,7 @@ public class TestableExtensionRuntime: ExtensionRuntime {
         createdSharedStates = []
         createdXdmSharedStates = []
     }
-    
+
     public func getHistoricalEvents(_ events: [EventHistoryRequest], enforceOrder: Bool, handler: @escaping ([EventHistoryResult]) -> Void) {
         receivedEventHistoryRequests = events
         receivedEnforceOrder = enforceOrder

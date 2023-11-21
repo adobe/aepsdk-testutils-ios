@@ -18,7 +18,7 @@ import XCTest
 public class MockNetworkService: Networking {
     private let helper: NetworkRequestHelper = NetworkRequestHelper()
     private var responseDelay: UInt32
-    
+
     // Public initializer
     public init(responseDelay: UInt32 = 0) {
         self.responseDelay = responseDelay
