@@ -28,6 +28,9 @@ public class MockNetworkService: Networking {
         if self.responseDelay > 0 {
             sleep(self.responseDelay)
         }
+        
+        helper.recordSentNetworkRequest(networkRequest)
+        helper.countDownExpected(networkRequest: networkRequest)
 
         if let response = self.getMockResponse(for: networkRequest) {
             completionHandler?(response)
@@ -46,10 +49,6 @@ public class MockNetworkService: Networking {
                 )
             )
         }
-        // Do these countdown after notifying completion handler to avoid prematurely ungating awaits
-        // before required network logic finishes
-        helper.recordSentNetworkRequest(networkRequest)
-        helper.countDownExpected(networkRequest: networkRequest)
     }
 
     public func reset() {
