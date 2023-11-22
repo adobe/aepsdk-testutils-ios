@@ -165,7 +165,6 @@ class NetworkRequestHelper {
     }
     
     func assertUnexpectedRequests(file: StaticString = #file, line: UInt = #line) {
-        wait() // Wait for all network requests to be completed
         var unexpectedRequestsCount = 0
         var unexpectedRequestsAsString = ""
 
