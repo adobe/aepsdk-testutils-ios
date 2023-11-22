@@ -28,9 +28,9 @@ public class MockNetworkService: Networking {
         if self.responseDelay > 0 {
             sleep(self.responseDelay)
         }
-        
+
         helper.recordSentNetworkRequest(networkRequest)
-        
+
         if let response = self.getMockResponse(for: networkRequest) {
             completionHandler?(response)
         } else {
@@ -48,7 +48,7 @@ public class MockNetworkService: Networking {
                 )
             )
         }
-        
+
         // Do countdown after notifying completion handler to avoid prematurely ungating awaits
         // before required network logic finishes
         helper.countDownExpected(networkRequest: networkRequest)
@@ -88,7 +88,7 @@ public class MockNetworkService: Networking {
         }
         setMockResponse(for: networkRequest, responseConnection: responseConnection)
     }
-    
+
     /// Sets a mock network response for the provided network request.
     ///
     /// - Parameters:
@@ -146,7 +146,7 @@ public class MockNetworkService: Networking {
         }
         return getNetworkRequestsWith(url: url, httpMethod: httpMethod, expectationTimeout: expectationTimeout, file: file, line: line)
     }
-    
+
     /// Returns the network request(s) sent through the Core NetworkService, or empty if none was found.
     ///
     /// Use this method after calling `setExpectationForNetworkRequest(url:httpMethod:expectedCount:file:line:)` to wait for expected requests.

@@ -163,7 +163,7 @@ class NetworkRequestHelper {
         if ignoreUnexpectedRequests { return }
         assertUnexpectedRequests()
     }
-    
+
     func assertUnexpectedRequests(file: StaticString = #file, line: UInt = #line) {
         var unexpectedRequestsCount = 0
         var unexpectedRequestsAsString = ""
@@ -207,10 +207,10 @@ class NetworkRequestHelper {
         guard let url = URL(string: url) else {
             return []
         }
-        
+
         return getNetworkRequestsWith(url: url, httpMethod: httpMethod, expectationTimeout: expectationTimeout, file: file, line: line)
     }
-    
+
     /// Returns the network request(s) sent through the Core NetworkService, or empty if none was found.
     ///
     /// Use this method after calling `setExpectationForNetworkRequest(networkRequest:expectedCount:file:line:)` to wait for expected requests.
