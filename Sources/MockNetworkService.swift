@@ -110,8 +110,8 @@ public class MockNetworkService: Networking {
     ///   - line: The line from which the method is called, used for localized assertion failures.
     /// - SeeAlso:
     ///     - ``setExpectationForNetworkRequest(url:httpMethod:expectedCount:file:line:)``
-    public func assertAllNetworkRequestExpectations(file: StaticString = #file, line: UInt = #line) {
-        helper.assertAllNetworkRequestExpectations(file: file, line: line)
+    public func assertAllNetworkRequestExpectations(ignoreUnexpectedRequests: Bool = true, file: StaticString = #file, line: UInt = #line) {
+        helper.assertAllNetworkRequestExpectations(ignoreUnexpectedRequests: ignoreUnexpectedRequests, file: file, line: line)
     }
 
     /// Returns the network request(s) sent through the Core NetworkService, or empty if none was found.

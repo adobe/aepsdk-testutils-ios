@@ -146,7 +146,7 @@ class NetworkRequestHelper {
     /// - SeeAlso:
     ///     - ``setExpectationForNetworkRequest(url:httpMethod:)``
     func assertAllNetworkRequestExpectations(ignoreUnexpectedRequests: Bool = true, file: StaticString = #file, line: UInt = #line) {
-        if expectedNetworkRequests.isEmpty && {
+        if expectedNetworkRequests.isEmpty {
             if !ignoreUnexpectedRequests {
                 assertUnexpectedRequests()
             }
