@@ -82,11 +82,21 @@ public class MockNetworkService: Networking {
     ///   - url: The URL `String` of the `NetworkRequest` for which the mock response is being set.
     ///   - httpMethod: The HTTP method of the `NetworkRequest` for which the mock response is being set.
     ///   - responseConnection: The `HttpConnection` to set as a response. If `nil` is provided, a default HTTP status code `200` response is used.
-    public func setMockResponse(url: String, httpMethod: HttpMethod, responseConnection: HttpConnection) {
+    public func setMockResponse(url: String, httpMethod: HttpMethod = .post, responseConnection: HttpConnection) {
         guard let networkRequest = NetworkRequest(urlString: url, httpMethod: httpMethod) else {
             return
         }
         setMockResponse(for: networkRequest, responseConnection: responseConnection)
+    }
+    
+    /// Sets a mock network response for the provided network request.
+    ///
+    /// - Parameters:
+    ///   - url: The `URL` of the `NetworkRequest` for which the mock response is being set.
+    ///   - httpMethod: The HTTP method of the `NetworkRequest` for which the mock response is being set.
+    ///   - responseConnection: The `HttpConnection` to set as a response. If `nil` is provided, a default HTTP status code `200` response is used.
+    public func setMockResponse(url: URL, httpMethod: HttpMethod = .post, responseConnection: HttpConnection) {
+        setMockResponse(for: NetworkRequest(url: url, httpMethod: httpMethod), responseConnection: responseConnection)
     }
 
     // MARK: - Passthrough for shared helper APIs
@@ -131,7 +141,28 @@ public class MockNetworkService: Networking {
     /// - SeeAlso:
     ///     - ``setExpectationForNetworkRequest(url:httpMethod:expectedCount:file:line:)``
     public func getNetworkRequestsWith(url: String, httpMethod: HttpMethod, expectationTimeout: TimeInterval = TestConstants.Defaults.WAIT_NETWORK_REQUEST_TIMEOUT, file: StaticString = #file, line: UInt = #line) -> [NetworkRequest] {
-        helper.getNetworkRequestsWith(url: url, httpMethod: httpMethod, expectationTimeout: expectationTimeout, file: file, line: line)
+        guard let url = URL(string: url) else {
+            return []
+        }
+        return getNetworkRequestsWith(url: url, httpMethod: httpMethod, expectationTimeout: expectationTimeout, file: file, line: line)
+    }
+    
+    /// Returns the network request(s) sent through the Core NetworkService, or empty if none was found.
+    ///
+    /// Use this method after calling `setExpectationForNetworkRequest(url:httpMethod:expectedCount:file:line:)` to wait for expected requests.
+    ///
+    /// - Parameters:
+    ///   - url: The URL `String` of the `NetworkRequest` to get.
+    ///   - httpMethod: The HTTP method of the `NetworkRequest` to get.
+    ///   - expectationTimeout: The duration (in seconds) to wait for **expected network requests** before failing, with a default of ``WAIT_NETWORK_REQUEST_TIMEOUT``. Otherwise waits for ``WAIT_TIMEOUT`` without failing.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
+    /// - Returns: An array of `NetworkRequest`s that match the provided `url` and `httpMethod`. Returns an empty array if no matching requests were dispatched.
+    ///
+    /// - SeeAlso:
+    ///     - ``setExpectationForNetworkRequest(url:httpMethod:expectedCount:file:line:)``
+    public func getNetworkRequestsWith(url: URL, httpMethod: HttpMethod, expectationTimeout: TimeInterval = TestConstants.Defaults.WAIT_NETWORK_REQUEST_TIMEOUT, file: StaticString = #file, line: UInt = #line) -> [NetworkRequest] {
+        return helper.getNetworkRequestsWith(url: url, httpMethod: httpMethod, expectationTimeout: expectationTimeout, file: file, line: line)
     }
 
     // MARK: - Private helpers
