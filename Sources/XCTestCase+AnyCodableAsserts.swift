@@ -21,7 +21,7 @@ public protocol AnyCodableAsserts {
 
     /// Gets an event's data payload converted into `AnyCodable` format
     func getAnyCodable(_ event: Event) -> AnyCodable?
-    
+
     /// Converts a network request's connect payload into `AnyCodable` format.
     func getAnyCodable(_ networkRequest: NetworkRequest) -> AnyCodable?
 
@@ -81,7 +81,7 @@ public protocol AnyCodableAsserts {
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, exactMatchPaths: [String], file: StaticString, line: UInt)
-    
+
     func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: [MultiPathConfig], file: StaticString, line: UInt)
     func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: MultiPathConfig..., file: StaticString, line: UInt)
 
@@ -130,7 +130,7 @@ public protocol AnyCodableAsserts {
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertExactMatch(expected: AnyCodable, actual: AnyCodable?, typeMatchPaths: [String], file: StaticString, line: UInt)
-    
+
     func assertExactMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: [MultiPathConfig], file: StaticString, line: UInt)
     func assertExactMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: MultiPathConfig..., file: StaticString, line: UInt)
 }
@@ -143,7 +143,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
     func getAnyCodable(_ event: Event) -> AnyCodable? {
         return AnyCodable(AnyCodable.from(dictionary: event.data))
     }
-    
+
     func getAnyCodable(_ networkRequest: NetworkRequest) -> AnyCodable? {
         guard let payloadAsDictionary = try? JSONSerialization.jsonObject(with: networkRequest.connectPayload, options: []) as? [String: Any] else {
             return nil
@@ -173,17 +173,19 @@ public extension AnyCodableAsserts where Self: XCTestCase {
     func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, exactMatchPaths: [String] = [], file: StaticString = #file, line: UInt = #line) {
         assertTypeMatch(expected: expected, actual: actual, pathOptions: ValueExactMatch(paths: exactMatchPaths, scope: .subtree), file: file, line: line)
     }
-    
+
     func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) {
         let treeDefaults: [MultiPathConfig] = [
-            WildcardMatch(paths: nil, isActive: false),
             CollectionEqualCount(paths: nil, isActive: false),
-            ValueTypeMatch(paths: nil)]
-        
+            KeyMustBeAbsent(paths: nil, isActive: false),
+            ValueTypeMatch(paths: nil),
+            WildcardMatch(paths: nil, isActive: false)
+        ]
+
         let nodeTree = generateNodeTree(pathOptions: pathOptions, treeDefaults: treeDefaults, file: file, line: line)
         validateJSON(expected: expected, actual: actual, nodeTree: nodeTree, file: file, line: line)
     }
-    
+
     func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: MultiPathConfig..., file: StaticString = #file, line: UInt = #line) {
         assertTypeMatch(expected: expected, actual: actual, pathOptions: pathOptions, file: file, line: line)
     }
@@ -192,13 +194,15 @@ public extension AnyCodableAsserts where Self: XCTestCase {
     func assertExactMatch(expected: AnyCodable, actual: AnyCodable?, typeMatchPaths: [String] = [], file: StaticString = #file, line: UInt = #line) {
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: typeMatchPaths, scope: .subtree), file: file, line: line)
     }
-    
+
     func assertExactMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) {
         let treeDefaults: [MultiPathConfig] = [
-            WildcardMatch(paths: nil, isActive: false),
             CollectionEqualCount(paths: nil, isActive: false),
-            ValueExactMatch(paths: nil)]
-        
+            KeyMustBeAbsent(paths: nil, isActive: false),
+            ValueExactMatch(paths: nil),
+            WildcardMatch(paths: nil, isActive: false)
+        ]
+
         let nodeTree = generateNodeTree(pathOptions: pathOptions, treeDefaults: treeDefaults, file: file, line: line)
         validateJSON(expected: expected, actual: actual, nodeTree: nodeTree, file: file, line: line)
     }
@@ -337,8 +341,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         nodeTree: NodeConfig,
         shouldAssert: Bool = true,
         file: StaticString = #file,
-        line: UInt = #line) -> Bool 
-    {
+        line: UInt = #line) -> Bool {
         if expected == nil {
             return true
         }
@@ -373,7 +376,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             }
             return false
         }
-        
+
         // Create a dictionary where:
         // key: the index in String format
         // value: the resolved option for if wildcard matching should be used for the index
@@ -386,23 +389,23 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         wildcardIndexes.forEach { key, _ in
             expectedIndexes.removeValue(forKey: key)
         }
-        
+
         var availableWildcardActualIndexes = Set((0..<actual.count).map({ String($0) })).subtracting(expectedIndexes.keys)
-        
-        var finalResult = true
+
+        var validationResult = true
         // Validate non-wildcard expected side indexes first, as these don't have
         // position flexibility
         for (index, config) in expectedIndexes {
             let intIndex = Int(index)!
-            finalResult = validateJSON(
+            validationResult = validateJSON(
                 expected: expected[intIndex],
                 actual: actual[intIndex],
                 keyPath: keyPath + [intIndex],
                 nodeTree: nodeTree.getChild(named: index) ?? nodeTree.asFinalNode(),
                 shouldAssert: shouldAssert,
-                file: file, line: line) && finalResult
+                file: file, line: line) && validationResult
         }
-        
+
         for (index, config) in wildcardIndexes {
             let intIndex = Int(index)!
 
@@ -427,13 +430,13 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                         Key path: \#(keyPathAsString(keyPath))
                         """#, file: file, line: line)
                 }
-                finalResult = false
+                validationResult = false
                 break
             }
             availableWildcardActualIndexes.remove(actualIndex)
         }
-        
-        return finalResult
+
+        return validationResult
     }
 
     /// Performs a cutomizable validation between the given `expected` and `actual` `AnyCodable`dictionaries, using the configured options.
@@ -456,8 +459,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         nodeTree: NodeConfig,
         shouldAssert: Bool = true,
         file: StaticString = #file,
-        line: UInt = #line) -> Bool 
-    {
+        line: UInt = #line) -> Bool {
         if expected == nil {
             return true
         }
@@ -492,9 +494,33 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             }
             return false
         }
-        var finalResult = true
+
+        // Check if key must be absent
+        let keysThatMustBeAbsent = nodeTree.children.filter({ $0.keyMustBeAbsent.isActive }).compactMap({ $0.name })
+        var keyAbsenceResult = true
+        for absentKey in keysThatMustBeAbsent {
+            if actual[absentKey] != nil {
+                if shouldAssert {
+                    XCTFail(#"""
+                        Actual JSON should not have key with name: \#(absentKey)
+
+                        Expected: \#(expected)
+
+                        Actual: \#(actual)
+
+                        Key path: \#(keyPathAsString(keyPath))
+                    """#, file: file, line: line)
+                }
+                keyAbsenceResult = false
+            }
+        }
+        guard keyAbsenceResult else {
+            return keyAbsenceResult
+        }
+
+        var validationResult = true
         for (key, value) in expected {
-            finalResult = validateJSON(
+            validationResult = validateJSON(
                 expected: value,
                 actual: actual[key],
                 keyPath: keyPath + [key],
@@ -502,9 +528,9 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 shouldAssert: shouldAssert,
                 file: file,
                 line: line)
-                && finalResult
+                && validationResult
         }
-        return finalResult
+        return validationResult
     }
 
     // MARK: - Test setup and output helpers
@@ -523,20 +549,20 @@ public extension AnyCodableAsserts where Self: XCTestCase {
     private func generateNodeTree(pathOptions: [MultiPathConfig], treeDefaults: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) -> NodeConfig {
         // 1. creates the first node using the incoming defaults
         // using the first node it passes the path to the node to create the child nodes and just loops through all the paths passing them
-        
+
         var subtreeOptions: [NodeConfig.OptionKey: NodeConfig.Config] = [:]
         for treeDefault in treeDefaults {
             let key = treeDefault.optionKey
             let config = NodeConfig.Config(isActive: treeDefault.isActive)
             subtreeOptions[key] = config
         }
-        
+
         let rootNode = NodeConfig(name: nil, subtreeOptions: subtreeOptions)
 
         for pathConfig in pathOptions {
             rootNode.createOrUpdateNode(using: pathConfig)
         }
-        
+
         return rootNode
     }
 

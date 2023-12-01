@@ -271,4 +271,54 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
         }
     }
 
+    // MARK: - Path options tests
+    func testKeyMustBeAbsentPasses_whenSinglePath() {
+        let expectedJSONString = """
+        {}
+        """
+
+        let actualJSONString = """
+        {
+            "key1": 1
+        }
+        """
+        let expected = getAnyCodable(expectedJSONString)!
+        let actual = getAnyCodable(actualJSONString)!
+
+        assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key2"))
+    }
+
+    func testKeyMustBeAbsentPasses_whenMutliplePaths() {
+        let expectedJSONString = """
+        {}
+        """
+
+        let actualJSONString = """
+        {
+            "key1": 1
+        }
+        """
+        let expected = getAnyCodable(expectedJSONString)!
+        let actual = getAnyCodable(actualJSONString)!
+
+        assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key2", "key3"))
+    }
+
+    func testKeyMustBeAbsentCorrectlyFails_whenKeyPresent() {
+        let expectedJSONString = """
+        {}
+        """
+
+        let actualJSONString = """
+        {
+            "key1": 1
+        }
+        """
+        let expected = getAnyCodable(expectedJSONString)!
+        let actual = getAnyCodable(actualJSONString)!
+
+        XCTExpectFailure("Validation should fail when key that must be absent is present in actual") {
+            assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key1"))
+        }
+    }
 }
