@@ -46,7 +46,7 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
             (expected: #"{ "key1": null }"#, actual: #"{ "key1": null }"#) // `null` as value
         ]
         let testCases = rawCases.map { tuple in
-            return (expected: getAnyCodable(tuple.expected)!, actual: getAnyCodable(tuple.actual))
+            return (expected: tuple.expected.toAnyCodable()!, actual: tuple.actual.toAnyCodable()!)
         }
         for (index, (expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should match basic collection values: [\(index)]: test with expected=\(expected), actual=\(actual)") { _ in
@@ -87,7 +87,7 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
             (expected: #"{ "key1": { "key2": "a" } }"#, actual: #"{ "key1": { "key2": "b", "key3": 3 } }"#)
         ]
         let testCases = rawCases.map { tuple in
-            return (expected: getAnyCodable(tuple.expected)!, actual: getAnyCodable(tuple.actual))
+            return (expected: tuple.expected.toAnyCodable()!, actual: tuple.actual.toAnyCodable()!)
         }
         for (index, (expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should match only by type for values of the same type: [\(index)]: test with expected=\(expected), actual=\(actual)") { _ in
@@ -113,7 +113,7 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
              actual: #"{ "key1": 1, "key2": "a", "key3": 1.0, "key4": true, "key5": "extra" }"#)
         ]
         let testCases = rawCases.map { tuple in
-            return (expected: getAnyCodable(tuple.expected)!, actual: getAnyCodable(tuple.actual))
+            return (expected: tuple.expected.toAnyCodable()!, actual: tuple.actual.toAnyCodable()!)
         }
         for (index, (expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should pass flexible matching when expected is a subset: [\(index)]: test with expected=\(expected), actual=\(actual)") { _ in
@@ -216,9 +216,9 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
         ]
         let testCases = rawCases.map { tuple in
             print(tuple)
-            let expectedAnyCodable: AnyCodable? = getAnyCodable(tuple.expected)
-            let actualAnyCodable: AnyCodable? = getAnyCodable(tuple.actual)
-            return (expected: expectedAnyCodable!, actual: actualAnyCodable)
+            let expectedAnyCodable = tuple.expected.toAnyCodable()!
+            let actualAnyCodable = tuple.actual.toAnyCodable()!
+            return (expected: expectedAnyCodable, actual: actualAnyCodable)
         }
         print("translated testCases: \(testCases)")
         for (index, (expected, actual)) in testCases.enumerated() {
@@ -241,9 +241,9 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
             (path: "key1", expected: nil, actual: nil, format: { #"{ "key1": \#($0 ?? "null") }"# })
         ]
         let testCases = rawCases.map { tuple in
-            let expectedAnyCodable: AnyCodable? = getAnyCodable(tuple.format(tuple.expected))
-            let actualAnyCodable: AnyCodable? = getAnyCodable(tuple.format(tuple.actual))
-            return (path: tuple.path, expected: expectedAnyCodable!, actual: actualAnyCodable)
+            let expectedAnyCodable = tuple.format(tuple.expected).toAnyCodable()!
+            let actualAnyCodable = tuple.format(tuple.actual).toAnyCodable()!
+            return (path: tuple.path, expected: expectedAnyCodable, actual: actualAnyCodable)
         }
         for (index, (path, expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should not fail because of alternate path: [\(index)]: test with path=\(path), expected=\(expected), actual=\(actual)") { _ in
@@ -273,9 +273,9 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
             (path: "[*]", expected: nil, actual: nil, format: { #"[\#($0 ?? "null")]"# })
         ]
         let testCases = rawCases.map { tuple in
-            let expectedAnyCodable: AnyCodable? = getAnyCodable(tuple.format(tuple.expected))
-            let actualAnyCodable: AnyCodable? = getAnyCodable(tuple.format(tuple.actual))
-            return (path: tuple.path, expected: expectedAnyCodable!, actual: actualAnyCodable)
+            let expectedAnyCodable = tuple.format(tuple.expected).toAnyCodable()!
+            let actualAnyCodable = tuple.format(tuple.actual).toAnyCodable()!
+            return (path: tuple.path, expected: expectedAnyCodable, actual: actualAnyCodable)
         }
         for (index, (path, expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should not fail because of alternate path: [\(index)]: test with path=\(path), expected=\(expected), actual=\(actual)") { _ in
@@ -293,9 +293,9 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
             (path: "key1", expected: true, actual: false, format: { #"{ "key1": \#($0!) }"# })
         ]
         let testCases = rawCases.map { tuple in
-            let expectedAnyCodable: AnyCodable? = getAnyCodable(tuple.format(tuple.expected))
-            let actualAnyCodable: AnyCodable? = getAnyCodable(tuple.format(tuple.actual))
-            return (path: tuple.path, expected: expectedAnyCodable!, actual: actualAnyCodable)
+            let expectedAnyCodable = tuple.format(tuple.expected).toAnyCodable()!
+            let actualAnyCodable = tuple.format(tuple.actual).toAnyCodable()!
+            return (path: tuple.path, expected: expectedAnyCodable, actual: actualAnyCodable)
         }
         for (index, (path, expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should apply alternate path to matching logic: [\(index)]: test with path=\(path), expected=\(expected), actual=\(actual)") { _ in
@@ -321,9 +321,9 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
             (path: "[*]", expected: true, actual: false, format: { #"[\#($0)]"# })
         ]
         let testCases = rawCases.map { tuple in
-            let expectedAnyCodable: AnyCodable? = getAnyCodable(tuple.format(tuple.expected))
-            let actualAnyCodable: AnyCodable? = getAnyCodable(tuple.format(tuple.actual))
-            return (path: tuple.path, expected: expectedAnyCodable!, actual: actualAnyCodable)
+            let expectedAnyCodable = tuple.format(tuple.expected).toAnyCodable()!
+            let actualAnyCodable = tuple.format(tuple.actual).toAnyCodable()!
+            return (path: tuple.path, expected: expectedAnyCodable, actual: actualAnyCodable)
         }
         for (index, (path, expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should apply alternate path to matching logic: [\(index)]: test with path=\(path), expected=\(expected), actual=\(actual)") { _ in
@@ -364,9 +364,9 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
             (path: "\\[1\\\\][0]", expected: 1, actual: 2, format: { #"{ "[1\\]": [\#($0)] }"# }) // Incomplete array style access then actual array style access
         ]
         let testCases = rawCases.map { tuple in
-            let expectedAnyCodable: AnyCodable? = getAnyCodable(tuple.format(tuple.expected))
-            let actualAnyCodable: AnyCodable? = getAnyCodable(tuple.format(tuple.actual))
-            return (path: tuple.path, expected: expectedAnyCodable!, actual: actualAnyCodable)
+            let expectedAnyCodable = tuple.format(tuple.expected).toAnyCodable()!
+            let actualAnyCodable = tuple.format(tuple.actual).toAnyCodable()!
+            return (path: tuple.path, expected: expectedAnyCodable, actual: actualAnyCodable)
         }
         for (index, (path, expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should handle special keys in alternate paths: [\(index)]: test with path=\(path), expected=\(expected), actual=\(actual)") { _ in
@@ -388,7 +388,7 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
             ["[*]"]
         ]
         let testCases = rawCases.map { paths in
-            return (paths: paths, expected: getAnyCodable("[1,2]")!, actual: getAnyCodable("[1]"))
+            return (paths: paths, expected: "[1,2]".toAnyCodable()!, actual: "[1]".toAnyCodable()!)
         }
         for (index, (paths, expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should error on larger expected arrays: [\(index)]: test with paths=\(paths), expected=\(expected), actual=\(actual)") { _ in
@@ -413,8 +413,8 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
         ]
         let testCases = rawCases.map { paths in
             return (paths: paths,
-                    expected: getAnyCodable(#"{ "key1": 1, "key2": 2 }"#)!,
-                    actual: getAnyCodable(#"{ "key1": 1}"#))
+                    expected: #"{ "key1": 1, "key2": 2 }"#.toAnyCodable()!,
+                    actual: #"{ "key1": 1}"#.toAnyCodable()!)
         }
         for (index, (paths, expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should error on larger expected maps: [\(index)]: test with paths=\(paths), expected=\(expected), actual=\(actual)") { _ in
