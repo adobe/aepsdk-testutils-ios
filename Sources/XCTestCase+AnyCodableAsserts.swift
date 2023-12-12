@@ -196,6 +196,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         return AnyCodable(AnyCodable.from(dictionary: event.data))
     }
 
+
     func getAnyCodable(_ networkRequest: NetworkRequest) -> AnyCodable? {
         guard let payloadAsDictionary = try? JSONSerialization.jsonObject(with: networkRequest.connectPayload, options: []) as? [String: Any] else {
             return nil
@@ -228,7 +229,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
 
     func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) {
         guard let expectedAnyCodable = expected.toAnyCodable() else {
-            XCTFail("Expected is nil", file: file, line: line)
+            XCTFail("Expected is nil. If nil is expected, use XCTAssertNil instead.", file: file, line: line)
             return
         }
         let treeDefaults: [MultiPathConfig] = [
@@ -253,7 +254,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
 
     func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) {
         guard let expectedAnyCodable = expected.toAnyCodable() else {
-            XCTFail("Expected is nil", file: file, line: line)
+            XCTFail("Expected is nil. If nil is expected, use XCTAssertNil instead.", file: file, line: line)
             return
         }
         let treeDefaults: [MultiPathConfig] = [
