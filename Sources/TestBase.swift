@@ -103,8 +103,26 @@ open class TestBase: XCTestCase {
             let waitResult = expectedEvent.value.await(timeout: timeout)
             let expectedCount: Int32 = expectedEvent.value.getInitialCount()
             let receivedCount: Int32 = expectedEvent.value.getInitialCount() - expectedEvent.value.getCurrentCount()
-            XCTAssertFalse(waitResult == DispatchTimeoutResult.timedOut, "Timed out waiting for event type \(expectedEvent.key.type) and source \(expectedEvent.key.source), expected \(expectedCount), but received \(receivedCount)", file: (file), line: line)
-            XCTAssertEqual(expectedCount, receivedCount, "Expected \(expectedCount) event(s) of type \(expectedEvent.key.type) and source \(expectedEvent.key.source), but received \(receivedCount)", file: (file), line: line)
+            XCTAssertFalse(
+                waitResult == DispatchTimeoutResult.timedOut,
+                """
+                Timed out waiting for event type \(expectedEvent.key.type) and
+                source \(expectedEvent.key.source), expected \(expectedCount),
+                but received \(receivedCount)
+                """,
+                file: (file),
+                line: line
+            )
+            XCTAssertEqual(
+                expectedCount,
+                receivedCount,
+                """
+                Expected \(expectedCount) event(s) of type \(expectedEvent.key.type) and
+                source \(expectedEvent.key.source), but received \(receivedCount)
+                """,
+                file: (file),
+                line: line
+            )
         }
 
         guard ignoreUnexpectedEvents == false else { return }
@@ -126,7 +144,16 @@ open class TestBase: XCTestCase {
                 _ = expectedEvent.await(timeout: TestConstants.Defaults.WAIT_EVENT_TIMEOUT)
                 let expectedCount: Int32 = expectedEvent.getInitialCount()
                 let receivedCount: Int32 = expectedEvent.getInitialCount() - expectedEvent.getCurrentCount()
-                XCTAssertEqual(expectedCount, receivedCount, "Expected \(expectedCount) events of type \(receivedEvent.key.type) and source \(receivedEvent.key.source), but received \(receivedCount)", file: (file), line: line)
+                XCTAssertEqual(
+                    expectedCount,
+                    receivedCount,
+                    """
+                    Expected \(expectedCount) events of type \(receivedEvent.key.type) and
+                    source \(receivedEvent.key.source), but received \(receivedCount)
+                    """,
+                    file: (file),
+                    line: line
+                )
             }
             // check for events that don't have expectations set
             else {

@@ -478,17 +478,25 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                     shouldAssert: false)
             }) else {
                 if shouldAssert {
-                    XCTFail(#"""
-                        Wildcard \#(NodeConfig.resolveOption(.primitiveExactMatch, for: nodeTree.getChild(named: index), parent: nodeTree).isActive ? "exact" : "type") match found no matches on Actual side satisfying the Expected requirement.
+                    let resolvedExactMatchOption = NodeConfig.resolveOption(
+                        .primitiveExactMatch,
+                        for: nodeTree.getChild(named: index),
+                        parent: nodeTree).isActive
+                    XCTFail(
+                        #"""
+                            Wildcard \#(resolvedExactMatchOption ? "exact" : "type") match found no matches on Actual side satisfying the Expected requirement.
 
-                        Requirement: \#(nodeTree)
+                            Requirement: \#(nodeTree)
 
-                        Expected: \#(expected[intIndex])
+                            Expected: \#(expected[intIndex])
 
-                        Actual (remaining unmatched elements): \#(availableWildcardActualIndexes.map({ actual[Int($0)!] }))
+                            Actual (remaining unmatched elements): \#(availableWildcardActualIndexes.map({ actual[Int($0)!] }))
 
-                        Key path: \#(keyPathAsString(keyPath))
-                        """#, file: file, line: line)
+                            Key path: \#(keyPathAsString(keyPath))
+                        """#,
+                        file: file,
+                        line: line
+                    )
                 }
                 validationResult = false
                 break
