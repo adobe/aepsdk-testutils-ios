@@ -567,7 +567,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         let keysThatMustBeAbsent = nodeTree.children.filter({ $0.keyMustBeAbsent.isActive }).compactMap({ $0.name })
         var keyAbsenceResult = true
         for absentKey in keysThatMustBeAbsent {
-            if actual[absentKey] != nil {
+            if actual.contains(where: { $0.key == absentKey }) {
                 if shouldAssert {
                     XCTFail(#"""
                         Actual JSON should not have key with name: \#(absentKey)
