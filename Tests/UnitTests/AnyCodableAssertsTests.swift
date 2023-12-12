@@ -30,15 +30,13 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
     /// - Note: Tests can rely on unique sets of wildcard index values without the need to test
     /// every variation.
     func testShouldValidateAlternatePathWildcardOrderIndependence() {
-        let expectedJSONString = """
+        let expected = """
         [1, 2]
         """
 
-        let actualJSONString = """
+        let actual = """
         ["a", "b", 1, 2]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
 
         assertExactMatch(expected: expected, actual: actual, typeMatchPaths: ["[*0]", "[*1]"])
         assertExactMatch(expected: expected, actual: actual, typeMatchPaths: ["[*1]", "[*0]"])
@@ -49,15 +47,13 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
 
     /// Validates that the wildcard character `*` can only be placed to the left of the index value.
     func testShouldValidateWildcardIndexFormats() {
-        let expectedJSONString = """
+        let expected = """
         [1]
         """
 
-        let actualJSONString = """
+        let actual = """
         ["a", 1]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
 
         assertExactMatch(expected: expected, actual: actual, typeMatchPaths: ["[*0]"])
         XCTExpectFailure("Validation should fail when using an invalid wildcard format") {
@@ -86,15 +82,13 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
     /// 1. Specific index alternate path checks only against its paired index, as expected.
     /// 2. Wildcard index allows for matching other positions.
     func testShouldMatchSpecificIndexToPairedIndexAndWildcardToAnyPosition() {
-        let expectedJSONString = """
+        let expected = """
         [1]
         """
 
-        let actualJSONString = """
+        let actual = """
         ["a", 1]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
 
         XCTExpectFailure("Validation should fail when matching using a specific index path without a match") {
             assertExactMatch(expected: expected, actual: actual, typeMatchPaths: ["[0]"])
@@ -112,15 +106,13 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
     /// - Note: Specifically, this checks the value at `actual[1]` is not first matched to the wildcard and
     /// fails to satisfy the unspecified index `expected[1]`.
     func testShouldPrioritizeStandardIndexMatchesOverWildcardMatches() {
-        let expectedJSONString = """
+        let expected = """
         [1, 1]
         """
 
-        let actualJSONString = """
+        let actual = """
         ["a", 1, 1]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
 
         assertExactMatch(expected: expected, actual: actual, typeMatchPaths: ["[*0]"])
         assertTypeMatch(expected: expected, actual: actual, exactMatchPaths: ["[*0]"])
@@ -130,15 +122,13 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
     /// 1. Specific index alternate paths should correctly match their corresponding indexes.
     /// 2. Wildcard matching should correctly match with any appropriate index.
     func testShouldMatchSpecificIndexesAndAlignWildcardsWithAppropriateIndexes() {
-        let expectedJSONString = """
+        let expected = """
         [1, 2]
         """
 
-        let actualJSONString = """
+        let actual = """
         [4, 3, 2, 1]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
 
         assertExactMatch(expected: expected, actual: actual, typeMatchPaths: ["[0]", "[1]"])
         assertExactMatch(expected: expected, actual: actual, typeMatchPaths: ["[*]"])
@@ -151,15 +141,13 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
 
     /// Validates that specific index wildcards only apply to the index specified.
     func testShouldMatchSpecificIndexWildcardToItsDesignatedIndexOnly() {
-        let expectedJSONString = """
+        let expected = """
         [1, 2]
         """
 
-        let actualJSONString = """
+        let actual = """
         [1, 3, 2, 1]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
 
         assertExactMatch(expected: expected, actual: actual, typeMatchPaths: ["[*1]"])
         assertTypeMatch(expected: expected, actual: actual, exactMatchPaths: ["[*1]"])
@@ -168,7 +156,7 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
     /// Validates that array-style access chained with key-value style access functions correctly.
     /// This covers both specific index and wildcard index styles.
     func testShouldCorrectlyChainArrayStyleWithKeyValueAccess() {
-        let expectedJSONString = """
+        let expected = """
         [
             {
                 "key1": 1,
@@ -178,7 +166,7 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
         ]
         """
 
-        let actualJSONString = """
+        let actual = """
         [
             {
                 "key1": 1,
@@ -187,9 +175,6 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
             }
         ]
         """
-
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
 
         assertExactMatch(expected: expected, actual: actual, typeMatchPaths: ["[0].key1"])
         assertExactMatch(expected: expected, actual: actual, typeMatchPaths: ["[*].key1"])
@@ -200,20 +185,17 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
 
     /// Validates that chained array-style access functions correctly.
     func testShouldCorrectlyChainArrayStyleAccess2x() {
-        let expectedJSONString = """
+        let expected = """
         [
             [1]
         ]
         """
 
-        let actualJSONString = """
+        let actual = """
         [
             [2]
         ]
         """
-
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
 
         assertExactMatch(expected: expected, actual: actual, typeMatchPaths: ["[0][0]"])
 
@@ -224,16 +206,13 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
 
     /// Validates that longer chained array-style access functions correctly.
     func testShouldCorrectlyChainArrayStyleAccess4x() {
-        let expectedJSONString = """
+        let expected = """
         [[[[1]]]]
         """
 
-        let actualJSONString = """
+        let actual = """
         [[[[2]]]]
         """
-
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
 
         assertExactMatch(expected: expected, actual: actual, typeMatchPaths: ["[0][0][0][0]"])
 
@@ -245,20 +224,17 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
     /// Validates that key-value style access chained with array-style access functions correctly.
     /// This covers both specific index and wildcard index styles.
     func testShouldCorrectlyChainKeyValueWithArrayStyleAccess() {
-        let expectedJSONString = """
+        let expected = """
         {
             "key1": [1]
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
             "key1": [2]
         }
         """
-
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
 
         assertExactMatch(expected: expected, actual: actual, typeMatchPaths: ["key1[0]"])
         assertExactMatch(expected: expected, actual: actual, typeMatchPaths: ["key1[*]"])
@@ -273,49 +249,43 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
 
     // MARK: - Path options tests
     func testKeyMustBeAbsentPasses_whenSinglePath() {
-        let expectedJSONString = """
+        let expected = """
         {}
         """
 
-        let actualJSONString = """
+        let actual = """
         {
             "key1": 1
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key2"))
     }
 
     func testKeyMustBeAbsentPasses_whenMutliplePaths() {
-        let expectedJSONString = """
+        let expected = """
         {}
         """
 
-        let actualJSONString = """
+        let actual = """
         {
             "key1": 1
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key2", "key3"))
     }
 
     func testKeyMustBeAbsentCorrectlyFails_whenKeyPresent() {
-        let expectedJSONString = """
+        let expected = """
         {}
         """
 
-        let actualJSONString = """
+        let actual = """
         {
             "key1": 1
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
 
         XCTExpectFailure("Validation should fail when key that must be absent is present in actual") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key1"))

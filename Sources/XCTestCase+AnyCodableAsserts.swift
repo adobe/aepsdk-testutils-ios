@@ -15,6 +15,58 @@ import AEPServices
 import Foundation
 import XCTest
 
+public protocol AnyCodableComparable {
+    func toAnyCodable() -> AnyCodable?
+}
+
+extension Optional where Wrapped: AnyCodableComparable {
+    public func toAnyCodable() -> AnyCodable? {
+        switch self {
+        case .some(let value):
+            return value.toAnyCodable()
+        case .none:
+            return nil
+        }
+    }
+}
+
+extension Dictionary: AnyCodableComparable where Key == String, Value: Any {
+    public func toAnyCodable() -> AnyCodable? {
+        // Convert self to [String: Any?] - this is a no-op for [String: Any] and
+        // correctly wraps the value in an optional for [String: Any?]
+        let optionalValueDict = self.mapValues { $0 as Any? }
+        return AnyCodable(AnyCodable.from(dictionary: optionalValueDict))
+    }
+}
+
+extension String: AnyCodableComparable  {
+    public func toAnyCodable() -> AnyCodable? {
+        guard let data = self.data(using: .utf8) else { return nil }
+        return try? JSONDecoder().decode(AnyCodable.self, from: data)
+    }
+}
+
+extension AnyCodable: AnyCodableComparable {
+    public func toAnyCodable() -> AnyCodable? {
+        return self
+    }
+}
+
+extension Event: AnyCodableComparable {
+    public func toAnyCodable() -> AnyCodable? {
+        return self.data?.toAnyCodable()
+    }
+}
+
+extension NetworkRequest: AnyCodableComparable {
+    public func toAnyCodable() -> AnyCodable? {
+        guard let payloadAsDictionary = try? JSONSerialization.jsonObject(with: self.connectPayload, options: []) as? [String: Any] else {
+            return nil
+        }
+        return payloadAsDictionary.toAnyCodable()
+    }
+}
+
 public protocol AnyCodableAsserts {
     /// Gets the `AnyCodable` representation of a JSON string
     func getAnyCodable(_ jsonString: String) -> AnyCodable?
@@ -35,7 +87,7 @@ public protocol AnyCodableAsserts {
     ///   - actual: The actual `AnyCodable` to compare.
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
-    func assertEqual(expected: AnyCodable?, actual: AnyCodable?, file: StaticString, line: UInt)
+    func assertEqual(expected: AnyCodableComparable?, actual: AnyCodableComparable?, file: StaticString, line: UInt)
 
     /// Performs a flexible JSON comparison where only the key-value pairs from the expected JSON are required.
     /// By default, the function validates that both values are of the same type.
@@ -80,10 +132,10 @@ public protocol AnyCodableAsserts {
     ///   - exactMatchPaths: The key paths in the expected JSON that should use exact matching mode, where values require both the same type and literal value.
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
-    func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, exactMatchPaths: [String], file: StaticString, line: UInt)
+    func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, exactMatchPaths: [String], file: StaticString, line: UInt)
 
-    func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: [MultiPathConfig], file: StaticString, line: UInt)
-    func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: MultiPathConfig..., file: StaticString, line: UInt)
+    func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: [MultiPathConfig], file: StaticString, line: UInt)
+    func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: MultiPathConfig..., file: StaticString, line: UInt)
 
     /// Performs a flexible JSON comparison where only the key-value pairs from the expected JSON are required.
     /// By default, the function uses exact match mode, validating that both values are of the same type
@@ -129,10 +181,10 @@ public protocol AnyCodableAsserts {
     ///   - typeMatchPaths: The key paths in the expected JSON that should use type matching mode, where values require only the same type (and are non-nil if the expected value is not nil).
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
-    func assertExactMatch(expected: AnyCodable, actual: AnyCodable?, typeMatchPaths: [String], file: StaticString, line: UInt)
+    func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, typeMatchPaths: [String], file: StaticString, line: UInt)
 
-    func assertExactMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: [MultiPathConfig], file: StaticString, line: UInt)
-    func assertExactMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: MultiPathConfig..., file: StaticString, line: UInt)
+    func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: [MultiPathConfig], file: StaticString, line: UInt)
+    func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: MultiPathConfig..., file: StaticString, line: UInt)
 }
 
 public extension AnyCodableAsserts where Self: XCTestCase {
@@ -152,7 +204,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
     }
 
     // Exact equality is just a special case of exact match
-    func assertEqual(expected: AnyCodable?, actual: AnyCodable?, file: StaticString = #file, line: UInt = #line) {
+    func assertEqual(expected: AnyCodableComparable?, actual: AnyCodableComparable?, file: StaticString = #file, line: UInt = #line) {
         if expected == nil && actual == nil {
             return
         }
@@ -170,11 +222,15 @@ public extension AnyCodableAsserts where Self: XCTestCase {
     }
 
     // MARK: Type match
-    func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, exactMatchPaths: [String] = [], file: StaticString = #file, line: UInt = #line) {
+    func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, exactMatchPaths: [String] = [], file: StaticString = #file, line: UInt = #line) {
         assertTypeMatch(expected: expected, actual: actual, pathOptions: ValueExactMatch(paths: exactMatchPaths, scope: .subtree), file: file, line: line)
     }
 
-    func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) {
+    func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) {
+        guard let expectedAnyCodable = expected.toAnyCodable() else {
+            XCTFail("Expected is nil", file: file, line: line)
+            return
+        }
         let treeDefaults: [MultiPathConfig] = [
             CollectionEqualCount(paths: nil, isActive: false),
             KeyMustBeAbsent(paths: nil, isActive: false),
@@ -183,19 +239,23 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         ]
 
         let nodeTree = generateNodeTree(pathOptions: pathOptions, treeDefaults: treeDefaults, file: file, line: line)
-        validateJSON(expected: expected, actual: actual, nodeTree: nodeTree, file: file, line: line)
+        validateJSON(expected: expectedAnyCodable, actual: actual?.toAnyCodable(), nodeTree: nodeTree, file: file, line: line)
     }
 
-    func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: MultiPathConfig..., file: StaticString = #file, line: UInt = #line) {
+    func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: MultiPathConfig..., file: StaticString = #file, line: UInt = #line) {
         assertTypeMatch(expected: expected, actual: actual, pathOptions: pathOptions, file: file, line: line)
     }
 
     // MARK: Exact match
-    func assertExactMatch(expected: AnyCodable, actual: AnyCodable?, typeMatchPaths: [String] = [], file: StaticString = #file, line: UInt = #line) {
+    func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, typeMatchPaths: [String] = [], file: StaticString = #file, line: UInt = #line) {
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: typeMatchPaths, scope: .subtree), file: file, line: line)
     }
 
-    func assertExactMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) {
+    func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) {
+        guard let expectedAnyCodable = expected.toAnyCodable() else {
+            XCTFail("Expected is nil", file: file, line: line)
+            return
+        }
         let treeDefaults: [MultiPathConfig] = [
             CollectionEqualCount(paths: nil, isActive: false),
             KeyMustBeAbsent(paths: nil, isActive: false),
@@ -204,10 +264,10 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         ]
 
         let nodeTree = generateNodeTree(pathOptions: pathOptions, treeDefaults: treeDefaults, file: file, line: line)
-        validateJSON(expected: expected, actual: actual, nodeTree: nodeTree, file: file, line: line)
+        validateJSON(expected: expectedAnyCodable, actual: actual?.toAnyCodable(), nodeTree: nodeTree, file: file, line: line)
     }
 
-    func assertExactMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: MultiPathConfig..., file: StaticString = #file, line: UInt = #line) {
+    func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: MultiPathConfig..., file: StaticString = #file, line: UInt = #line) {
         assertExactMatch(expected: expected, actual: actual, pathOptions: pathOptions, file: file, line: line)
     }
 
