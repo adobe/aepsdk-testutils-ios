@@ -39,7 +39,7 @@ extension Dictionary: AnyCodableComparable where Key == String, Value: Any {
     }
 }
 
-extension String: AnyCodableComparable  {
+extension String: AnyCodableComparable {
     public func toAnyCodable() -> AnyCodable? {
         guard let data = self.data(using: .utf8) else { return nil }
         return try? JSONDecoder().decode(AnyCodable.self, from: data)
@@ -195,7 +195,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
     func getAnyCodable(_ event: Event) -> AnyCodable? {
         return AnyCodable(AnyCodable.from(dictionary: event.data))
     }
-
 
     func getAnyCodable(_ networkRequest: NetworkRequest) -> AnyCodable? {
         guard let payloadAsDictionary = try? JSONSerialization.jsonObject(with: networkRequest.connectPayload, options: []) as? [String: Any] else {
