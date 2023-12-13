@@ -21,6 +21,9 @@ public protocol AnyCodableAsserts {
 
     /// Gets an event's data payload converted into `AnyCodable` format
     func getAnyCodable(_ event: Event) -> AnyCodable?
+    
+    /// Converts a network request's connect payload into `AnyCodable` format.
+    func getAnyCodable(_ networkRequest: NetworkRequest) -> AnyCodable?
 
     /// Converts a network request's connect payload into `AnyCodable` format.
     func getAnyCodable(_ networkRequest: NetworkRequest) -> AnyCodable?
@@ -81,6 +84,9 @@ public protocol AnyCodableAsserts {
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, exactMatchPaths: [String], file: StaticString, line: UInt)
+    
+    func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: [MultiPathConfig], file: StaticString, line: UInt)
+    func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: MultiPathConfig..., file: StaticString, line: UInt)
 
     func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: [MultiPathConfig], file: StaticString, line: UInt)
     func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: MultiPathConfig..., file: StaticString, line: UInt)
@@ -142,6 +148,13 @@ public extension AnyCodableAsserts where Self: XCTestCase {
 
     func getAnyCodable(_ event: Event) -> AnyCodable? {
         return AnyCodable(AnyCodable.from(dictionary: event.data))
+    }
+    
+    func getAnyCodable(_ networkRequest: NetworkRequest) -> AnyCodable? {
+        guard let payloadAsDictionary = try? JSONSerialization.jsonObject(with: networkRequest.connectPayload, options: []) as? [String: Any] else {
+            return nil
+        }
+        return AnyCodable(AnyCodable.from(dictionary: payloadAsDictionary))
     }
 
     func getAnyCodable(_ networkRequest: NetworkRequest) -> AnyCodable? {
@@ -343,7 +356,8 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         nodeTree: NodeConfig,
         shouldAssert: Bool = true,
         file: StaticString = #file,
-        line: UInt = #line) -> Bool {
+        line: UInt = #line) -> Bool 
+    {
         if expected == nil {
             return true
         }
@@ -407,6 +421,9 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 shouldAssert: shouldAssert,
                 file: file, line: line) && validationResult
         }
+        
+        for (index, config) in wildcardIndexes {
+            let intIndex = Int(index)!
 
         for (index, config) in wildcardIndexes {
             let intIndex = Int(index)!
@@ -461,7 +478,8 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         nodeTree: NodeConfig,
         shouldAssert: Bool = true,
         file: StaticString = #file,
-        line: UInt = #line) -> Bool {
+        line: UInt = #line) -> Bool 
+    {
         if expected == nil {
             return true
         }
