@@ -442,9 +442,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 shouldAssert: shouldAssert,
                 file: file, line: line) && validationResult
         }
-        
-        for (index, config) in wildcardIndexes {
-            let intIndex = Int(index)!
 
         for (index, config) in wildcardIndexes {
             let intIndex = Int(index)!
