@@ -21,9 +21,6 @@ public protocol AnyCodableAsserts {
 
     /// Gets an event's data payload converted into `AnyCodable` format
     func getAnyCodable(_ event: Event) -> AnyCodable?
-    
-    /// Converts a network request's connect payload into `AnyCodable` format.
-    func getAnyCodable(_ networkRequest: NetworkRequest) -> AnyCodable?
 
     /// Converts a network request's connect payload into `AnyCodable` format.
     func getAnyCodable(_ networkRequest: NetworkRequest) -> AnyCodable?
@@ -84,9 +81,6 @@ public protocol AnyCodableAsserts {
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, exactMatchPaths: [String], file: StaticString, line: UInt)
-    
-    func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: [MultiPathConfig], file: StaticString, line: UInt)
-    func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: MultiPathConfig..., file: StaticString, line: UInt)
 
     func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: [MultiPathConfig], file: StaticString, line: UInt)
     func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: MultiPathConfig..., file: StaticString, line: UInt)
@@ -148,13 +142,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
 
     func getAnyCodable(_ event: Event) -> AnyCodable? {
         return AnyCodable(AnyCodable.from(dictionary: event.data))
-    }
-    
-    func getAnyCodable(_ networkRequest: NetworkRequest) -> AnyCodable? {
-        guard let payloadAsDictionary = try? JSONSerialization.jsonObject(with: networkRequest.connectPayload, options: []) as? [String: Any] else {
-            return nil
-        }
-        return AnyCodable(AnyCodable.from(dictionary: payloadAsDictionary))
     }
 
     func getAnyCodable(_ networkRequest: NetworkRequest) -> AnyCodable? {
@@ -356,8 +343,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         nodeTree: NodeConfig,
         shouldAssert: Bool = true,
         file: StaticString = #file,
-        line: UInt = #line) -> Bool 
-    {
+        line: UInt = #line) -> Bool {
         if expected == nil {
             return true
         }
@@ -421,9 +407,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 shouldAssert: shouldAssert,
                 file: file, line: line) && validationResult
         }
-        
-        for (index, config) in wildcardIndexes {
-            let intIndex = Int(index)!
 
         for (index, config) in wildcardIndexes {
             let intIndex = Int(index)!
@@ -447,14 +430,13 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                         Actual (remaining unmatched elements): \#(availableWildcardActualIndexes.map({ actual[Int($0)!] }))
 
                         Key path: \#(keyPathAsString(keyPath))
-                        """#, file: file, line: line)
+                    """#, file: file, line: line)
                 }
                 validationResult = false
                 break
             }
             availableWildcardActualIndexes.remove(actualIndex)
         }
-
         return validationResult
     }
 
@@ -478,8 +460,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         nodeTree: NodeConfig,
         shouldAssert: Bool = true,
         file: StaticString = #file,
-        line: UInt = #line) -> Bool 
-    {
+        line: UInt = #line) -> Bool {
         if expected == nil {
             return true
         }
@@ -516,7 +497,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         }
 
         // Check if key must be absent
-            // note that this only validates the hierarchy where expected exists
+        // note that this only validates the hierarchy where expected exists
         let keysThatMustBeAbsent = nodeTree.children.filter({ $0.keyMustBeAbsent.isActive }).compactMap({ $0.name })
         var keyAbsenceResult = true
         for absentKey in keysThatMustBeAbsent {
@@ -563,7 +544,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         line: UInt
     ) -> Bool {
 
-
         // get the concrete type first
         // then in the concrete type validation body check the children of the node tree
         // if there are any that require validation then do so
@@ -582,22 +562,22 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             return validateNodeTreeOptions(keyPath: keyPath, nodeTree: nodeTree, file: file, line: line)
         }
         switch actual {
-//        case let (expected, actual) where (expected.value is String && actual.value is String):
-//            fallthrough
-//        case let (expected, actual) where (expected.value is Bool && actual.value is Bool):
-//            fallthrough
-//        case let (expected, actual) where (expected.value is Int && actual.value is Int):
-//            fallthrough
-//        case let (expected, actual) where (expected.value is Double && actual.value is Double):
-//            if nodeTree.primitiveExactMatch.isActive {
-//                if shouldAssert {
-//                    XCTAssertEqual(expected, actual, "Key path: \(keyPathAsString(keyPath))", file: file, line: line)
-//                }
-//                return expected == actual
-//            } else {
-//                // Value type matching already passed by virtue of passing the where condition in the switch case
-//                return true
-//            }
+        //        case let (expected, actual) where (expected.value is String && actual.value is String):
+        //            fallthrough
+        //        case let (expected, actual) where (expected.value is Bool && actual.value is Bool):
+        //            fallthrough
+        //        case let (expected, actual) where (expected.value is Int && actual.value is Int):
+        //            fallthrough
+        //        case let (expected, actual) where (expected.value is Double && actual.value is Double):
+        //            if nodeTree.primitiveExactMatch.isActive {
+        //                if shouldAssert {
+        //                    XCTAssertEqual(expected, actual, "Key path: \(keyPathAsString(keyPath))", file: file, line: line)
+        //                }
+        //                return expected == actual
+        //            } else {
+        //                // Value type matching already passed by virtue of passing the where condition in the switch case
+        //                return true
+        //            }
         case let actual where actual.value is [String: AnyCodable]:
             return validateNodeTreeOptions(
                 actual: actual.value as? [String: AnyCodable],
@@ -706,7 +686,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         // MARK: KeyMustBeAbsent check
         return true
     }
-
 
     // MARK: - Test setup and output helpers
 
