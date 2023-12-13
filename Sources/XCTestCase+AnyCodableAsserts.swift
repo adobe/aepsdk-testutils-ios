@@ -377,7 +377,8 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         nodeTree: NodeConfig,
         shouldAssert: Bool = true,
         file: StaticString = #file,
-        line: UInt = #line) -> Bool {
+        line: UInt = #line) -> Bool 
+    {
         if expected == nil {
             return true
         }
@@ -441,6 +442,9 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 shouldAssert: shouldAssert,
                 file: file, line: line) && validationResult
         }
+        
+        for (index, config) in wildcardIndexes {
+            let intIndex = Int(index)!
 
         for (index, config) in wildcardIndexes {
             let intIndex = Int(index)!
@@ -503,7 +507,8 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         nodeTree: NodeConfig,
         shouldAssert: Bool = true,
         file: StaticString = #file,
-        line: UInt = #line) -> Bool {
+        line: UInt = #line) -> Bool 
+    {
         if expected == nil {
             return true
         }
