@@ -321,4 +321,25 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
             assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key1"))
         }
     }
+
+    func testKeyMustBeAbsentCorrectlyFails_whenKeyPresentInDifferentHierarchy() {
+        let expectedJSONString = """
+        { "key1": 1 }
+        """
+
+        let actualJSONString = """
+        {
+          "key1": 1,
+          "key2": {
+            "key3": 1
+          }
+        }
+        """
+        let expected = getAnyCodable(expectedJSONString)!
+        let actual = getAnyCodable(actualJSONString)!
+
+        XCTExpectFailure("Validation should fail when key that must be absent is present in actual") {
+            assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key2.key3"))
+        }
+    }
 }
