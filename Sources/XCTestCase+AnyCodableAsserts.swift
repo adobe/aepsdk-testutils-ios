@@ -535,7 +535,22 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         return validationResult
     }
 
-    /// For validation options that require traversal of the `actual` structure. Relies on the node tree options to perform traversal. does not do anything when the top level `actual` is a primitive type, as the validation options considered here are not applicable
+    // MARK: - Node tree validation
+    /// Validates the `actual` JSON structure based on the `NodeConfig` tree.
+    ///
+    /// This method performs a recursive validation of the `actual` JSON structure against the specified `NodeConfig` tree.
+    /// It handles various types within the `actual` JSON, including dictionaries and arrays, and applies the validation
+    /// rules defined in the `NodeConfig` tree. The method focuses on traversing the `NodeConfig` tree, not the `actual` JSON.
+    /// The validation checks if the `actual` JSON meets the conditions specified in the `NodeConfig` tree, such as the absence
+    /// of certain keys or the structure of the JSON.
+    ///
+    /// - Parameters:
+    ///   - actual: The `AnyCodable` representation of the actual JSON to be validated.
+    ///   - keyPath: An array representing the current key path in the JSON structure during recursive traversal.
+    ///   - nodeTree: The `NodeConfig` tree defining the validation rules and conditions.
+    ///   - file: The file in which the validation is being performed, used for logging and debugging purposes.
+    ///   - line: The line number in the file where the validation is called, used for logging and debugging purposes.
+    /// - Returns: A Boolean value indicating whether the `actual` JSON structure satisfies the conditions in the `NodeConfig` tree.
     private func validateNodeTreeOptions(
         actual: AnyCodable?,
         keyPath: [Any],
@@ -544,40 +559,13 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         line: UInt
     ) -> Bool {
 
-        // get the concrete type first
-        // then in the concrete type validation body check the children of the node tree
-        // if there are any that require validation then do so
-
-        // NOTES:
-        // the node tree is what is being traversed, not actual
-        // it doesnt make sense for the top level to be defined as mustbeabsent since that is a nil check?
-        // but even if the direct children do not have the option set, their descendants might have the option so the entire tree needs to be traversed until terminus of the node tree
-        // there is some overlap of traversal between expected and node tree touching the same nodes but the compute penalty is only 2x for overlap
-        // also note that children are only traversed when the concrete type is performed
-        // note that `actual` can "run out" at any time, since it is the nodeTree that is being traversed and the nodeTree's conditions that must be satisfied
-        // it's up to the individual node's condition requirements as to whether actual "running out" is permissible or not
-        // in the case of key must be absent - it is satisfactory
-
+        /// If `actual` does not exist, continue node tree traversal with `actual` as `nil`
         guard let actual = actual else {
             return validateNodeTreeOptions(keyPath: keyPath, nodeTree: nodeTree, file: file, line: line)
         }
+
         switch actual {
-        //        case let (expected, actual) where (expected.value is String && actual.value is String):
-        //            fallthrough
-        //        case let (expected, actual) where (expected.value is Bool && actual.value is Bool):
-        //            fallthrough
-        //        case let (expected, actual) where (expected.value is Int && actual.value is Int):
-        //            fallthrough
-        //        case let (expected, actual) where (expected.value is Double && actual.value is Double):
-        //            if nodeTree.primitiveExactMatch.isActive {
-        //                if shouldAssert {
-        //                    XCTAssertEqual(expected, actual, "Key path: \(keyPathAsString(keyPath))", file: file, line: line)
-        //                }
-        //                return expected == actual
-        //            } else {
-        //                // Value type matching already passed by virtue of passing the where condition in the switch case
-        //                return true
-        //            }
+        // Handle dictionaries
         case let actual where actual.value is [String: AnyCodable]:
             return validateNodeTreeOptions(
                 actual: actual.value as? [String: AnyCodable],
@@ -585,6 +573,14 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 nodeTree: nodeTree,
                 file: file,
                 line: line)
+        case let actual where actual.value is [String: Any?]:
+            return validateNodeTreeOptions(
+                actual: AnyCodable.from(dictionary: actual.value as? [String: Any?]),
+                keyPath: keyPath,
+                nodeTree: nodeTree,
+                file: file,
+                line: line)
+        // Handle arrays
         case let actual where actual.value is [AnyCodable]:
             return validateNodeTreeOptions(
                 actual: actual.value as? [AnyCodable],
@@ -599,14 +595,8 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 nodeTree: nodeTree,
                 file: file,
                 line: line)
-        case let actual where actual.value is [String: Any?]:
-            return validateNodeTreeOptions(
-                actual: AnyCodable.from(dictionary: actual.value as? [String: Any?]),
-                keyPath: keyPath,
-                nodeTree: nodeTree,
-                file: file,
-                line: line)
         default:
+            // MARK: KeyMustBeAbsent check
             // Value type validations currently do not have any options that should be handled by the node tree
             // validation side - default is true
             return true
@@ -620,18 +610,29 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         file: StaticString,
         line: UInt
     ) -> Bool {
-        // does nothing - array key must not exist is the same thing as size validation
-        // mid value array key not exist doesnt make sense
+        // MARK: KeyMustBeAbsent check
+        // Does nothing - array key must not exist can be covered by size validation
+
         var validationResult = true
+        
         // Traverse all node children
         for child in nodeTree.children {
             guard let keyName = child.name, let key = Int(keyName) else { continue }
-            validationResult = validateNodeTreeOptions(
-                actual: actual?[key],
-                keyPath: keyPath + [key],
-                nodeTree: child,
-                file: file,
-                line: line) && validationResult
+            if actual?.indices.contains(key) == true {
+                validationResult = validateNodeTreeOptions(
+                    actual: actual?[key],
+                    keyPath: keyPath + [key],
+                    nodeTree: child,
+                    file: file,
+                    line: line) && validationResult
+            }
+            else {
+                validationResult = validateNodeTreeOptions(
+                    keyPath: keyPath + [key],
+                    nodeTree: child,
+                    file: file,
+                    line: line) && validationResult
+            }
         }
         return validationResult
     }
@@ -663,7 +664,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         }
         validationResult = validationResult && keyAbsenceResult
 
-        // traverse all node children
+        // Traverse all node children
         for child in nodeTree.children {
             guard let key = child.name else { continue }
             validationResult = validateNodeTreeOptions(

@@ -322,6 +322,8 @@ class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
         }
     }
 
+    /// This test validates an edge case where the `KeyMustBeAbsent` option is used on a part of the `actual` JSON hierarchy that `expected`
+    /// does **not** traverse.
     func testKeyMustBeAbsentCorrectlyFails_whenKeyPresentInDifferentHierarchy() {
         let expectedJSONString = """
         { "key1": 1 }
