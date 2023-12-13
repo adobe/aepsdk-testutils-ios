@@ -68,15 +68,6 @@ extension NetworkRequest: AnyCodableComparable {
 }
 
 public protocol AnyCodableAsserts {
-    /// Gets the `AnyCodable` representation of a JSON string
-    func getAnyCodable(_ jsonString: String) -> AnyCodable?
-
-    /// Gets an event's data payload converted into `AnyCodable` format
-    func getAnyCodable(_ event: Event) -> AnyCodable?
-
-    /// Converts a network request's connect payload into `AnyCodable` format.
-    func getAnyCodable(_ networkRequest: NetworkRequest) -> AnyCodable?
-
     /// Asserts exact equality between two `AnyCodable` instances.
     ///
     /// In the event of an assertion failure, this function provides a trace of the key path, which includes dictionary keys and array indexes,
@@ -188,22 +179,6 @@ public protocol AnyCodableAsserts {
 }
 
 public extension AnyCodableAsserts where Self: XCTestCase {
-    func getAnyCodable(_ jsonString: String) -> AnyCodable? {
-        return try? JSONDecoder().decode(AnyCodable.self, from: jsonString.data(using: .utf8)!)
-    }
-
-    func getAnyCodable(_ event: Event) -> AnyCodable? {
-        return AnyCodable(AnyCodable.from(dictionary: event.data))
-    }
-
-
-    func getAnyCodable(_ networkRequest: NetworkRequest) -> AnyCodable? {
-        guard let payloadAsDictionary = try? JSONSerialization.jsonObject(with: networkRequest.connectPayload, options: []) as? [String: Any] else {
-            return nil
-        }
-        return AnyCodable(AnyCodable.from(dictionary: payloadAsDictionary))
-    }
-
     // Exact equality is just a special case of exact match
     func assertEqual(expected: AnyCodableComparable?, actual: AnyCodableComparable?, file: StaticString = #file, line: UInt = #line) {
         if expected == nil && actual == nil {
