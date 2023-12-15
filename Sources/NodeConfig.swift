@@ -93,7 +93,7 @@ public struct KeyMustBeAbsent: MultiPathConfig {
     /// Initializes a new instance with an array of paths.
     public init(paths: [String?], keyNames: [String], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode, file: StaticString = #file, line: UInt = #line) {
         if isActive && keyNames.isEmpty {
-            XCTFail("Key names to validate as absent must not be empty. Use the `keyNames` parameter to set values.",  file: file, line: line)
+            XCTFail("Key names to validate as absent must not be empty. Use the `keyNames` parameter to set values.", file: file, line: line)
         }
         self.paths = paths
         self.config = NodeConfig.Config(isActive: isActive, keyNames: keyNames)
