@@ -203,10 +203,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
     }
 
     func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) {
-        guard let expectedAnyCodable = expected.toAnyCodable() else {
-            XCTFail("Expected is nil. If nil is expected, use XCTAssertNil instead.", file: file, line: line)
-            return
-        }
         let treeDefaults: [MultiPathConfig] = [
             CollectionEqualCount(paths: nil, isActive: false),
             KeyMustBeAbsent(paths: nil, isActive: false),
@@ -227,10 +223,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
     }
 
     func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) {
-        guard let expectedAnyCodable = expected.toAnyCodable() else {
-            XCTFail("Expected is nil. If nil is expected, use XCTAssertNil instead.", file: file, line: line)
-            return
-        }
         let treeDefaults: [MultiPathConfig] = [
             CollectionEqualCount(paths: nil, isActive: false),
             KeyMustBeAbsent(paths: nil, isActive: false),
@@ -246,12 +238,19 @@ public extension AnyCodableAsserts where Self: XCTestCase {
     }
 
     private func validate(
-        expected: AnyCodable,
-        actual: AnyCodable?,
+        expected: AnyCodableComparable,
+        actual: AnyCodableComparable?,
         pathOptions: [MultiPathConfig],
         treeDefaults: [MultiPathConfig],
         file: StaticString = #file,
-        line: UInt = #line) {
+        line: UInt = #line) 
+    {
+        guard let expected = expected.toAnyCodable() else {
+            XCTFail("Expected is nil. If nil is expected, use XCTAssertNil instead.", file: file, line: line)
+            return
+        }
+        let actual = actual?.toAnyCodable()
+
         let nodeTree = generateNodeTree(pathOptions: pathOptions, treeDefaults: treeDefaults, file: file, line: line)
         _ = validateActual(actual: actual, nodeTree: nodeTree, file: file, line: line)
         validateJSON(expected: expected, actual: actual, nodeTree: nodeTree, file: file, line: line)
