@@ -22,15 +22,14 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     // MARK: - General path options tests -
     // MARK: Path options
     func testSatisfiedPathOption_PassesWithArray() {
-        let expectedJSONString = """
+        let expected = """
         [1]
         """
 
-        let actualJSONString = """
+        let actual = """
         [2]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "[0]"))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -39,19 +38,18 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testSatisfiedPathOption_PassesWithDictionary() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key0": 1
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key0": 2
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0"))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -60,7 +58,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testSatisfiedNestedPathOption_PassesWithDictionary() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key0-0": 1,
           "key0-1": {
@@ -69,7 +67,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key0-0": 1,
           "key0-1": {
@@ -77,8 +75,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           }
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0-1.key1-0"))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -87,7 +84,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testSatisfiedNestedPathOption_PassesWithArray() {
-        let expectedJSONString = """
+        let expected = """
         [
           1,
           [
@@ -96,7 +93,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         ]
         """
 
-        let actualJSONString = """
+        let actual = """
         [
           1,
           [
@@ -104,8 +101,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           ]
         ]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "[1][0]"))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -114,15 +110,14 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testUnsatisfiedPathOption_FailsWithArray() {
-        let expectedJSONString = """
+        let expected = """
         [1]
         """
 
-        let actualJSONString = """
+        let actual = """
         [1, 2]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: nil))
@@ -133,20 +128,19 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testUnsatisfiedPathOption_FailsWithDictionary() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key0-0": 1
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key0-0": 1,
           "key0-1": 1
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: nil))
@@ -157,7 +151,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testUnatisfiedNestedPathOption_FailsWithArray() {
-        let expectedJSONString = """
+        let expected = """
         [
           1,
           [
@@ -166,7 +160,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         ]
         """
 
-        let actualJSONString = """
+        let actual = """
         [
           1,
           [
@@ -174,8 +168,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           ]
         ]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "[1][0]"))
@@ -186,7 +179,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testUnsatisfiedNestedPathOption_FailsWithDictionary() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key0-0": 1,
           "key0-1": {
@@ -197,7 +190,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key0-0": 1,
           "key0-1": {
@@ -208,8 +201,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           }
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "key0-1.key1-0"))
@@ -220,70 +212,66 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testNonexistentExpectedPathDoesNotAffectValidation_withArray() {
-        let expectedJSONString = """
+        let expected = """
         [1]
         """
 
-        let actualJSONString = """
+        let actual = """
         [1, 2]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "[1]"))
         assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "[1]"))
     }
 
     func testNonexistentExpectedPathDoesNotAffectValidation_withDictionary() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key0-0": 1
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key0-0": 1,
           "key0-1": 1
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "key-doesnt-exist"))
         assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "key-doesnt-exist"))
     }
 
     func testInvalidExpectedPathDoesNotAffectValidation_withArray() {
-        let expectedJSONString = """
+        let expected = """
         [1]
         """
 
-        let actualJSONString = """
+        let actual = """
         [1, 2]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "key0"))
         assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "key0"))
     }
 
     func testInvalidExpectedPathDoesNotAffectValidation_withDictionary() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key0-0": 1
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key0-0": 1,
           "key0-1": 1
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "[0]"))
         assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "[0]"))
@@ -293,15 +281,14 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     // NOTE: this is not testing Swift language variadic behavior (which is assumed to be correct), but
     // validating our own internal logic of how we pass variadic args to the main business logic
     func testVariadicAndArrayPathOptionsBehaveTheSame_withArray() {
-        let expectedJSONString = """
+        let expected = """
         [1]
         """
 
-        let actualJSONString = """
+        let actual = """
         [2]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "[0]"))
         assertExactMatch(expected: expected, actual: actual, pathOptions: [ValueTypeMatch(paths: "[0]")])
@@ -315,19 +302,18 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testVariadicAndArrayPathOptionsBehaveTheSame_withDictionary() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key0": 1
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key0": 2
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0"))
         assertExactMatch(expected: expected, actual: actual, pathOptions: [ValueTypeMatch(paths: "key0")])
@@ -340,15 +326,14 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testVariadicAndArrayPathsBehaveTheSame_withArray() {
-        let expectedJSONString = """
+        let expected = """
         [1, 1]
         """
 
-        let actualJSONString = """
+        let actual = """
         [2, 2]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "[0]", "[1]"))
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: ["[0]", "[1]"]))
@@ -361,21 +346,20 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testVariadicAndArrayPathsBehaveTheSame_withDictionary() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key0": 1,
           "key1": 1
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key0": 2,
           "key1": 2
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0", "key1"))
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: ["key0", "key1"]))
@@ -389,7 +373,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
 
     // MARK: Scope tests (subtree, single node)
     func testSubtreeOptionPropagates_WithArray() {
-        let expectedJSONString = """
+        let expected = """
         [
           1,
           [
@@ -398,7 +382,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         ]
         """
 
-        let actualJSONString = """
+        let actual = """
         [
           1,
           [
@@ -406,8 +390,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           ]
         ]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: nil, scope: .subtree))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -416,7 +399,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testSubtreeOptionPropagates_WithDictionary() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key0-0": {
             "key1-0": 1
@@ -424,15 +407,14 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key0-0": {
             "key1-0": 2
           }
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: nil, scope: .subtree))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -441,7 +423,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testSingleNodeOption_DoesNotPropagate_WithDictionary() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key0-0": 1,
           "key0-1": {
@@ -450,7 +432,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key0-0": 1,
           "key0-1": {
@@ -458,8 +440,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           }
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: nil))
@@ -468,7 +449,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testSingleNodeOption_DoesNotPropagate_WithArray() {
-        let expectedJSONString = """
+        let expected = """
         [
           1,
           [
@@ -477,7 +458,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         ]
         """
 
-        let actualJSONString = """
+        let actual = """
         [
           1,
           [
@@ -485,8 +466,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           ]
         ]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: nil))
@@ -496,21 +476,20 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
 
     // MARK: Multi-option tests
     func testPathOptions_OrderIndependence() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key0": 1,
           "key1": 1
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key0": 2,
           "key1": 2
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0"), ValueTypeMatch(paths: "key1"))
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key1"), ValueTypeMatch(paths: "key0"))
@@ -518,34 +497,32 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
 
     /// Validates that multiple options applied to the same key work as expected
     func testPathOptions_OverlappingConditions() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key1": [2]
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key1": ["a", "b", 1]
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key1[0]"), WildcardMatch(paths: "key1[0]"))
     }
 
     // MARK: Multi-path tests
     func testMultiPath_whenArray() {
-        let expectedJSONString = """
+        let expected = """
         [1, 1]
         """
 
-        let actualJSONString = """
+        let actual = """
         [2, 2]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "[0]", "[1]"))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -554,21 +531,20 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testMultiPath_whenDictionary() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key0": 1,
           "key1": 1
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key0": 2,
           "key1": 2
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0", "key1"))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -577,7 +553,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testMultiPath_SubtreePropagates_whenArray() {
-        let expectedJSONString = """
+        let expected = """
         [
           [
             [1], [1]
@@ -588,7 +564,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         ]
         """
 
-        let actualJSONString = """
+        let actual = """
         [
           [
             [2], [2]
@@ -598,8 +574,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           ]
         ]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "[0]", "[1]", scope: .subtree))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -608,7 +583,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testMultiPath_SubtreePropagates_whenDictionary() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key0-0": {
             "key1-0": {
@@ -629,7 +604,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key0-0": {
             "key1-0": {
@@ -649,8 +624,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           }
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0-0", "key0-1", scope: .subtree))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -660,15 +634,14 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
 
     // MARK: Config tests
     func testSetting_isActiveToFalse() {
-        let expectedJSONString = """
+        let expected = """
         [1]
         """
 
-        let actualJSONString = """
+        let actual = """
         [1, 2]
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: nil, isActive: false))
         assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: nil, isActive: false))
@@ -683,17 +656,16 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
 
     // MARK: KeyMustBeAbsent
     func testKeyMustBeAbsent_WithMissingKeyNames_Fails() {
-        let expectedJSONString = """
+        let expected = """
         {}
         """
 
-        let actualJSONString = """
+        let actual = """
         {
             "key1": 1
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
         XCTExpectFailure("Validation should fail when key names not provided") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil))
         }
@@ -709,49 +681,46 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testKeyMustBeAbsent_WithSinglePath_Passes() {
-        let expectedJSONString = """
+        let expected = """
         {}
         """
 
-        let actualJSONString = """
+        let actual = """
         {
             "key1": 1
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "key2"))
     }
 
     func testKeyMustBeAbsent_WithMultipleKeys_Passes() {
-        let expectedJSONString = """
+        let expected = """
         {}
         """
 
-        let actualJSONString = """
+        let actual = """
         {
             "key1": 1
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "key2", "key3"))
     }
 
     func testKeyMustBeAbsent_Fails_WhenKeyPresent() {
-        let expectedJSONString = """
+        let expected = """
         {}
         """
 
-        let actualJSONString = """
+        let actual = """
         {
             "key1": 1
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         XCTExpectFailure("Validation should fail when key that must be absent is present in actual") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "key1"))
@@ -761,13 +730,13 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     /// This test validates an edge case where the `KeyMustBeAbsent` option is used on a part of the `actual` JSON hierarchy that `expected`
     /// does **not** traverse.
     func testKeyMustBeAbsent_Fails_WhenKeyInDifferentHierarchy() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key1": 1
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key1": 1,
           "key2": {
@@ -775,8 +744,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           }
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         XCTExpectFailure("Validation should fail when key that must be absent is present in actual") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key2", keyNames: "key3"))
@@ -784,7 +752,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     func testKeyMustBeAbsent_SubtreeOptionPropagates_WithDictionary() {
-        let expectedJSONString = """
+        let expected = """
         {
           "key0-0": {
             "key1-0": {
@@ -796,7 +764,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         }
         """
 
-        let actualJSONString = """
+        let actual = """
         {
           "key0-0": {
             "key1-0": {
@@ -809,8 +777,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           }
         }
         """
-        let expected = getAnyCodable(expectedJSONString)!
-        let actual = getAnyCodable(actualJSONString)!
+        
 
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "disallowed-key", scope: .subtree))
