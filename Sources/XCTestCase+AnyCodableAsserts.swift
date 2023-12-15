@@ -276,7 +276,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         actual: AnyCodable?,
         keyPath: [Any] = [],
         nodeTree: NodeConfig,
-        nodeTree: NodeConfig,
         shouldAssert: Bool = true,
         file: StaticString = #file,
         line: UInt = #line) -> Bool {
@@ -307,7 +306,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             fallthrough
         case let (expected, actual) where (expected.value is Double && actual.value is Double):
             if nodeTree.primitiveExactMatch.isActive {
-            if nodeTree.primitiveExactMatch.isActive {
                 if shouldAssert {
                     XCTAssertEqual(expected, actual, "Key path: \(keyPathAsString(keyPath))", file: file, line: line)
                 }
@@ -322,7 +320,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 actual: actual.value as? [String: AnyCodable],
                 keyPath: keyPath,
                 nodeTree: nodeTree,
-                nodeTree: nodeTree,
                 shouldAssert: shouldAssert,
                 file: file,
                 line: line)
@@ -331,7 +328,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 expected: expected.value as? [AnyCodable],
                 actual: actual.value as? [AnyCodable],
                 keyPath: keyPath,
-                nodeTree: nodeTree,
                 nodeTree: nodeTree,
                 shouldAssert: shouldAssert,
                 file: file,
@@ -342,7 +338,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 actual: AnyCodable.from(array: actual.value as? [Any?]),
                 keyPath: keyPath,
                 nodeTree: nodeTree,
-                nodeTree: nodeTree,
                 shouldAssert: shouldAssert,
                 file: file,
                 line: line)
@@ -351,7 +346,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 expected: AnyCodable.from(dictionary: expected.value as? [String: Any?]),
                 actual: AnyCodable.from(dictionary: actual.value as? [String: Any?]),
                 keyPath: keyPath,
-                nodeTree: nodeTree,
                 nodeTree: nodeTree,
                 shouldAssert: shouldAssert,
                 file: file,
@@ -390,7 +384,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         actual: [AnyCodable]?,
         keyPath: [Any],
         nodeTree: NodeConfig,
-        nodeTree: NodeConfig,
         shouldAssert: Bool = true,
         file: StaticString = #file,
         line: UInt = #line) -> Bool {
@@ -412,10 +405,8 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             return false
         }
         if nodeTree.collectionEqualCount.isActive ? (expected.count != actual.count) : (expected.count > actual.count) {
-        if nodeTree.collectionEqualCount.isActive ? (expected.count != actual.count) : (expected.count > actual.count) {
             if shouldAssert {
                 XCTFail(#"""
-                    Expected JSON \#(nodeTree.collectionEqualCount.isActive ? "count does not match" : "has more elements than") Actual JSON.
                     Expected JSON \#(nodeTree.collectionEqualCount.isActive ? "count does not match" : "has more elements than") Actual JSON.
 
                     Expected count: \#(expected.count)
@@ -474,15 +465,11 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 if shouldAssert {
                     XCTFail(#"""
                         Wildcard \#(NodeConfig.resolveOption(.primitiveExactMatch, for: nodeTree.getChild(named: index), parent: nodeTree).isActive ? "exact" : "type") match found no matches on Actual side satisfying the Expected requirement.
-                        Wildcard \#(NodeConfig.resolveOption(.primitiveExactMatch, for: nodeTree.getChild(named: index), parent: nodeTree).isActive ? "exact" : "type") match found no matches on Actual side satisfying the Expected requirement.
 
-                        Requirement: \#(nodeTree)
                         Requirement: \#(nodeTree)
 
                         Expected: \#(expected[intIndex])
-                        Expected: \#(expected[intIndex])
 
-                        Actual (remaining unmatched elements): \#(availableWildcardActualIndexes.map({ actual[Int($0)!] }))
                         Actual (remaining unmatched elements): \#(availableWildcardActualIndexes.map({ actual[Int($0)!] }))
 
                         Key path: \#(keyPathAsString(keyPath))
@@ -491,7 +478,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 validationResult = false
                 break
             }
-            availableWildcardActualIndexes.remove(actualIndex)
             availableWildcardActualIndexes.remove(actualIndex)
         }
         return validationResult
@@ -515,7 +501,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         actual: [String: AnyCodable]?,
         keyPath: [Any],
         nodeTree: NodeConfig,
-        nodeTree: NodeConfig,
         shouldAssert: Bool = true,
         file: StaticString = #file,
         line: UInt = #line) -> Bool {
@@ -537,10 +522,8 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             return false
         }
         if nodeTree.collectionEqualCount.isActive ? (expected.count != actual.count) : (expected.count > actual.count) {
-        if nodeTree.collectionEqualCount.isActive ? (expected.count != actual.count) : (expected.count > actual.count) {
             if shouldAssert {
                 XCTFail(#"""
-                    Expected JSON \#(nodeTree.collectionEqualCount.isActive ? "count does not match" : "has more elements than") Actual JSON.
                     Expected JSON \#(nodeTree.collectionEqualCount.isActive ? "count does not match" : "has more elements than") Actual JSON.
 
                     Expected count: \#(expected.count)
@@ -562,7 +545,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 expected: value,
                 actual: actual[key],
                 keyPath: keyPath + [key],
-                nodeTree: nodeTree.getChild(named: key) ?? nodeTree.asFinalNode(),
                 nodeTree: nodeTree.getChild(named: key) ?? nodeTree.asFinalNode(),
                 shouldAssert: shouldAssert,
                 file: file,
