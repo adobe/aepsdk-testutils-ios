@@ -215,8 +215,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         pathOptions: [MultiPathConfig],
         treeDefaults: [MultiPathConfig],
         file: StaticString = #file,
-        line: UInt = #line) 
-    {
+        line: UInt = #line) {
         let nodeTree = generateNodeTree(pathOptions: pathOptions, treeDefaults: treeDefaults, file: file, line: line)
         _ = validateActual(actual: actual, nodeTree: nodeTree, file: file, line: line)
         validateJSON(expected: expected, actual: actual, nodeTree: nodeTree, file: file, line: line)

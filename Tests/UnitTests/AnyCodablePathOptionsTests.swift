@@ -305,7 +305,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "[0]"))
         assertExactMatch(expected: expected, actual: actual, pathOptions: [ValueTypeMatch(paths: "[0]")])
-        
+
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertTypeMatch(expected: expected, actual: actual, pathOptions: ValueExactMatch(paths: "[0]"))
         }
@@ -762,7 +762,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     /// does **not** traverse.
     func testKeyMustBeAbsent_Fails_WhenKeyInDifferentHierarchy() {
         let expectedJSONString = """
-        { 
+        {
           "key1": 1
         }
         """
