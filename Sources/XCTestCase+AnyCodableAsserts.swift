@@ -182,9 +182,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             WildcardMatch(paths: nil, isActive: false)
         ]
 
-        let nodeTree = generateNodeTree(pathOptions: pathOptions, treeDefaults: treeDefaults, file: file, line: line)
-        validateNodeTreeOptions(actual: actual, keyPath: [], nodeTree: nodeTree, file: file, line: line)
-        validateJSON(expected: expected, actual: actual, nodeTree: nodeTree, file: file, line: line)
+        validate(expected: expected, actual: actual, pathOptions: pathOptions, treeDefaults: treeDefaults, file: file, line: line)
     }
 
     func assertTypeMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: MultiPathConfig..., file: StaticString = #file, line: UInt = #line) {
@@ -204,16 +202,27 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             WildcardMatch(paths: nil, isActive: false)
         ]
 
-        let nodeTree = generateNodeTree(pathOptions: pathOptions, treeDefaults: treeDefaults, file: file, line: line)
-        validateNodeTreeOptions(actual: actual, keyPath: [], nodeTree: nodeTree, file: file, line: line)
-        validateJSON(expected: expected, actual: actual, nodeTree: nodeTree, file: file, line: line)
+        validate(expected: expected, actual: actual, pathOptions: pathOptions, treeDefaults: treeDefaults, file: file, line: line)
     }
 
     func assertExactMatch(expected: AnyCodable, actual: AnyCodable?, pathOptions: MultiPathConfig..., file: StaticString = #file, line: UInt = #line) {
         assertExactMatch(expected: expected, actual: actual, pathOptions: pathOptions, file: file, line: line)
     }
 
-    // MARK: - AnyCodable flexible validation helpers
+    private func validate(
+        expected: AnyCodable,
+        actual: AnyCodable?,
+        pathOptions: [MultiPathConfig],
+        treeDefaults: [MultiPathConfig],
+        file: StaticString = #file,
+        line: UInt = #line) 
+    {
+        let nodeTree = generateNodeTree(pathOptions: pathOptions, treeDefaults: treeDefaults, file: file, line: line)
+        _ = validateActual(actual: actual, nodeTree: nodeTree, file: file, line: line)
+        validateJSON(expected: expected, actual: actual, nodeTree: nodeTree, file: file, line: line)
+    }
+
+    // MARK: - AnyCodable validation helpers
     /// Performs a cutomizable validation between the given `expected` and `actual` values, using the configured options.
     /// In case of a validation failure **and** if `shouldAssert` is `true`, a test failure occurs.
     ///
@@ -496,30 +505,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             return false
         }
 
-        // Check if key must be absent
-        // note that this only validates the hierarchy where expected exists
-        let keysThatMustBeAbsent = nodeTree.children.filter({ $0.keyMustBeAbsent.isActive }).compactMap({ $0.name })
-        var keyAbsenceResult = true
-        for absentKey in keysThatMustBeAbsent {
-            if actual.contains(where: { $0.key == absentKey }) {
-                if shouldAssert {
-                    XCTFail(#"""
-                        Actual JSON should not have key with name: \#(absentKey)
-
-                        Expected: \#(expected)
-
-                        Actual: \#(actual)
-
-                        Key path: \#(keyPathAsString(keyPath))
-                    """#, file: file, line: line)
-                }
-                keyAbsenceResult = false
-            }
-        }
-        guard keyAbsenceResult else {
-            return keyAbsenceResult
-        }
-
         var validationResult = true
         for (key, value) in expected {
             validationResult = validateJSON(
@@ -535,46 +520,47 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         return validationResult
     }
 
-    // MARK: - Node tree validation
-    /// Validates the `actual` JSON structure based on the `NodeConfig` tree.
+    // MARK: - Actual JSON validation
+
+    /// Validates the provided `actual` value against a specified `nodeTree` configuration.
     ///
-    /// This method performs a recursive validation of the `actual` JSON structure against the specified `NodeConfig` tree.
-    /// It handles various types within the `actual` JSON, including dictionaries and arrays, and applies the validation
-    /// rules defined in the `NodeConfig` tree. The method focuses on traversing the `NodeConfig` tree, not the `actual` JSON.
-    /// The validation checks if the `actual` JSON meets the conditions specified in the `NodeConfig` tree, such as the absence
-    /// of certain keys or the structure of the JSON.
+    /// This method traverses a `NodeConfig` tree to validate the `actual` value according to the specified node configuration.
+    /// It handles different types of values including dictionaries and arrays, and applies the relevant validation rules
+    /// based on the configuration of each node in the tree.
+    ///
+    /// Note that this logic is meant to perform negative validation (for example, the absence of keys), and this means when `actual` nodes run out
+    /// validation automatically passes. Positive validation should use `expected` + `validateJSON`
     ///
     /// - Parameters:
-    ///   - actual: The `AnyCodable` representation of the actual JSON to be validated.
-    ///   - keyPath: An array representing the current key path in the JSON structure during recursive traversal.
-    ///   - nodeTree: The `NodeConfig` tree defining the validation rules and conditions.
-    ///   - file: The file in which the validation is being performed, used for logging and debugging purposes.
-    ///   - line: The line number in the file where the validation is called, used for logging and debugging purposes.
-    /// - Returns: A Boolean value indicating whether the `actual` JSON structure satisfies the conditions in the `NodeConfig` tree.
-    private func validateNodeTreeOptions(
+    ///   - actual: The value to be validated, wrapped in `AnyCodable`.
+    ///   - keyPath: An array representing the current traversal path in the node tree. Starts as an empty array.
+    ///   - nodeTree: The root of the `NodeConfig` tree against which the validation is performed.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
+    ///
+    /// - Returns: A `Bool` indicating whether the `actual` value is valid based on the `nodeTree` configuration.
+    func validateActual(
         actual: AnyCodable?,
-        keyPath: [Any],
+        keyPath: [Any] = [],
         nodeTree: NodeConfig,
         file: StaticString,
         line: UInt
     ) -> Bool {
-
-        /// If `actual` does not exist, continue node tree traversal with `actual` as `nil`
         guard let actual = actual else {
-            return validateNodeTreeOptions(keyPath: keyPath, nodeTree: nodeTree, file: file, line: line)
+            return true
         }
 
         switch actual {
         // Handle dictionaries
         case let actual where actual.value is [String: AnyCodable]:
-            return validateNodeTreeOptions(
+            return validateActual(
                 actual: actual.value as? [String: AnyCodable],
                 keyPath: keyPath,
                 nodeTree: nodeTree,
                 file: file,
                 line: line)
         case let actual where actual.value is [String: Any?]:
-            return validateNodeTreeOptions(
+            return validateActual(
                 actual: AnyCodable.from(dictionary: actual.value as? [String: Any?]),
                 keyPath: keyPath,
                 nodeTree: nodeTree,
@@ -582,14 +568,14 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 line: line)
         // Handle arrays
         case let actual where actual.value is [AnyCodable]:
-            return validateNodeTreeOptions(
+            return validateActual(
                 actual: actual.value as? [AnyCodable],
                 keyPath: keyPath,
                 nodeTree: nodeTree,
                 file: file,
                 line: line)
         case let actual where actual.value is [Any?]:
-            return validateNodeTreeOptions(
+            return validateActual(
                 actual: AnyCodable.from(array: actual.value as? [Any?]),
                 keyPath: keyPath,
                 nodeTree: nodeTree,
@@ -597,95 +583,103 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 line: line)
         default:
             // MARK: KeyMustBeAbsent check
-            // Value type validations currently do not have any options that should be handled by the node tree
+            // Value type validations currently do not have any options that should be handled by `actual`
             // validation side - default is true
             return true
         }
     }
 
-    private func validateNodeTreeOptions(
+    /// Validates an array of `AnyCodable` values against the provided node configuration tree.
+    ///
+    /// This method iterates through each element in the given array of `AnyCodable` and performs validation
+    /// based on the provided `NodeConfig`.
+    ///
+    /// - Parameters:
+    ///   - actual: The array of `AnyCodable` values to be validated.
+    ///   - keyPath: An array representing the current path in the node tree during the traversal.
+    ///   - nodeTree: The current node in the `NodeConfig` tree against which the `actual` values are validated.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
+    ///
+    /// - Returns: A `Bool` indicating whether all elements in the `actual` array are valid according to the node tree configuration.
+    private func validateActual(
         actual: [AnyCodable]?,
         keyPath: [Any],
         nodeTree: NodeConfig,
         file: StaticString,
         line: UInt
     ) -> Bool {
-        // MARK: KeyMustBeAbsent check
-        // Does nothing - array key must not exist can be covered by size validation
+        guard let actual = actual else {
+            return true
+        }
 
         var validationResult = true
-        
-        // Traverse all node children
-        for child in nodeTree.children {
-            guard let keyName = child.name, let key = Int(keyName) else { continue }
-            if actual?.indices.contains(key) == true {
-                validationResult = validateNodeTreeOptions(
-                    actual: actual?[key],
-                    keyPath: keyPath + [key],
-                    nodeTree: child,
-                    file: file,
-                    line: line) && validationResult
-            }
-            else {
-                validationResult = validateNodeTreeOptions(
-                    keyPath: keyPath + [key],
-                    nodeTree: child,
-                    file: file,
-                    line: line) && validationResult
-            }
+
+        for (index, element) in actual.enumerated() {
+            // MARK: KeyMustBeAbsent check
+            // No check required - Validating an array key must not exist can be covered by size validation
+            validationResult = validateActual(
+                actual: element,
+                keyPath: keyPath + [index],
+                nodeTree: nodeTree.getChild(named: String(index)) ?? nodeTree.asFinalNode(),
+                file: file,
+                line: line
+            ) && validationResult
         }
+
         return validationResult
     }
 
-    private func validateNodeTreeOptions(
+    /// Validates a dictionary of `AnyCodable` values against the provided node configuration tree.
+    ///
+    /// This method iterates through each key-value pair in the given dictionary and performs validation
+    /// based on the provided `NodeConfig`.
+    ///
+    /// - Parameters:
+    ///   - actual: The dictionary of `AnyCodable` values to be validated.
+    ///   - keyPath: An array representing the current path in the node tree during the traversal.
+    ///   - nodeTree: The current node in the `NodeConfig` tree against which the `actual` values are validated.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
+    ///
+    /// - Returns: A `Bool` indicating whether all key-value pairs in the `actual` dictionary are valid according to the node tree configuration.
+    private func validateActual(
         actual: [String: AnyCodable]?,
         keyPath: [Any],
         nodeTree: NodeConfig,
         file: StaticString,
         line: UInt
     ) -> Bool {
+        guard let actual = actual else {
+            return true
+        }
+
         var validationResult = true
-        // MARK: KeyMustBeAbsent check
-        // Check for keys that must be absent in the current node
-        let keysThatMustBeAbsent = nodeTree.children.filter({ $0.keyMustBeAbsent.isActive }).compactMap({ $0.name })
-        var keyAbsenceResult = true
-        for absentKey in keysThatMustBeAbsent {
-            guard let actual = actual else { break } // Actual not existing is satisfactory for keys must be absent check
-            if actual.contains(where: { $0.key == absentKey }) {
+
+        for (key, value) in actual {
+            // MARK: KeyMustBeAbsent check
+            // Check for keys that must be absent in the current node
+            let resolvedKeyMustBeAbsent = NodeConfig.resolveOption(.keyMustBeAbsent, for: nodeTree.getChild(named: key), parent: nodeTree)
+            if resolvedKeyMustBeAbsent.keyNames.contains(key) {
                 XCTFail(#"""
-                    Actual JSON should not have key with name: \#(absentKey)
+                    Actual JSON should not have key with name: \#(key)
 
                     Actual: \#(actual)
 
                     Key path: \#(keyPathAsString(keyPath))
                 """#, file: file, line: line)
-                keyAbsenceResult = false
+                validationResult = false
             }
-        }
-        validationResult = validationResult && keyAbsenceResult
-
-        // Traverse all node children
-        for child in nodeTree.children {
-            guard let key = child.name else { continue }
-            validationResult = validateNodeTreeOptions(
-                actual: actual?[key],
+            validationResult = validateActual(
+                actual: value,
                 keyPath: keyPath + [key],
-                nodeTree: child,
+                nodeTree: nodeTree.getChild(named: key) ?? nodeTree.asFinalNode(),
                 file: file,
-                line: line) && validationResult
+                line: line
+            ) && validationResult
         }
-        return validationResult
-    }
 
-    // Handles the case where actual has run out
-    private func validateNodeTreeOptions(
-        keyPath: [Any],
-        nodeTree: NodeConfig,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) -> Bool {
-        // MARK: KeyMustBeAbsent check
-        return true
+        return validationResult
     }
 
     // MARK: - Test setup and output helpers
@@ -708,8 +702,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         var subtreeOptions: [NodeConfig.OptionKey: NodeConfig.Config] = [:]
         for treeDefault in treeDefaults {
             let key = treeDefault.optionKey
-            let config = NodeConfig.Config(isActive: treeDefault.isActive)
-            subtreeOptions[key] = config
+            subtreeOptions[key] = treeDefault.config
         }
 
         let rootNode = NodeConfig(name: nil, subtreeOptions: subtreeOptions)

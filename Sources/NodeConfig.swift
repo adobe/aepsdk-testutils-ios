@@ -24,7 +24,7 @@ public protocol MultiPathConfig {
     /// A `NodeConfig.OptionKey` value that specifies the type of option applied to the paths.
     var optionKey: NodeConfig.OptionKey { get }
     /// A Boolean value indicating whether the configuration is active.
-    var isActive: Bool { get }
+    var config: NodeConfig.Config { get }
     /// A `NodeConfig.Scope` value defining the scope of the configuration, such as whether it is applied to a single node or a subtree.
     var scope: NodeConfig.Scope { get }
 }
@@ -39,7 +39,7 @@ struct PathConfig {
     /// A `NodeConfig.OptionKey` value that specifies the type of option applied to the path.
     var optionKey: NodeConfig.OptionKey
     /// A Boolean value indicating whether the configuration is active.
-    var isActive: Bool
+    var config: NodeConfig.Config
     /// A `NodeConfig.Scope` value defining the scope of the configuration, such as whether it is applied to a single node or a subtree.
     var scope: NodeConfig.Scope
 }
@@ -48,13 +48,13 @@ struct PathConfig {
 public struct WildcardMatch: MultiPathConfig {
     public let paths: [String?]
     public let optionKey: NodeConfig.OptionKey = .wildcardMatch
-    public let isActive: Bool
+    public let config: NodeConfig.Config
     public let scope: NodeConfig.Scope
 
     /// Initializes a new instance with an array of paths.
     public init(paths: [String?], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
         self.paths = paths
-        self.isActive = isActive
+        self.config = NodeConfig.Config(isActive: isActive)
         self.scope = scope
     }
 
@@ -68,13 +68,13 @@ public struct WildcardMatch: MultiPathConfig {
 public struct CollectionEqualCount: MultiPathConfig {
     public let paths: [String?]
     public let optionKey: NodeConfig.OptionKey = .collectionEqualCount
-    public let isActive: Bool
+    public let config: NodeConfig.Config
     public let scope: NodeConfig.Scope
 
     /// Initializes a new instance with an array of paths.
     public init(paths: [String?], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
         self.paths = paths
-        self.isActive = isActive
+        self.config = NodeConfig.Config(isActive: isActive)
         self.scope = scope
     }
 
@@ -87,19 +87,22 @@ public struct CollectionEqualCount: MultiPathConfig {
 public struct KeyMustBeAbsent: MultiPathConfig {
     public let paths: [String?]
     public let optionKey: NodeConfig.OptionKey = .keyMustBeAbsent
-    public let isActive: Bool
+    public let config: NodeConfig.Config
     public let scope: NodeConfig.Scope
 
     /// Initializes a new instance with an array of paths.
-    public init(paths: [String?], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
+    public init(paths: [String?], keyNames: [String], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode, file: StaticString = #file, line: UInt = #line) {
+        if isActive && keyNames.isEmpty {
+            XCTFail("Key names to validate as absent must not be empty. Use the `keyNames` parameter to set values.",  file: file, line: line)
+        }
         self.paths = paths
-        self.isActive = isActive
+        self.config = NodeConfig.Config(isActive: isActive, keyNames: keyNames)
         self.scope = scope
     }
 
     /// Variadic initializer allowing multiple string paths.
-    public init(paths: String?..., isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
-        self.init(paths: paths, isActive: isActive, scope: scope)
+    public init(paths: String?..., keyNames: String..., isActive: Bool = true, scope: NodeConfig.Scope = .singleNode, file: StaticString = #file, line: UInt = #line) {
+        self.init(paths: paths, keyNames: keyNames, isActive: isActive, scope: scope, file: file, line: line)
     }
 }
 
@@ -107,7 +110,7 @@ public struct KeyMustBeAbsent: MultiPathConfig {
 public struct ValueExactMatch: MultiPathConfig {
     public let paths: [String?]
     public let optionKey: NodeConfig.OptionKey = .primitiveExactMatch
-    public let isActive: Bool = true
+    public let config: NodeConfig.Config = NodeConfig.Config(isActive: true)
     public let scope: NodeConfig.Scope
 
     /// Initializes a new instance with an array of paths.
@@ -126,7 +129,7 @@ public struct ValueExactMatch: MultiPathConfig {
 public struct ValueTypeMatch: MultiPathConfig {
     public let paths: [String?]
     public let optionKey: NodeConfig.OptionKey = .primitiveExactMatch
-    public let isActive: Bool = false
+    public let config: NodeConfig.Config = NodeConfig.Config(isActive: false)
     public let scope: NodeConfig.Scope
 
     /// Initializes a new instance with an array of paths.
@@ -167,6 +170,7 @@ public class NodeConfig: Hashable {
     public struct Config: Hashable {
         /// Flag for is an option is active or not.
         var isActive: Bool
+        var keyNames: [String] = []
     }
 
     public enum NodeOption {
@@ -247,6 +251,12 @@ public class NodeConfig: Hashable {
         return children.first(where: { $0.name == name })
     }
 
+    func getChild(named index: Int?) -> NodeConfig? {
+        guard let index = index else { return nil }
+        let indexString = String(index)
+        return children.first(where: { $0.name == indexString })
+    }
+
     /// Resolves a given node's option using the following precedence:
     /// 1. Node's own node-specific option
     /// 2. Parent node's node-specific option
@@ -278,7 +288,7 @@ public class NodeConfig: Hashable {
     }
 
     func createOrUpdateNode(using multiPathConfig: MultiPathConfig) {
-        let pathConfigs = multiPathConfig.paths.map({ PathConfig(path: $0, optionKey: multiPathConfig.optionKey, isActive: multiPathConfig.isActive, scope: multiPathConfig.scope) })
+        let pathConfigs = multiPathConfig.paths.map({ PathConfig(path: $0, optionKey: multiPathConfig.optionKey, config: multiPathConfig.config, scope: multiPathConfig.scope) })
         for pathConfig in pathConfigs {
             createOrUpdateNode(using: pathConfig)
         }
@@ -345,7 +355,7 @@ public class NodeConfig: Hashable {
 
         // Apply the node option to the final node
         let key = pathConfig.optionKey
-        let config = Config(isActive: pathConfig.isActive)
+        let config = pathConfig.config
         let scope = pathConfig.scope
 
         if scope == .subtree {

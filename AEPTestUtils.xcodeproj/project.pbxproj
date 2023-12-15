@@ -43,6 +43,7 @@
 		4C7043492AF45B05008CF67D /* URL+Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7043482AF45B05008CF67D /* URL+Testable.swift */; };
 		4C70434C2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */; };
 		4C70434D2AFB0D4F008CF67D /* AnyCodableAssertsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsTests.swift */; };
+		4C84194A2B2BD690007AA163 /* AnyCodablePathOptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8419492B2BD690007AA163 /* AnyCodablePathOptionsTests.swift */; };
 		4C9CF7C82AE20A7300EB88D4 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C9CF7C72AE20A7300EB88D4 /* XCTest.framework */; };
 		4CE14ECC2AFDC7F100969B36 /* NodeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE14ECB2AFDC7F100969B36 /* NodeConfig.swift */; };
 		72EC4ED272DA96D1B2F44F4D /* Pods_UnitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E05720B5778E784DC19DA9C /* Pods_UnitTests.framework */; };
@@ -106,6 +107,7 @@
 		4C7043482AF45B05008CF67D /* URL+Testable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Testable.swift"; sourceTree = "<group>"; };
 		4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCodableAssertsParameterizedTests.swift; sourceTree = "<group>"; };
 		4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCodableAssertsTests.swift; sourceTree = "<group>"; };
+		4C8419492B2BD690007AA163 /* AnyCodablePathOptionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCodablePathOptionsTests.swift; sourceTree = "<group>"; };
 		4C9CF7C72AE20A7300EB88D4 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		4CE14ECB2AFDC7F100969B36 /* NodeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeConfig.swift; sourceTree = "<group>"; };
 		D444995F2519506B0093B364 /* AEPTestUtils.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AEPTestUtils.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -205,6 +207,7 @@
 			children = (
 				4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */,
 				4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsTests.swift */,
+				4C8419492B2BD690007AA163 /* AnyCodablePathOptionsTests.swift */,
 				D4D5B5252432599B00CAB6E4 /* Info.plist */,
 			);
 			name = UnitTests;
@@ -470,6 +473,7 @@
 			files = (
 				4C70434C2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift in Sources */,
 				4C70434D2AFB0D4F008CF67D /* AnyCodableAssertsTests.swift in Sources */,
+				4C84194A2B2BD690007AA163 /* AnyCodablePathOptionsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
