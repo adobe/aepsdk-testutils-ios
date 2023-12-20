@@ -10,7 +10,6 @@
 // governing permissions and limitations under the License.
 //
 
-
 import Foundation
 import XCTest
 
@@ -25,7 +24,7 @@ public protocol MultiPathConfig {
     /// A `NodeConfig.OptionKey` value that specifies the type of option applied to the paths.
     var optionKey: NodeConfig.OptionKey { get }
     /// A Boolean value indicating whether the configuration is active.
-    var isActive: Bool { get }
+    var config: NodeConfig.Config { get }
     /// A `NodeConfig.Scope` value defining the scope of the configuration, such as whether it is applied to a single node or a subtree.
     var scope: NodeConfig.Scope { get }
 }
@@ -40,7 +39,7 @@ struct PathConfig {
     /// A `NodeConfig.OptionKey` value that specifies the type of option applied to the path.
     var optionKey: NodeConfig.OptionKey
     /// A Boolean value indicating whether the configuration is active.
-    var isActive: Bool
+    var config: NodeConfig.Config
     /// A `NodeConfig.Scope` value defining the scope of the configuration, such as whether it is applied to a single node or a subtree.
     var scope: NodeConfig.Scope
 }
@@ -49,16 +48,16 @@ struct PathConfig {
 public struct WildcardMatch: MultiPathConfig {
     public let paths: [String?]
     public let optionKey: NodeConfig.OptionKey = .wildcardMatch
-    public let isActive: Bool
+    public let config: NodeConfig.Config
     public let scope: NodeConfig.Scope
-    
+
     /// Initializes a new instance with an array of paths.
     public init(paths: [String?], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
         self.paths = paths
-        self.isActive = isActive
+        self.config = NodeConfig.Config(isActive: isActive)
         self.scope = scope
     }
-    
+
     /// Variadic initializer allowing multiple string paths.
     public init(paths: String?..., isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
         self.init(paths: paths, isActive: isActive, scope: scope)
@@ -69,19 +68,41 @@ public struct WildcardMatch: MultiPathConfig {
 public struct CollectionEqualCount: MultiPathConfig {
     public let paths: [String?]
     public let optionKey: NodeConfig.OptionKey = .collectionEqualCount
-    public let isActive: Bool
+    public let config: NodeConfig.Config
     public let scope: NodeConfig.Scope
 
     /// Initializes a new instance with an array of paths.
     public init(paths: [String?], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
         self.paths = paths
-        self.isActive = isActive
+        self.config = NodeConfig.Config(isActive: isActive)
         self.scope = scope
     }
-    
+
     /// Variadic initializer allowing multiple string paths.
     public init(paths: String?..., isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
         self.init(paths: paths, isActive: isActive, scope: scope)
+    }
+}
+
+public struct KeyMustBeAbsent: MultiPathConfig {
+    public let paths: [String?]
+    public let optionKey: NodeConfig.OptionKey = .keyMustBeAbsent
+    public let config: NodeConfig.Config
+    public let scope: NodeConfig.Scope
+
+    /// Initializes a new instance with an array of paths.
+    public init(paths: [String?], keyNames: [String], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode, file: StaticString = #file, line: UInt = #line) {
+        if isActive && keyNames.isEmpty {
+            XCTFail("Key names to validate as absent must not be empty. Use the `keyNames` parameter to set values.", file: file, line: line)
+        }
+        self.paths = paths
+        self.config = NodeConfig.Config(isActive: isActive, keyNames: keyNames)
+        self.scope = scope
+    }
+
+    /// Variadic initializer allowing multiple string paths.
+    public init(paths: String?..., keyNames: String..., isActive: Bool = true, scope: NodeConfig.Scope = .singleNode, file: StaticString = #file, line: UInt = #line) {
+        self.init(paths: paths, keyNames: keyNames, isActive: isActive, scope: scope, file: file, line: line)
     }
 }
 
@@ -89,15 +110,15 @@ public struct CollectionEqualCount: MultiPathConfig {
 public struct ValueExactMatch: MultiPathConfig {
     public let paths: [String?]
     public let optionKey: NodeConfig.OptionKey = .primitiveExactMatch
-    public let isActive: Bool = true
+    public let config: NodeConfig.Config = NodeConfig.Config(isActive: true)
     public let scope: NodeConfig.Scope
-    
+
     /// Initializes a new instance with an array of paths.
     public init(paths: [String?], scope: NodeConfig.Scope = .singleNode) {
         self.paths = paths
         self.scope = scope
     }
-    
+
     /// Variadic initializer allowing multiple string paths.
     public init(paths: String?..., scope: NodeConfig.Scope = .singleNode) {
         self.init(paths: paths, scope: scope)
@@ -108,7 +129,7 @@ public struct ValueExactMatch: MultiPathConfig {
 public struct ValueTypeMatch: MultiPathConfig {
     public let paths: [String?]
     public let optionKey: NodeConfig.OptionKey = .primitiveExactMatch
-    public let isActive: Bool = false
+    public let config: NodeConfig.Config = NodeConfig.Config(isActive: false)
     public let scope: NodeConfig.Scope
 
     /// Initializes a new instance with an array of paths.
@@ -116,7 +137,7 @@ public struct ValueTypeMatch: MultiPathConfig {
         self.paths = paths
         self.scope = scope
     }
-    
+
     /// Variadic initializer allowing multiple string paths.
     public init(paths: String?..., scope: NodeConfig.Scope = .singleNode) {
         self.init(paths: paths, scope: scope)
@@ -136,24 +157,26 @@ public class NodeConfig: Hashable {
         /// This node and all descendants should apply the current configuration.
         case subtree
     }
-    
+
     /// Defines the types of configuration options available for nodes.
     public enum OptionKey: String, Hashable, CaseIterable {
         case wildcardMatch
         case collectionEqualCount
         case primitiveExactMatch
+        case keyMustBeAbsent
     }
-    
+
     /// Represents the configuration details for a comparison option
     public struct Config: Hashable {
         /// Flag for is an option is active or not.
         var isActive: Bool
+        var keyNames: [String] = []
     }
-    
+
     public enum NodeOption {
         case option(OptionKey, Config, Scope)
     }
-    
+
     /// An string representing the name of the node. `nil` refers to the top level object
     let name: String?
     /// Options set specifically for this node.
@@ -175,11 +198,16 @@ public class NodeConfig: Hashable {
         set { options[.collectionEqualCount] = newValue }
     }
 
+    var keyMustBeAbsent: Config {
+        get { options[.keyMustBeAbsent] ?? subtreeOptions[.keyMustBeAbsent]! }
+        set { options[.keyMustBeAbsent] = newValue }
+    }
+
     var primitiveExactMatch: Config {
         get { options[.primitiveExactMatch] ?? subtreeOptions[.primitiveExactMatch]! }
         set { options[.primitiveExactMatch] = newValue }
     }
-    
+
     /// Creates a new node with the given values.
     ///
     /// Make sure to specify **all** OptionKey values for subtreeOptions, especially when the node is intended to be the root.
@@ -198,19 +226,19 @@ public class NodeConfig: Hashable {
             // If key is missing, add a default value
             validatedSubtreeOptions[key] = Config(isActive: false)
         }
-        
+
         self.name = name
         self.options = options
         self.subtreeOptions = validatedSubtreeOptions
         self.children = children
     }
-    
+
     // Implementation of Hashable
     public static func == (lhs: NodeConfig, rhs: NodeConfig) -> Bool {
         // Define equality based on properties of NodeConfig
         return lhs.name == rhs.name &&
-               lhs.options == rhs.options &&
-               lhs.subtreeOptions == rhs.subtreeOptions
+            lhs.options == rhs.options &&
+            lhs.subtreeOptions == rhs.subtreeOptions
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -218,11 +246,17 @@ public class NodeConfig: Hashable {
         hasher.combine(options)
         hasher.combine(subtreeOptions)
     }
-    
+
     func getChild(named name: String?) -> NodeConfig? {
         return children.first(where: { $0.name == name })
     }
-    
+
+    func getChild(named index: Int?) -> NodeConfig? {
+        guard let index = index else { return nil }
+        let indexString = String(index)
+        return children.first(where: { $0.name == indexString })
+    }
+
     /// Resolves a given node's option using the following precedence:
     /// 1. Node's own node-specific option
     /// 2. Parent node's node-specific option
@@ -244,27 +278,29 @@ public class NodeConfig: Hashable {
         switch option {
         case .collectionEqualCount:
             return node?.collectionEqualCount ?? parentNode.collectionEqualCount
+        case .keyMustBeAbsent:
+            return node?.keyMustBeAbsent ?? parentNode.keyMustBeAbsent
         case .primitiveExactMatch:
             return node?.primitiveExactMatch ?? parentNode.primitiveExactMatch
         case .wildcardMatch:
             return node?.wildcardMatch ?? parentNode.wildcardMatch
         }
     }
-    
+
     func createOrUpdateNode(using multiPathConfig: MultiPathConfig) {
-        let pathConfigs = multiPathConfig.paths.map({ PathConfig(path: $0, optionKey: multiPathConfig.optionKey, isActive: multiPathConfig.isActive, scope: multiPathConfig.scope) })
+        let pathConfigs = multiPathConfig.paths.map({ PathConfig(path: $0, optionKey: multiPathConfig.optionKey, config: multiPathConfig.config, scope: multiPathConfig.scope) })
         for pathConfig in pathConfigs {
             createOrUpdateNode(using: pathConfig)
         }
     }
-    
+
     // Helper method to create or traverse nodes
     func createOrUpdateNode(using pathConfig: PathConfig) {
         var current = self
-        
+
         let path = pathConfig.path
         let keyPath = getKeyPathComponents(from: path)
-        
+
         // Inline function to find or create a child node
         func findOrCreateChildNode(named name: String) -> NodeConfig {
             let child: NodeConfig
@@ -283,20 +319,19 @@ public class NodeConfig: Hashable {
             let key = key.replacingOccurrences(of: "\\.", with: ".")
             // Extract the string part and array component part(s) from the key string
             let components = extractArrayFormattedComponents(pathComponent: key)
-            
+
             // Process string part of key
             if let stringComponent = components.stringComponent {
                 current = findOrCreateChildNode(named: stringComponent)
             }
-            
+
             // Process array component parts if applicable
             for arrayComponent in components.arrayComponents {
                 // 1. Check for general wildcard case
                 if arrayComponent == "[*]" {
                     // this actually applies to the current node (since the named node is a collection by virtue of it having array components
                     current.options[.wildcardMatch] = Config(isActive: true)
-                }
-                else {
+                } else {
                     // 2. Extract valid indexes, and wildcard status
                     // indexes represent the "named" child elements of arrays
                     guard let indexResult = extractValidWildcardIndex(pathComponent: arrayComponent) else {
@@ -310,7 +345,7 @@ public class NodeConfig: Hashable {
                 }
             }
         }
-        
+
         func propagateSubtreeOptions(for node: NodeConfig) {
             for child in node.children {
                 child.subtreeOptions = node.subtreeOptions
@@ -320,25 +355,24 @@ public class NodeConfig: Hashable {
 
         // Apply the node option to the final node
         let key = pathConfig.optionKey
-        let config = Config(isActive: pathConfig.isActive)
+        let config = pathConfig.config
         let scope = pathConfig.scope
-        
+
         if scope == .subtree {
             current.subtreeOptions[key] = config
             // Propagate this subtree option update to all children
             propagateSubtreeOptions(for: current)
-        }
-        else {
+        } else {
             current.options[key] = config
         }
     }
-    
-    
+
     func asFinalNode() -> NodeConfig {
-        // should not modify since other function calls may still depend on children - return a new instance with the values set
-        return NodeConfig(name: nil, options: options, subtreeOptions: subtreeOptions)
+        // Should not modify self since other recursive function calls may still depend on children.
+        // Instead, return a new instance with the proper values set
+        return NodeConfig(name: nil, options: [:], subtreeOptions: subtreeOptions)
     }
-    
+
     /// Extracts and returns a tuple with a valid index and a flag indicating whether it's a wildcard index from a single path component.
     ///
     /// This method considers a key that matches the array access format (ex: `[*123]` or `[123]`).
@@ -374,7 +408,7 @@ public class NodeConfig: Hashable {
 
         return (validIndex, isWildcard)
     }
-    
+
     /// Finds all matches of the `regexPattern` in the `text` and for each match, returns the original matched `String`
     /// and its corresponding non-null capture groups.
     ///
@@ -421,7 +455,7 @@ public class NodeConfig: Hashable {
 
         return captureGroups
     }
-    
+
     /// Extracts and returns the components of a given key path string.
     ///
     /// The method is designed to handle key paths in a specific style such as "key0\.key1.key2[1][2].key3", which represents
@@ -476,7 +510,7 @@ public class NodeConfig: Hashable {
 
         return segments
     }
-    
+
     /// Extracts valid array format access components from a given path component and returns the separated components.
     ///
     /// Given `"key1[0][1]"`, the result is `["key1", "[0]", "[1]"]`.
@@ -492,7 +526,7 @@ public class NodeConfig: Hashable {
     func extractArrayFormattedComponents(pathComponent: String) -> (stringComponent: String?, arrayComponents: [String]) {
         // Handle edge case where input is empty
         if pathComponent.isEmpty { return (stringComponent: "", arrayComponents: []) }
-        
+
         var stringComponent: String = ""
         var arrayComponents: [String] = []
         var bracketCount = 0
@@ -546,8 +580,8 @@ public class NodeConfig: Hashable {
         }
         if !stringComponent.isEmpty {
             stringComponent = stringComponent
-                                .replacingOccurrences(of: "\\[", with: "[")
-                                .replacingOccurrences(of: "\\]", with: "]")
+                .replacingOccurrences(of: "\\[", with: "[")
+                .replacingOccurrences(of: "\\]", with: "]")
         }
         if lastArrayAccessEnd == pathComponent.startIndex {
             return (stringComponent: nil, arrayComponents: arrayComponents)
@@ -569,15 +603,15 @@ extension NodeConfig: CustomStringConvertible {
         result += "\(indentString)Name: \(name ?? "<Unnamed>")\n"
 
         result += "\(indentString)FINAL options:\n"
-        
+
         result += "\(indentString)Equal Count: \(collectionEqualCount)\n"
         result += "\(indentString)Exact Match: \(primitiveExactMatch)\n"
         result += "\(indentString)Wildcard   : \(wildcardMatch)\n"
-        
+
         // Node options
         // Accumulate options in a temporary string
         let sortedOptions = options.sorted { $0.key < $1.key }
-        var optionsDescription = sortedOptions.map { (key, config) in
+        var optionsDescription = sortedOptions.map { key, config in
             "\(indentString)  \(key): \(config)"
         }.joined(separator: "\n")
 
@@ -585,11 +619,11 @@ extension NodeConfig: CustomStringConvertible {
         if !optionsDescription.isEmpty {
             result += "\(indentString)Options:\n" + optionsDescription + "\n"
         }
-        
+
         // Subtree
         // Accumulate options in a temporary string
         let sortedSubtreeOptions = subtreeOptions.sorted { $0.key < $1.key }
-        var subtreeOptionsDescription = sortedSubtreeOptions.map { (key, config) in
+        var subtreeOptionsDescription = sortedSubtreeOptions.map { key, config in
             "\(indentString)  \(key): \(config)"
         }.joined(separator: "\n")
 
@@ -635,6 +669,7 @@ extension NodeConfig.OptionKey: CustomStringConvertible {
         switch self {
         case .wildcardMatch: return "Wildcard   "
         case .collectionEqualCount: return "Equal Count"
+        case .keyMustBeAbsent: return "Key Absent"
         case .primitiveExactMatch: return "Exact Match"
         // Add cases for other options
         }
