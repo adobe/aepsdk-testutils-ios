@@ -29,7 +29,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         let actual = """
         [2]
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "[0]"))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -49,7 +48,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           "key0": 2
         }
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0"))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -75,7 +73,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           }
         }
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0-1.key1-0"))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -101,7 +98,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           ]
         ]
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "[1][0]"))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -117,7 +113,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         let actual = """
         [1, 2]
         """
-        
 
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: nil))
@@ -140,7 +135,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           "key0-1": 1
         }
         """
-        
 
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: nil))
@@ -168,7 +162,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           ]
         ]
         """
-        
 
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "[1][0]"))
@@ -201,7 +194,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           }
         }
         """
-        
 
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "key0-1.key1-0"))
@@ -219,7 +211,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         let actual = """
         [1, 2]
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "[1]"))
         assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "[1]"))
@@ -238,7 +229,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           "key0-1": 1
         }
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "key-doesnt-exist"))
         assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "key-doesnt-exist"))
@@ -252,7 +242,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         let actual = """
         [1, 2]
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "key0"))
         assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "key0"))
@@ -271,7 +260,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           "key0-1": 1
         }
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "[0]"))
         assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "[0]"))
@@ -288,7 +276,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         let actual = """
         [2]
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "[0]"))
         assertExactMatch(expected: expected, actual: actual, pathOptions: [ValueTypeMatch(paths: "[0]")])
@@ -313,7 +300,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           "key0": 2
         }
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0"))
         assertExactMatch(expected: expected, actual: actual, pathOptions: [ValueTypeMatch(paths: "key0")])
@@ -333,7 +319,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         let actual = """
         [2, 2]
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "[0]", "[1]"))
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: ["[0]", "[1]"]))
@@ -359,7 +344,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           "key1": 2
         }
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0", "key1"))
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: ["key0", "key1"]))
@@ -390,7 +374,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           ]
         ]
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: nil, scope: .subtree))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -414,7 +397,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           }
         }
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: nil, scope: .subtree))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -440,7 +422,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           }
         }
         """
-        
 
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: nil))
@@ -466,7 +447,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           ]
         ]
         """
-        
 
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: nil))
@@ -489,7 +469,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           "key1": 2
         }
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0"), ValueTypeMatch(paths: "key1"))
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key1"), ValueTypeMatch(paths: "key0"))
@@ -508,7 +487,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           "key1": ["a", "b", 1]
         }
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key1[0]"), WildcardMatch(paths: "key1[0]"))
     }
@@ -522,7 +500,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         let actual = """
         [2, 2]
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "[0]", "[1]"))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -544,7 +521,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           "key1": 2
         }
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0", "key1"))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -574,7 +550,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           ]
         ]
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "[0]", "[1]", scope: .subtree))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -624,7 +599,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           }
         }
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0-0", "key0-1", scope: .subtree))
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
@@ -641,7 +615,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         let actual = """
         [1, 2]
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: nil, isActive: false))
         assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: nil, isActive: false))
@@ -665,7 +638,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
             "key1": 1
         }
         """
-        
+
         XCTExpectFailure("Validation should fail when key names not provided") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil))
         }
@@ -690,7 +663,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
             "key1": 1
         }
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "key2"))
     }
@@ -705,7 +677,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
             "key1": 1
         }
         """
-        
 
         assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "key2", "key3"))
     }
@@ -720,7 +691,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
             "key1": 1
         }
         """
-        
 
         XCTExpectFailure("Validation should fail when key that must be absent is present in actual") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "key1"))
@@ -744,7 +714,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           }
         }
         """
-        
 
         XCTExpectFailure("Validation should fail when key that must be absent is present in actual") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key2", keyNames: "key3"))
@@ -777,7 +746,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
           }
         }
         """
-        
 
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "disallowed-key", scope: .subtree))

@@ -39,7 +39,7 @@ extension Dictionary: AnyCodableComparable where Key == String, Value: Any {
     }
 }
 
-extension String: AnyCodableComparable  {
+extension String: AnyCodableComparable {
     public func toAnyCodable() -> AnyCodable? {
         guard let data = self.data(using: .utf8) else { return nil }
         return try? JSONDecoder().decode(AnyCodable.self, from: data)
@@ -243,8 +243,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         pathOptions: [MultiPathConfig],
         treeDefaults: [MultiPathConfig],
         file: StaticString = #file,
-        line: UInt = #line) 
-    {
+        line: UInt = #line) {
         guard let expected = expected.toAnyCodable() else {
             XCTFail("Expected is nil. If nil is expected, use XCTAssertNil instead.", file: file, line: line)
             return
@@ -422,7 +421,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             return false
         }
 
-
         // Create a dictionary where:
         // key: the index in String format
         // value: the resolved option for if wildcard matching should be used for the index
@@ -452,7 +450,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 shouldAssert: shouldAssert,
                 file: file, line: line) && validationResult
         }
-
 
         for (index, config) in wildcardIndexes {
             let intIndex = Int(index)!
@@ -736,7 +733,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         // 1. creates the first node using the incoming defaults
         // using the first node it passes the path to the node to create the child nodes and just loops through all the paths passing them
 
-
         var subtreeOptions: [NodeConfig.OptionKey: NodeConfig.Config] = [:]
         for treeDefault in treeDefaults {
             let key = treeDefault.optionKey
@@ -744,13 +740,11 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             subtreeOptions[key] = treeDefault.config
         }
 
-
         let rootNode = NodeConfig(name: nil, subtreeOptions: subtreeOptions)
 
         for pathConfig in pathOptions {
             rootNode.createOrUpdateNode(using: pathConfig)
         }
-
 
         return rootNode
     }
