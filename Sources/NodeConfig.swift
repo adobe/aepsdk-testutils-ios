@@ -52,7 +52,7 @@ public struct WildcardMatch: MultiPathConfig {
     public let scope: NodeConfig.Scope
 
     /// Initializes a new instance with an array of paths.
-    public init(paths: [String?], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
+    public init(paths: [String?] = [nil], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
         self.paths = paths
         self.config = NodeConfig.Config(isActive: isActive)
         self.scope = scope
@@ -72,7 +72,7 @@ public struct CollectionEqualCount: MultiPathConfig {
     public let scope: NodeConfig.Scope
 
     /// Initializes a new instance with an array of paths.
-    public init(paths: [String?], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
+    public init(paths: [String?] = [nil], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
         self.paths = paths
         self.config = NodeConfig.Config(isActive: isActive)
         self.scope = scope
@@ -91,7 +91,7 @@ public struct KeyMustBeAbsent: MultiPathConfig {
     public let scope: NodeConfig.Scope
 
     /// Initializes a new instance with an array of paths.
-    public init(paths: [String?], keyNames: [String], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode, file: StaticString = #file, line: UInt = #line) {
+    public init(paths: [String?] = [nil], keyNames: [String], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode, file: StaticString = #file, line: UInt = #line) {
         if isActive && keyNames.isEmpty {
             XCTFail("Key names to validate as absent must not be empty. Use the `keyNames` parameter to set values.", file: file, line: line)
         }
@@ -114,7 +114,7 @@ public struct ValueExactMatch: MultiPathConfig {
     public let scope: NodeConfig.Scope
 
     /// Initializes a new instance with an array of paths.
-    public init(paths: [String?], scope: NodeConfig.Scope = .singleNode) {
+    public init(paths: [String?] = [nil], scope: NodeConfig.Scope = .singleNode) {
         self.paths = paths
         self.scope = scope
     }
@@ -133,7 +133,7 @@ public struct ValueTypeMatch: MultiPathConfig {
     public let scope: NodeConfig.Scope
 
     /// Initializes a new instance with an array of paths.
-    public init(paths: [String?], scope: NodeConfig.Scope = .singleNode) {
+    public init(paths: [String?] = [nil], scope: NodeConfig.Scope = .singleNode) {
         self.paths = paths
         self.scope = scope
     }

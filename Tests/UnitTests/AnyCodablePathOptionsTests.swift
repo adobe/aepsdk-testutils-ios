@@ -122,6 +122,23 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         }
     }
 
+    func testUnsatisfiedPathOption_UsingDefaultPathOption_FailsWithArray() {
+        let expected = """
+        [1]
+        """
+
+        let actual = """
+        [1, 2]
+        """
+
+        XCTExpectFailure("Validation should fail when path option is not satisfied") {
+            assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount())
+        }
+        XCTExpectFailure("Validation should fail when path option is not satisfied") {
+            assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount())
+        }
+    }
+
     func testUnsatisfiedPathOption_FailsWithDictionary() {
         let expected = """
         {
