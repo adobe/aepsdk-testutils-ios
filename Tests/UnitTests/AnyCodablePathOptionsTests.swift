@@ -579,7 +579,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
 
     /// Validates that when constructing the node tree, subtree values are not improperly overridden or reset to their default values..
     func testSubtreeValues_NotIncorrectlyOverridden_WhenSettingMultiple() {
-        let expected = #"""
+        let expected = """
         {
           "key1": {
             "key2": {
@@ -591,9 +591,9 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
             }
           }
         }
-        """#
+        """
 
-        let actual = #"""
+        let actual = """
         {
           "key1": {
             "key2": {
@@ -605,22 +605,22 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
             }
           }
         }
-        """#
+        """
 
         assertExactMatch(
             expected: expected,
             actual: actual,
             pathOptions:
                 ValueTypeMatch(paths: "key1.key2.key3", scope: .subtree),
-                CollectionEqualCount(scope: .subtree)
+            CollectionEqualCount(scope: .subtree)
         )
 
         assertExactMatch(
             expected: expected,
             actual: actual,
-            pathOptions: 
+            pathOptions:
                 CollectionEqualCount(scope: .subtree),
-                ValueTypeMatch(paths: "key1.key2.key3", scope: .subtree)
+            ValueTypeMatch(paths: "key1.key2.key3", scope: .subtree)
         )
     }
 
@@ -1070,7 +1070,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
             actual: actual,
             pathOptions:
                 ValueTypeMatch(paths: "key0-1"),
-                ValueTypeMatch(paths: "key0-0", scope: .subtree))
+            ValueTypeMatch(paths: "key0-0", scope: .subtree))
     }
 
     // MARK: WildcardMatch
