@@ -560,29 +560,29 @@ public class NodeConfig: Hashable {
         var nextCharIsBackslash = false
         var lastArrayAccessEnd = pathComponent.endIndex // to track the end of the last valid array-style access
 
-        func isNextCharBackslash(i: String.Index) -> Bool {
-            if i == pathComponent.startIndex {
+        func isNextCharBackslash(_ index: String.Index) -> Bool {
+            if index == pathComponent.startIndex {
                 // There is no character before the startIndex.
                 return false
             }
 
             // Since we're iterating in reverse, the "next" character is before i
-            let previousIndex = pathComponent.index(before: i)
+            let previousIndex = pathComponent.index(before: index)
             return pathComponent[previousIndex] == "\\"
         }
 
-        outerLoop: for i in pathComponent.indices.reversed() {
-            switch pathComponent[i] {
-            case "]" where !isNextCharBackslash(i: i):
+        outerLoop: for index in pathComponent.indices.reversed() {
+            switch pathComponent[index] {
+            case "]" where !isNextCharBackslash(index):
                 bracketCount += 1
                 componentBuilder.append("]")
-            case "[" where !isNextCharBackslash(i: i):
+            case "[" where !isNextCharBackslash(index):
                 bracketCount -= 1
                 componentBuilder.append("[")
                 if bracketCount == 0 {
                     arrayComponents.insert(String(componentBuilder.reversed()), at: 0)
                     componentBuilder = ""
-                    lastArrayAccessEnd = i
+                    lastArrayAccessEnd = index
                 }
             case "\\":
                 if nextCharIsBackslash {
@@ -592,11 +592,11 @@ public class NodeConfig: Hashable {
                     componentBuilder.append("\\")
                 }
             default:
-                if bracketCount == 0 && i < lastArrayAccessEnd {
-                    stringComponent = String(pathComponent[pathComponent.startIndex...i])
+                if bracketCount == 0 && index < lastArrayAccessEnd {
+                    stringComponent = String(pathComponent[pathComponent.startIndex...index])
                     break outerLoop
                 }
-                componentBuilder.append(pathComponent[i])
+                componentBuilder.append(pathComponent[index])
             }
         }
 
