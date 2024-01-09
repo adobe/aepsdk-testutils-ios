@@ -464,7 +464,8 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             }) else {
                 if shouldAssert {
                     XCTFail(#"""
-                        Wildcard \#(NodeConfig.resolveOption(.primitiveExactMatch, for: nodeTree.getChild(named: index), parent: nodeTree).isActive ? "exact" : "type") match found no matches on Actual side satisfying the Expected requirement.
+                        Wildcard \#(NodeConfig.resolveOption(.primitiveExactMatch, for: nodeTree.getChild(named: index), parent: nodeTree).isActive ? "exact" : "type") 
+                        match found no matches on Actual side satisfying the Expected requirement.
 
                         Requirement: \#(nodeTree)
 
@@ -736,7 +737,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         var subtreeOptions: [NodeConfig.OptionKey: NodeConfig.Config] = [:]
         for treeDefault in treeDefaults {
             let key = treeDefault.optionKey
-            subtreeOptions[key] = treeDefault.config
             subtreeOptions[key] = treeDefault.config
         }
 

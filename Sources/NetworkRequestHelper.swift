@@ -157,8 +157,16 @@ class NetworkRequestHelper {
             let waitResult = expectedRequest.value.await(timeout: 10)
             let expectedCount: Int32 = expectedRequest.value.getInitialCount()
             let receivedCount: Int32 = expectedRequest.value.getInitialCount() - expectedRequest.value.getCurrentCount()
-            XCTAssertFalse(waitResult == DispatchTimeoutResult.timedOut, "Timed out waiting for network request(s) with URL \(expectedRequest.key.url.absoluteString) and HTTPMethod \(expectedRequest.key.httpMethod.toString()), expected \(expectedCount) but received \(receivedCount)", file: file, line: line)
-            XCTAssertEqual(expectedCount, receivedCount, "Expected \(expectedCount) network request(s) for URL \(expectedRequest.key.url.absoluteString) and HTTPMethod \(expectedRequest.key.httpMethod.toString()), but received \(receivedCount)", file: file, line: line)
+            XCTAssertFalse(waitResult == DispatchTimeoutResult.timedOut,
+                           """
+                           Timed out waiting for network request(s) with URL \(expectedRequest.key.url.absoluteString) and HTTPMethod
+                           \(expectedRequest.key.httpMethod.toString()), expected \(expectedCount) but received \(receivedCount)
+                           """, file: file, line: line)
+            XCTAssertEqual(expectedCount, receivedCount,
+                           """
+                           Expected \(expectedCount) network request(s) for URL \(expectedRequest.key.url.absoluteString) and HTTPMethod
+                           \(expectedRequest.key.httpMethod.toString()), but received \(receivedCount)
+                           """, file: file, line: line)
         }
         if ignoreUnexpectedRequests { return }
         assertUnexpectedRequests()
@@ -243,7 +251,11 @@ class NetworkRequestHelper {
     private func awaitRequest(_ networkRequest: NetworkRequest, expectationTimeout: TimeInterval = TestConstants.Defaults.WAIT_NETWORK_REQUEST_TIMEOUT, file: StaticString = #file, line: UInt = #line) {
 
         if let waitResult = awaitFor(networkRequest: networkRequest, timeout: expectationTimeout) {
-            XCTAssertFalse(waitResult == DispatchTimeoutResult.timedOut, "Timed out waiting for network request(s) with URL \(networkRequest.url) and HTTPMethod \(networkRequest.httpMethod.toString())", file: file, line: line)
+            XCTAssertFalse(waitResult == DispatchTimeoutResult.timedOut,
+                           """
+                           Timed out waiting for network request(s) with URL \(networkRequest.url)
+                           and HTTPMethod \(networkRequest.httpMethod.toString())
+                           """, file: file, line: line)
         } else {
             wait(TestConstants.Defaults.WAIT_TIMEOUT)
         }
