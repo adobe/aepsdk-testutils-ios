@@ -737,7 +737,6 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         for treeDefault in treeDefaults {
             let key = treeDefault.optionKey
             subtreeOptions[key] = treeDefault.config
-            subtreeOptions[key] = treeDefault.config
         }
 
         let rootNode = NodeConfig(name: nil, subtreeOptions: subtreeOptions)
