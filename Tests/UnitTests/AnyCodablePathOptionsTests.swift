@@ -282,6 +282,53 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "[0]"))
     }
 
+    func testOrderDependentOptionOverride() {
+        let expected = """
+        {
+          "key1": 1
+        }
+        """
+
+        let actual = """
+        {
+          "key1": 1,
+          "key2": 2
+        }
+        """
+
+        assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(), CollectionEqualCount(isActive: false))
+        assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(), CollectionEqualCount(isActive: false))
+        XCTExpectFailure("Validation should fail when path option is not satisfied") {
+            assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(isActive: false), CollectionEqualCount())
+        }
+        XCTExpectFailure("Validation should fail when path option is not satisfied") {
+            assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(isActive: false), CollectionEqualCount())
+        }
+    }
+
+    func testOrderDependentOptionOverride_WithSpecificKey() {
+        let expected = """
+        {
+          "key1": [1]
+        }
+        """
+
+        let actual = """
+        {
+          "key1": [1,2]
+        }
+        """
+
+        assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "key1"), CollectionEqualCount(paths: "key1", isActive: false))
+        assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "key1"), CollectionEqualCount(paths: "key1", isActive: false))
+        XCTExpectFailure("Validation should fail when path option is not satisfied") {
+            assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "key1", isActive: false), CollectionEqualCount(paths: "key1"))
+        }
+        XCTExpectFailure("Validation should fail when path option is not satisfied") {
+            assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: "key1", isActive: false), CollectionEqualCount(paths: "key1"))
+        }
+    }
+
     // MARK: Arg format tests
     // NOTE: this is not testing Swift language variadic behavior (which is assumed to be correct), but
     // validating our own internal logic of how we pass variadic args to the main business logic
@@ -471,6 +518,112 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         assertTypeMatch(expected: expected, actual: actual, pathOptions: ValueExactMatch(paths: nil))
     }
 
+    func testSubtreeOption_OverriddenBySingleNode() {
+        let expected = """
+        {
+          "key0-0": {
+            "key1-0": {
+              "key2-0": 1
+            }
+          }
+        }
+        """
+
+        let actual = """
+        {
+          "key0-0": {
+            "key1-0": {
+              "key2-0": 1
+            },
+            "key1-1": 1
+          }
+        }
+        """
+
+        assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(scope: .subtree), CollectionEqualCount(paths: "key0-0", isActive: false))
+        // Sanity check: Override without `.singleNode` should fail
+        XCTExpectFailure("Validation should fail when path option is not satisfied") {
+            assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(scope: .subtree))
+        }
+    }
+
+    func testSubtreeOption_OverriddenAtDifferentLevels() {
+        let expected = """
+        {
+          "key0-0": {
+            "key1-0": {
+              "key2-0": 1
+            }
+          }
+        }
+        """
+
+        let actual = """
+        {
+          "key0-0": {
+            "key1-0": {
+              "key2-0": 1,
+              "key2-1": 1
+            },
+            "key1-1": 1
+          }
+        }
+        """
+
+        assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(scope: .subtree), CollectionEqualCount(paths: "key0-0", isActive: false, scope: .subtree))
+        // Sanity check: Override without `.subtree` should fail
+        XCTExpectFailure("Validation should fail when path option is not satisfied") {
+            assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(scope: .subtree), CollectionEqualCount(paths: "key0-0", isActive: false))
+        }
+    }
+
+    /// Validates that when constructing the node tree, subtree values are not improperly overridden or reset to their default values..
+    func testSubtreeValues_NotIncorrectlyOverridden_WhenSettingMultiple() {
+        let expected = #"""
+        {
+          "key1": {
+            "key2": {
+              "key3": [
+                {
+                  "key4": "STRING_TYPE"
+                }
+              ]
+            }
+          }
+        }
+        """#
+
+        let actual = #"""
+        {
+          "key1": {
+            "key2": {
+              "key3": [
+                {
+                  "key4": "abc"
+                }
+              ]
+            }
+          }
+        }
+        """#
+
+        assertExactMatch(
+            expected: expected,
+            actual: actual,
+            pathOptions:
+                ValueTypeMatch(paths: "key1.key2.key3", scope: .subtree),
+                CollectionEqualCount(scope: .subtree)
+        )
+
+        assertExactMatch(
+            expected: expected,
+            actual: actual,
+            pathOptions: 
+                CollectionEqualCount(scope: .subtree),
+                ValueTypeMatch(paths: "key1.key2.key3", scope: .subtree)
+        )
+    }
+
     // MARK: Multi-option tests
     func testPathOptions_OrderIndependence() {
         let expected = """
@@ -638,13 +791,48 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     // MARK: - Specific path option testing -
-    // WildcardMatch
     // CollectionEqualCount
     // KeyMustBeAbsent
     // ValueExactMatch
     // ValueTypeMatch
+    // WildcardMatch
+
+    // MARK: CollectionEqualCount
+    /// Validates that the default init applies the option as expected. Note that this only tests the top level entity, because the default scope is `.singleNode`.
+    func testCollectionEqualCount_WithDefaultInit_CorrectlyFails() {
+        let expected = """
+        {}
+        """
+
+        let actual = """
+        {
+          "key1": 1
+        }
+        """
+
+        XCTExpectFailure("Validation should fail when collection counts are not equal") {
+            assertTypeMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount())
+        }
+    }
 
     // MARK: KeyMustBeAbsent
+    /// Validates that the default init applies the option as expected. Note that this only tests the top level entity, because the default scope is `.singleNode`.
+    func testKeyMustBeAbsent_WithDefaultInit_CorrectlyFails() {
+        let expected = """
+        {}
+        """
+
+        let actual = """
+        {
+          "key1": 1
+        }
+        """
+
+        XCTExpectFailure("Validation should fail when key name is present") {
+            assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(keyNames: "key1"))
+        }
+    }
+
     func testKeyMustBeAbsent_WithMissingKeyNames_Fails() {
         let expected = """
         {}
@@ -667,6 +855,28 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         }
         XCTExpectFailure("Validation should fail when key names not provided") {
             assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: [nil], keyNames: []))
+        }
+    }
+
+    func testKeyMustBeAbsent_WithInnerPath_CorrectlyFails() {
+        let expected = """
+        {}
+        """
+
+        let actual = """
+        {
+          "events": [
+            {
+              "request": {
+                "path": "something"
+              }
+            }
+          ],
+          "path": "top level"
+        }
+        """
+        XCTExpectFailure("Validation should fail when key names not provided") {
+            assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "events", keyNames: "path", scope: .subtree))
         }
     }
 
@@ -770,5 +980,110 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         XCTExpectFailure("Validation should fail when path option is not satisfied") {
             assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "disallowed-key", scope: .subtree))
         }
+    }
+
+    // MARK: ValueExactMatch
+    func testValueExactMatch_WithDefaultPathsInit_CorrectlyFails() {
+        let expected = """
+        {
+            "key1": 1
+        }
+        """
+
+        let actual = """
+        {
+            "key1": 2
+        }
+        """
+
+        XCTExpectFailure("Validation should fail when path option is not satisfied") {
+            assertTypeMatch(expected: expected, actual: actual, pathOptions: ValueExactMatch(scope: .subtree))
+        }
+    }
+
+    // MARK: ValueTypeMatch
+    func testValueTypeMatch_WithDefaultPathsInit_Passes() {
+        let expected = """
+        {
+        "key1": 1
+        }
+        """
+
+        let actual = """
+        {
+            "key1": 2
+        }
+        """
+
+        assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(scope: .subtree))
+    }
+
+    func testValueTypeMatch_SubtreeOption_Propagates() {
+        let expected = """
+        {
+          "key0-0": [
+            {
+              "key1-0": 1
+            }
+          ]
+        }
+        """
+
+        let actual = """
+        {
+          "key0-0": [
+            {
+              "key1-0": 2
+            }
+          ]
+        }
+        """
+
+        assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key0-0", scope: .subtree))
+    }
+
+    func testValueTypeMatch_SingleNodeAndSubtreeOption() {
+        let expected = """
+        {
+          "key0-0": [
+            {
+              "key1-0": 1
+            }
+          ],
+          "key0-1": 1
+        }
+        """
+
+        let actual = """
+        {
+          "key0-0": [
+            {
+              "key1-0": 2
+            }
+          ],
+          "key0-1": 2
+        }
+        """
+
+        assertExactMatch(
+            expected: expected,
+            actual: actual,
+            pathOptions:
+                ValueTypeMatch(paths: "key0-1"),
+                ValueTypeMatch(paths: "key0-0", scope: .subtree))
+    }
+
+    // MARK: WildcardMatch
+    /// Validates that the default init applies the option as expected. Note that this only tests the top level entity, because the default scope is `.singleNode`.
+    func testValueExactMatch_WithDefaultInit_CorrectlyFails() {
+        let expected = """
+        [1, 2]
+        """
+
+        let actual = """
+        [2, 1]
+        """
+
+        assertExactMatch(expected: expected, actual: actual, pathOptions: WildcardMatch())
     }
 }
