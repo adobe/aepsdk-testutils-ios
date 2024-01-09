@@ -182,7 +182,12 @@ class NetworkRequestHelper {
     ///
     /// - SeeAlso:
     ///     - ``setExpectationForNetworkRequest(networkRequest:expectedCount:file:line:)``
-    func getNetworkRequestsWith(url: String, httpMethod: HttpMethod, expectationTimeout: TimeInterval = TestConstants.Defaults.WAIT_NETWORK_REQUEST_TIMEOUT, file: StaticString = #file, line: UInt = #line) -> [NetworkRequest] {
+    func getNetworkRequestsWith(
+        url: String,
+        httpMethod: HttpMethod,
+        expectationTimeout: TimeInterval = TestConstants.Defaults.WAIT_NETWORK_REQUEST_TIMEOUT,
+        file: StaticString = #file,
+        line: UInt = #line) -> [NetworkRequest] {
         guard let networkRequest = NetworkRequest(urlString: url, httpMethod: httpMethod) else {
             return []
         }

@@ -464,7 +464,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             }) else {
                 if shouldAssert {
                     XCTFail(#"""
-                        Wildcard \#(NodeConfig.resolveOption(.primitiveExactMatch, for: nodeTree.getChild(named: index), parent: nodeTree).isActive ? "exact" : "type") 
+                        Wildcard \#(NodeConfig.resolveOption(.primitiveExactMatch, for: nodeTree.getChild(named: index), parent: nodeTree).isActive ? "exact" : "type")
                         match found no matches on Actual side satisfying the Expected requirement.
 
                         Requirement: \#(nodeTree)
