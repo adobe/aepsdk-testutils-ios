@@ -115,8 +115,7 @@ public struct KeyMustBeAbsent: MultiPathConfig {
         isActive: Bool = true,
         scope: NodeConfig.Scope = .singleNode,
         file: StaticString = #file,
-        line: UInt = #line) 
-    {
+        line: UInt = #line) {
         let finalPaths = paths.isEmpty ? [nil] : paths
         self.init(paths: finalPaths, keyNames: keyNames, isActive: isActive, scope: scope, file: file, line: line)
     }
