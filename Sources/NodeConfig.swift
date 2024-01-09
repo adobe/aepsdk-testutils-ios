@@ -60,7 +60,8 @@ public struct WildcardMatch: MultiPathConfig {
 
     /// Variadic initializer allowing multiple string paths.
     public init(paths: String?..., isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
-        self.init(paths: paths, isActive: isActive, scope: scope)
+        let finalPaths = paths.isEmpty ? [nil] : paths
+        self.init(paths: finalPaths, isActive: isActive, scope: scope)
     }
 }
 
@@ -80,7 +81,8 @@ public struct CollectionEqualCount: MultiPathConfig {
 
     /// Variadic initializer allowing multiple string paths.
     public init(paths: String?..., isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
-        self.init(paths: paths, isActive: isActive, scope: scope)
+        let finalPaths = paths.isEmpty ? [nil] : paths
+        self.init(paths: finalPaths, isActive: isActive, scope: scope)
     }
 }
 
@@ -91,7 +93,13 @@ public struct KeyMustBeAbsent: MultiPathConfig {
     public let scope: NodeConfig.Scope
 
     /// Initializes a new instance with an array of paths.
-    public init(paths: [String?] = [nil], keyNames: [String], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode, file: StaticString = #file, line: UInt = #line) {
+    public init(
+        paths: [String?] = [nil],
+        keyNames: [String],
+        isActive: Bool = true,
+        scope: NodeConfig.Scope = .singleNode,
+        file: StaticString = #file,
+        line: UInt = #line) {
         if isActive && keyNames.isEmpty {
             XCTFail("Key names to validate as absent must not be empty. Use the `keyNames` parameter to set values.", file: file, line: line)
         }
@@ -101,8 +109,16 @@ public struct KeyMustBeAbsent: MultiPathConfig {
     }
 
     /// Variadic initializer allowing multiple string paths.
-    public init(paths: String?..., keyNames: String..., isActive: Bool = true, scope: NodeConfig.Scope = .singleNode, file: StaticString = #file, line: UInt = #line) {
-        self.init(paths: paths, keyNames: keyNames, isActive: isActive, scope: scope, file: file, line: line)
+    public init(
+        paths: String?...,
+        keyNames: String...,
+        isActive: Bool = true,
+        scope: NodeConfig.Scope = .singleNode,
+        file: StaticString = #file,
+        line: UInt = #line) 
+    {
+        let finalPaths = paths.isEmpty ? [nil] : paths
+        self.init(paths: finalPaths, keyNames: keyNames, isActive: isActive, scope: scope, file: file, line: line)
     }
 }
 
@@ -121,7 +137,8 @@ public struct ValueExactMatch: MultiPathConfig {
 
     /// Variadic initializer allowing multiple string paths.
     public init(paths: String?..., scope: NodeConfig.Scope = .singleNode) {
-        self.init(paths: paths, scope: scope)
+        let finalPaths = paths.isEmpty ? [nil] : paths
+        self.init(paths: finalPaths, scope: scope)
     }
 }
 
@@ -140,7 +157,8 @@ public struct ValueTypeMatch: MultiPathConfig {
 
     /// Variadic initializer allowing multiple string paths.
     public init(paths: String?..., scope: NodeConfig.Scope = .singleNode) {
-        self.init(paths: paths, scope: scope)
+        let finalPaths = paths.isEmpty ? [nil] : paths
+        self.init(paths: finalPaths, scope: scope)
     }
 }
 
@@ -288,7 +306,13 @@ public class NodeConfig: Hashable {
     }
 
     func createOrUpdateNode(using multiPathConfig: MultiPathConfig) {
-        let pathConfigs = multiPathConfig.paths.map({ PathConfig(path: $0, optionKey: multiPathConfig.optionKey, config: multiPathConfig.config, scope: multiPathConfig.scope) })
+        let pathConfigs = multiPathConfig.paths.map({
+            PathConfig(
+                path: $0,
+                optionKey: multiPathConfig.optionKey,
+                config: multiPathConfig.config,
+                scope: multiPathConfig.scope)
+        })
         for pathConfig in pathConfigs {
             createOrUpdateNode(using: pathConfig)
         }
