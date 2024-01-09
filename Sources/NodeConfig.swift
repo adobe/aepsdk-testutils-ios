@@ -347,8 +347,11 @@ public class NodeConfig: Hashable {
         }
 
         func propagateSubtreeOptions(for node: NodeConfig) {
+            let key = pathConfig.optionKey
             for child in node.children {
-                child.subtreeOptions = node.subtreeOptions
+                // Only propagate the subtree value for the specific option key,
+                // otherwise, previously set subtree values will be reset to the default values
+                child.subtreeOptions[key] = node.subtreeOptions[key]
                 propagateSubtreeOptions(for: child)
             }
         }
