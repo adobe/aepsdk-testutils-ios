@@ -187,6 +187,7 @@
 				4C0293A42AE1D4540093CCBA /* MockHitProcessor.swift */,
 				4C02939F2AE1D4540093CCBA /* MockNetworkService.swift */,
 				4C0293A72AE1D4540093CCBA /* NetworkRequestHelper.swift */,
+				4CE14ECB2AFDC7F100969B36 /* NodeConfig.swift */,
 				4C0293AE2AE1D4550093CCBA /* RealNetworkService.swift */,
 				4C0293A62AE1D4540093CCBA /* TestableExtensionRuntime.swift */,
 				4C0293AF2AE1D4550093CCBA /* TestableNetworkRequest.swift */,
@@ -196,7 +197,6 @@
 				4C7043482AF45B05008CF67D /* URL+Testable.swift */,
 				4C0293AA2AE1D4550093CCBA /* UserDefaults+Test.swift */,
 				4C0293C12AE1D9AD0093CCBA /* XCTestCase+AnyCodableAsserts.swift */,
-				4CE14ECB2AFDC7F100969B36 /* NodeConfig.swift */,
 				D4967534251130D3001F5F95 /* Info.plist */,
 			);
 			path = Sources;
