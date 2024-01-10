@@ -184,7 +184,11 @@ class NetworkRequestHelper {
                 _ = expectedRequest.await(timeout: TestConstants.Defaults.WAIT_NETWORK_REQUEST_TIMEOUT)
                 let expectedCount: Int32 = expectedRequest.getInitialCount()
                 let receivedCount: Int32 = expectedRequest.getInitialCount() - expectedRequest.getCurrentCount()
-                XCTAssertEqual(expectedCount, receivedCount, "Expected \(expectedCount) network request(s) for URL \(sentRequestURL) and HTTPMethod \(sentRequestHTTPMethod), but received \(receivedCount)", file: file, line: line)
+                XCTAssertEqual(expectedCount, receivedCount, 
+                               """
+                               Expected \(expectedCount) network request(s) for URL \(sentRequestURL) and HTTPMethod \(sentRequestHTTPMethod),
+                               but received \(receivedCount)
+                               """, file: file, line: line)
             }
             // Check for requests that don't have expectations set
             else {
@@ -194,7 +198,10 @@ class NetworkRequestHelper {
             }
         }
 
-        XCTAssertEqual(0, unexpectedRequestsCount, "Received \(unexpectedRequestsCount) unexpected network request(s): \(unexpectedRequestsAsString)", file: file, line: line)
+        XCTAssertEqual(0, unexpectedRequestsCount, 
+                       """
+                       Received \(unexpectedRequestsCount) unexpected network request(s): \(unexpectedRequestsAsString)
+                       """, file: file, line: line)
     }
 
     /// Returns the network request(s) sent through the Core NetworkService, or empty if none was found.
