@@ -696,7 +696,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             // MARK: KeyMustBeAbsent check
             // Check for keys that must be absent in the current node
             let resolvedKeyMustBeAbsent = NodeConfig.resolveOption(.keyMustBeAbsent, for: nodeTree.getChild(named: key), parent: nodeTree)
-            if resolvedKeyMustBeAbsent.keyNames.contains(key) {
+            if resolvedKeyMustBeAbsent.isActive {
                 XCTFail(#"""
                     Actual JSON should not have key with name: \#(key)
 
