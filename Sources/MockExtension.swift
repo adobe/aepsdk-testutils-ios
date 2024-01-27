@@ -14,29 +14,29 @@ import Foundation
 
 @testable import AEPCore
 
-class MockExtension: Extension {
-    var name = "com.adobe.mockExtension"
-    var friendlyName = "mockExtension"
-    static var extensionVersion = "0.0.1"
-    var metadata: [String: String]?
+public class MockExtension: Extension {
+    public var name = "com.adobe.mockExtension"
+    public var friendlyName = "mockExtension"
+    public static var extensionVersion = "0.0.1"
+    public var metadata: [String: String]?
 
-    static var registrationClosure: (() -> Void)?
-    static var unregistrationClosure: (() -> Void)?
-    static var eventReceivedClosure: ((Event) -> Void)?
+    public static var registrationClosure: (() -> Void)?
+    public static var unregistrationClosure: (() -> Void)?
+    public static var eventReceivedClosure: ((Event) -> Void)?
 
-    let runtime: ExtensionRuntime
+    public let runtime: ExtensionRuntime
 
-    required init(runtime: ExtensionRuntime) {
+    public required init(runtime: ExtensionRuntime) {
         self.runtime = runtime
     }
 
-    static func reset() {
+    public static func reset() {
         registrationClosure = nil
         unregistrationClosure = nil
         eventReceivedClosure = nil
     }
 
-    func onRegistered() {
+    public func onRegistered() {
         registerListener(type: EventType.wildcard, source: EventSource.wildcard) { event in
             if let closure = type(of: self).eventReceivedClosure {
                 closure(event)
@@ -48,13 +48,13 @@ class MockExtension: Extension {
         }
     }
 
-    func onUnregistered() {
+    public func onUnregistered() {
         if let closure = type(of: self).unregistrationClosure {
             closure()
         }
     }
 
-    func readyForEvent(_: Event) -> Bool {
+    public func readyForEvent(_: Event) -> Bool {
         return true
     }
 }
