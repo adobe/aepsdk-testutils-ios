@@ -49,8 +49,8 @@ public class RealNetworkService: NetworkService {
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
     /// - SeeAlso: ``setExpectation(for:)``
-    public func assertAllNetworkRequestExpectations(file: StaticString = #file, line: UInt = #line) {
-        helper.assertAllNetworkRequestExpectations(file: file, line: line)
+    public func assertAllNetworkRequestExpectations(ignoreUnexpectedRequests: Bool = true, file: StaticString = #file, line: UInt = #line) {
+        helper.assertAllNetworkRequestExpectations(ignoreUnexpectedRequests: ignoreUnexpectedRequests, file: file, line: line)
     }
 
     public func reset() {
