@@ -134,7 +134,7 @@ open class TestBase: XCTestCase {
                 _ = expectedEvent.await(timeout: TestConstants.Defaults.WAIT_EVENT_TIMEOUT)
                 let expectedCount: Int32 = expectedEvent.getInitialCount()
                 let receivedCount: Int32 = expectedEvent.getInitialCount() - expectedEvent.getCurrentCount()
-                XCTAssertEqual(expectedCount, receivedCount, 
+                XCTAssertEqual(expectedCount, receivedCount,
                                """
                                Expected \(expectedCount) events of type \(receivedEvent.key.type) and source \(receivedEvent.key.source),
                                but received \(receivedCount)

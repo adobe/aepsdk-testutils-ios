@@ -829,56 +829,32 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         """
 
         XCTExpectFailure("Validation should fail when key name is present") {
-            assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(keyNames: "key1"))
+            assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key1"))
         }
     }
 
-    func testKeyMustBeAbsent_WithMissingKeyNames_Fails() {
-        let expected = """
-        {}
-        """
-
-        let actual = """
-        {
-            "key1": 1
-        }
-        """
-
-        XCTExpectFailure("Validation should fail when key names not provided") {
-            assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil))
-        }
-        XCTExpectFailure("Validation should fail when key names not provided") {
-            assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: [nil], keyNames: []))
-        }
-        XCTExpectFailure("Validation should fail when key names not provided") {
-            assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil))
-        }
-        XCTExpectFailure("Validation should fail when key names not provided") {
-            assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: [nil], keyNames: []))
-        }
-    }
-
-    func testKeyMustBeAbsent_WithInnerPath_CorrectlyFails() {
-        let expected = """
-        {}
-        """
-
-        let actual = """
-        {
-          "events": [
-            {
-              "request": {
-                "path": "something"
-              }
-            }
-          ],
-          "path": "top level"
-        }
-        """
-        XCTExpectFailure("Validation should fail when key names not provided") {
-            assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "events", keyNames: "path", scope: .subtree))
-        }
-    }
+    // TODO: Wildcard keyname/index functionality
+    //    func testKeyMustBeAbsent_WithInnerPath_CorrectlyFails() {
+    //        let expected = """
+    //        {}
+    //        """
+    //
+    //        let actual = """
+    //        {
+    //          "events": [
+    //            {
+    //              "request": {
+    //                "path": "something"
+    //              }
+    //            }
+    //          ],
+    //          "path": "top level"
+    //        }
+    //        """
+    //        XCTExpectFailure("Validation should fail when key names not provided") {
+    //            assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "events[*].request.path", scope: .subtree))
+    //        }
+    //    }
 
     func testKeyMustBeAbsent_WithSinglePath_Passes() {
         let expected = """
@@ -891,7 +867,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         }
         """
 
-        assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "key2"))
+        assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key2"))
     }
 
     func testKeyMustBeAbsent_WithMultipleKeys_Passes() {
@@ -905,7 +881,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         }
         """
 
-        assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "key2", "key3"))
+        assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key2", "key3"))
     }
 
     func testKeyMustBeAbsent_Fails_WhenKeyPresent() {
@@ -920,7 +896,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         """
 
         XCTExpectFailure("Validation should fail when key that must be absent is present in actual") {
-            assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "key1"))
+            assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key1"))
         }
     }
 
@@ -943,42 +919,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         """
 
         XCTExpectFailure("Validation should fail when key that must be absent is present in actual") {
-            assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key2", keyNames: "key3"))
-        }
-    }
-
-    func testKeyMustBeAbsent_SubtreeOptionPropagates_WithDictionary() {
-        let expected = """
-        {
-          "key0-0": {
-            "key1-0": {
-              "key2-0":{
-                "key3-0": 1
-              }
-            }
-          }
-        }
-        """
-
-        let actual = """
-        {
-          "key0-0": {
-            "key1-0": {
-              "key2-0":{
-                "key3-0": 1,
-                "disallowed-key": 1
-              },
-              "disallowed-key": 1
-            }
-          }
-        }
-        """
-
-        XCTExpectFailure("Validation should fail when path option is not satisfied") {
-            assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "disallowed-key", scope: .subtree))
-        }
-        XCTExpectFailure("Validation should fail when path option is not satisfied") {
-            assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "disallowed-key", scope: .subtree))
+            assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key2.key3"))
         }
     }
 

@@ -93,31 +93,16 @@ public struct KeyMustBeAbsent: MultiPathConfig {
     public let scope: NodeConfig.Scope
 
     /// Initializes a new instance with an array of paths.
-    public init(
-        paths: [String?] = [nil],
-        keyNames: [String],
-        isActive: Bool = true,
-        scope: NodeConfig.Scope = .singleNode,
-        file: StaticString = #file,
-        line: UInt = #line) {
-        if isActive && keyNames.isEmpty {
-            XCTFail("Key names to validate as absent must not be empty. Use the `keyNames` parameter to set values.", file: file, line: line)
-        }
+    public init(paths: [String?] = [nil], isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
         self.paths = paths
-        self.config = NodeConfig.Config(isActive: isActive, keyNames: keyNames)
+        self.config = NodeConfig.Config(isActive: isActive)
         self.scope = scope
     }
 
     /// Variadic initializer allowing multiple string paths.
-    public init(
-        paths: String?...,
-        keyNames: String...,
-        isActive: Bool = true,
-        scope: NodeConfig.Scope = .singleNode,
-        file: StaticString = #file,
-        line: UInt = #line) {
+    public init(paths: String?..., isActive: Bool = true, scope: NodeConfig.Scope = .singleNode) {
         let finalPaths = paths.isEmpty ? [nil] : paths
-        self.init(paths: finalPaths, keyNames: keyNames, isActive: isActive, scope: scope, file: file, line: line)
+        self.init(paths: finalPaths, isActive: isActive, scope: scope)
     }
 }
 
@@ -187,7 +172,6 @@ public class NodeConfig: Hashable {
     public struct Config: Hashable {
         /// Flag for is an option is active or not.
         var isActive: Bool
-        var keyNames: [String] = []
     }
 
     public enum NodeOption {
