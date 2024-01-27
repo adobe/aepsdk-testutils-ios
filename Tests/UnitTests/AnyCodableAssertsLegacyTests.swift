@@ -15,7 +15,7 @@ import AEPTestUtils
 import Foundation
 import XCTest
 
-class AnyCodableAssertsTests: XCTestCase, AnyCodableAsserts {
+class AnyCodableAssertsLegacyTests: XCTestCase, AnyCodableAsserts {
     /// Validates `null` equated to itself is true
     func testShouldMatchWhenBothValuesAreNil() {
         let expected: AnyCodable? = nil

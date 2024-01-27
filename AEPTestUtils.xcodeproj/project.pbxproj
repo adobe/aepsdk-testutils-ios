@@ -42,7 +42,7 @@
 		4C7043472AF45A98008CF67D /* EventSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7043462AF45A98008CF67D /* EventSpec.swift */; };
 		4C7043492AF45B05008CF67D /* URL+Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7043482AF45B05008CF67D /* URL+Testable.swift */; };
 		4C70434C2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */; };
-		4C70434D2AFB0D4F008CF67D /* AnyCodableAssertsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsTests.swift */; };
+		4C70434D2AFB0D4F008CF67D /* AnyCodableAssertsLegacyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsLegacyTests.swift */; };
 		4C84194A2B2BD690007AA163 /* AnyCodablePathOptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8419492B2BD690007AA163 /* AnyCodablePathOptionsTests.swift */; };
 		4C9CF7C82AE20A7300EB88D4 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C9CF7C72AE20A7300EB88D4 /* XCTest.framework */; };
 		4CE14ECC2AFDC7F100969B36 /* NodeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE14ECB2AFDC7F100969B36 /* NodeConfig.swift */; };
@@ -106,7 +106,7 @@
 		4C7043462AF45A98008CF67D /* EventSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSpec.swift; sourceTree = "<group>"; };
 		4C7043482AF45B05008CF67D /* URL+Testable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Testable.swift"; sourceTree = "<group>"; };
 		4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCodableAssertsParameterizedTests.swift; sourceTree = "<group>"; };
-		4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCodableAssertsTests.swift; sourceTree = "<group>"; };
+		4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsLegacyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCodableAssertsLegacyTests.swift; sourceTree = "<group>"; };
 		4C8419492B2BD690007AA163 /* AnyCodablePathOptionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCodablePathOptionsTests.swift; sourceTree = "<group>"; };
 		4C9CF7C72AE20A7300EB88D4 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		4CE14ECB2AFDC7F100969B36 /* NodeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeConfig.swift; sourceTree = "<group>"; };
@@ -206,7 +206,7 @@
 			isa = PBXGroup;
 			children = (
 				4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */,
-				4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsTests.swift */,
+				4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsLegacyTests.swift */,
 				4C8419492B2BD690007AA163 /* AnyCodablePathOptionsTests.swift */,
 				D4D5B5252432599B00CAB6E4 /* Info.plist */,
 			);
@@ -472,7 +472,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C70434C2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift in Sources */,
-				4C70434D2AFB0D4F008CF67D /* AnyCodableAssertsTests.swift in Sources */,
+				4C70434D2AFB0D4F008CF67D /* AnyCodableAssertsLegacyTests.swift in Sources */,
 				4C84194A2B2BD690007AA163 /* AnyCodablePathOptionsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

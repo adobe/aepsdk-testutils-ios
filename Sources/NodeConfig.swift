@@ -44,10 +44,11 @@ struct PathConfig {
     var scope: NodeConfig.Scope
 }
 
-/// A structure representing the wildcard match configuration.
-public struct WildcardMatch: MultiPathConfig {
+/// Validation option which specifies: Array elements from `expected` may match elements from `actual` regardless of index position.
+/// When combining any position option indexes and standard indexes, standard indexes are validated first.
+public struct AnyOrderMatch: MultiPathConfig {
     public let paths: [String?]
-    public let optionKey: NodeConfig.OptionKey = .wildcardMatch
+    public let optionKey: NodeConfig.OptionKey = .anyOrderMatch
     public let config: NodeConfig.Config
     public let scope: NodeConfig.Scope
 
@@ -65,7 +66,7 @@ public struct WildcardMatch: MultiPathConfig {
     }
 }
 
-/// A structure representing the collection equal count configuration.
+/// Validation option which specifies: Collections (objects and/or arrays) must have the same number of elements.
 public struct CollectionEqualCount: MultiPathConfig {
     public let paths: [String?]
     public let optionKey: NodeConfig.OptionKey = .collectionEqualCount
@@ -86,6 +87,7 @@ public struct CollectionEqualCount: MultiPathConfig {
     }
 }
 
+/// Validation option which specifies: `actual` must not have the key name specified.
 public struct KeyMustBeAbsent: MultiPathConfig {
     public let paths: [String?]
     public let optionKey: NodeConfig.OptionKey = .keyMustBeAbsent
@@ -106,7 +108,7 @@ public struct KeyMustBeAbsent: MultiPathConfig {
     }
 }
 
-/// A structure representing the value exact match configuration.
+/// Validation option which specifies: values must have the same type and literal value
 public struct ValueExactMatch: MultiPathConfig {
     public let paths: [String?]
     public let optionKey: NodeConfig.OptionKey = .primitiveExactMatch
@@ -126,7 +128,7 @@ public struct ValueExactMatch: MultiPathConfig {
     }
 }
 
-/// A structure representing the value type match configuration.
+/// Validation option which specifies: values must have the same type but their literal values can be different.
 public struct ValueTypeMatch: MultiPathConfig {
     public let paths: [String?]
     public let optionKey: NodeConfig.OptionKey = .primitiveExactMatch
@@ -162,7 +164,7 @@ public class NodeConfig: Hashable {
 
     /// Defines the types of configuration options available for nodes.
     public enum OptionKey: String, Hashable, CaseIterable {
-        case wildcardMatch
+        case anyOrderMatch
         case collectionEqualCount
         case primitiveExactMatch
         case keyMustBeAbsent
@@ -170,7 +172,7 @@ public class NodeConfig: Hashable {
 
     /// Represents the configuration details for a comparison option
     public struct Config: Hashable {
-        /// Flag for is an option is active or not.
+        /// Flag that controls if the option is active or not.
         var isActive: Bool
     }
 
@@ -178,20 +180,34 @@ public class NodeConfig: Hashable {
         case option(OptionKey, Config, Scope)
     }
 
+    private struct PathComponent {
+        var name: String?
+        /// Flag that controls if this path component is an AnyOrder option type
+        var isAnyOrder: Bool
+        /// Flag that controls if this path component is an array index
+        var isArray: Bool
+        /// Flag that controls if this path component is a wildcard
+        var isWildcard: Bool
+    }
+
     /// An string representing the name of the node. `nil` refers to the top level object
-    let name: String?
-    /// Options set specifically for this node.
+    var name: String?
+    /// Options set specifically for this node. Specific `OptionKey`s may or may not be present - it is optional.
     private(set) var options: [OptionKey: Config] = [:]
-    /// Options set for the subtree, applicable when no options are set for the node itself.
+    /// Options set for the subtree, used as the default option when no node-specific options are set. All `OptionKey`s MUST be
+    /// present.
     private var subtreeOptions: [OptionKey: Config] = [:]
+
     /// The set of child nodes.
     private(set) var children: Set<NodeConfig>
+    /// The node configuration for wildcard children
+    private(set) var wildcardChildren: NodeConfig?
 
     // Property accessors for each option which use the `options` set for the current node
     // and fall back to subtree options.
-    var wildcardMatch: Config {
-        get { options[.wildcardMatch] ?? subtreeOptions[.wildcardMatch]! }
-        set { options[.wildcardMatch] = newValue }
+    var anyOrderMatch: Config {
+        get { options[.anyOrderMatch] ?? subtreeOptions[.anyOrderMatch]! }
+        set { options[.anyOrderMatch] = newValue }
     }
 
     var collectionEqualCount: Config {
@@ -211,13 +227,14 @@ public class NodeConfig: Hashable {
 
     /// Creates a new node with the given values.
     ///
-    /// Make sure to specify **all** OptionKey values for subtreeOptions, especially when the node is intended to be the root.
+    /// Make sure to specify **all** `OptionKey` values for `subtreeOptions`, especially when the node is intended to be the root.
     /// These subtree options will be used for all descendants unless otherwise specified. If any subtree option keys are missing, a
     /// default value will be provided.
     init(name: String?,
          options: [OptionKey: Config] = [:],
          subtreeOptions: [OptionKey: Config],
-         children: Set<NodeConfig> = []) {
+         children: Set<NodeConfig> = [],
+         wildcardChild: NodeConfig? = nil) {
         // Validate subtreeOptions has every option defined
         var validatedSubtreeOptions = subtreeOptions
         for key in OptionKey.allCases {
@@ -232,6 +249,7 @@ public class NodeConfig: Hashable {
         self.options = options
         self.subtreeOptions = validatedSubtreeOptions
         self.children = children
+        self.wildcardChildren = wildcardChild
     }
 
     // Implementation of Hashable
@@ -248,6 +266,14 @@ public class NodeConfig: Hashable {
         hasher.combine(subtreeOptions)
     }
 
+    /// Creates a deep copy of the current `NodeConfig` instance.
+    func deepCopy() -> NodeConfig {
+        let copiedNode = NodeConfig(name: name, options: options, subtreeOptions: subtreeOptions)
+        copiedNode.children = Set(self.children.map { $0.deepCopy() })
+        copiedNode.wildcardChildren = wildcardChildren?.deepCopy()
+        return copiedNode
+    }
+
     func getChild(named name: String?) -> NodeConfig? {
         return children.first(where: { $0.name == name })
     }
@@ -258,18 +284,36 @@ public class NodeConfig: Hashable {
         return children.first(where: { $0.name == indexString })
     }
 
+    func getNextNode(for name: String?) -> NodeConfig {
+        return getChild(named: name) ?? wildcardChildren ?? asFinalNode()
+    }
+
+    func getNextNode(for index: Int?) -> NodeConfig {
+        return getChild(named: index) ?? wildcardChildren ?? asFinalNode()
+    }
+
     /// Resolves a given node's option using the following precedence:
-    /// 1. Node's own node-specific option
-    /// 2. Parent node's node-specific option
-    /// 3. Node's subtree default option
-    /// 4. Parent node's subtree default option
+    /// 1. Single node option
+    ///   a. Current node
+    ///   b. Wildcard child
+    ///   c. Parent node
+    ///
+    /// 2. Subtree option
+    ///   a. Current node
+    ///   b. Wildcard child
+    ///   c. Parent node
     ///
     /// This is to handle the case where an array has a node-specific option like wildcard match which should apply to all direct children
     /// (that is, only 1 level down), and one of the children has a node specific option disabling wildcard match.
     static func resolveOption(_ option: OptionKey, for node: NodeConfig?, parent parentNode: NodeConfig) -> Config {
-        // Check node's node-specific option
+        // Single node options
+        // Current node
         if let nodeOption = node?.options[option] {
             return nodeOption
+        }
+        // Wildcard child
+        if let wildcardOption = node?.wildcardChildren?.options[option] {
+            return wildcardOption
         }
         // Check array's node-specific option
         if let arrayOption = parentNode.options[option] {
@@ -277,18 +321,18 @@ public class NodeConfig: Hashable {
         }
         // Check node's subtree option, falling back to array node's default subtree config
         switch option {
+        case .anyOrderMatch:
+            return node?.anyOrderMatch ?? node?.wildcardChildren?.anyOrderMatch ?? parentNode.anyOrderMatch
         case .collectionEqualCount:
-            return node?.collectionEqualCount ?? parentNode.collectionEqualCount
+            return node?.collectionEqualCount ?? node?.wildcardChildren?.collectionEqualCount ?? parentNode.collectionEqualCount
         case .keyMustBeAbsent:
-            return node?.keyMustBeAbsent ?? parentNode.keyMustBeAbsent
+            return node?.keyMustBeAbsent ?? node?.wildcardChildren?.keyMustBeAbsent ?? parentNode.keyMustBeAbsent
         case .primitiveExactMatch:
-            return node?.primitiveExactMatch ?? parentNode.primitiveExactMatch
-        case .wildcardMatch:
-            return node?.wildcardMatch ?? parentNode.wildcardMatch
+            return node?.primitiveExactMatch ?? node?.wildcardChildren?.primitiveExactMatch ?? parentNode.primitiveExactMatch
         }
     }
 
-    func createOrUpdateNode(using multiPathConfig: MultiPathConfig) {
+    func createOrUpdateNode(with multiPathConfig: MultiPathConfig, isLegacyMode: Bool, file: StaticString, line: UInt) {
         let pathConfigs = multiPathConfig.paths.map({
             PathConfig(
                 path: $0,
@@ -297,83 +341,134 @@ public class NodeConfig: Hashable {
                 scope: multiPathConfig.scope)
         })
         for pathConfig in pathConfigs {
-            createOrUpdateNode(using: pathConfig)
+            createOrUpdateNode(with: pathConfig, isLegacyMode: isLegacyMode, file: file, line: line)
         }
     }
 
     // Helper method to create or traverse nodes
-    func createOrUpdateNode(using pathConfig: PathConfig) {
-        var current = self
+    func createOrUpdateNode(with pathConfig: PathConfig, isLegacyMode: Bool, file: StaticString, line: UInt) {
+        let pathComponents = getProcessedPathComponents(for: pathConfig.path, file: file, line: line)
+        updateTree(nodes: [self], with: pathConfig, pathComponents: pathComponents, isLegacyMode: isLegacyMode)
+    }
 
-        let path = pathConfig.path
-        let keyPath = getKeyPathComponents(from: path)
-
-        // Inline function to find or create a child node
-        func findOrCreateChildNode(named name: String) -> NodeConfig {
-            let child: NodeConfig
-            if let existingChild = current.children.first(where: { $0.name == name }) {
-                child = existingChild
-            } else {
-                // Apply subtreeOptions to the child
-                let newChild = NodeConfig(name: name, subtreeOptions: current.subtreeOptions)
-                current.children.insert(newChild)
-                child = newChild
-            }
-            return child
-        }
-        var isFirstComponent = true
-        for key in keyPath {
-            let key = key.replacingOccurrences(of: "\\.", with: ".")
-            // Extract the string part and array component part(s) from the key string
-            let components = extractArrayFormattedComponents(pathComponent: key)
-
-            // Process string part of key
-            if let stringComponent = components.stringComponent {
-                current = findOrCreateChildNode(named: stringComponent)
-            }
-
-            // Process array component parts if applicable
-            for arrayComponent in components.arrayComponents {
-                // 1. Check for general wildcard case
-                if arrayComponent == "[*]" {
-                    // this actually applies to the current node (since the named node is a collection by virtue of it having array components
-                    current.options[.wildcardMatch] = Config(isActive: true)
+    private func updateTree(nodes: [NodeConfig], with pathConfig: PathConfig, pathComponents: [PathComponent], isLegacyMode: Bool) {
+        if nodes.isEmpty { return }
+        var pathComponents = pathComponents
+        // Reached the end of the pathComponents - apply the PathConfig to the current nodes
+        if pathComponents.isEmpty {
+            // Apply the node option to the final node
+            for node in nodes {
+                if pathConfig.scope == .subtree {
+                    // Propagate this subtree option update to all children
+                    propagateSubtreeOption(for: node, pathConfig: pathConfig)
                 } else {
-                    // 2. Extract valid indexes, and wildcard status
-                    // indexes represent the "named" child elements of arrays
-                    guard let indexResult = extractValidWildcardIndex(pathComponent: arrayComponent) else {
-                        return
+                    node.options[pathConfig.optionKey] = pathConfig.config
+                }
+            }
+            return
+        }
+
+        // Note the removal of the first path component from the overall array - this progresses the recursion by 1
+        let pathComponent = pathComponents.removeFirst()
+        var nextNodes: [NodeConfig] = []
+        for node in nodes {
+            guard let pathComponentName = pathComponent.name else { continue }
+
+            let child = findOrCreateChild(of: node, named: pathComponentName, isWildcard: pathComponent.isWildcard)
+            nextNodes.append(child)
+
+            if pathComponent.isWildcard {
+                nextNodes.append(contentsOf: node.children)
+            }
+            if isLegacyMode && pathComponent.isAnyOrder {
+                node.options[.anyOrderMatch] = Config(isActive: true)
+            }
+        }
+        updateTree(nodes: nextNodes, with: pathConfig, pathComponents: pathComponents, isLegacyMode: isLegacyMode)
+    }
+
+    private func getProcessedPathComponents(for pathString: String?, file: StaticString, line: UInt) -> [PathComponent] {
+        let objectPathComponents = getObjectPathComponents(from: pathString)
+
+        var pathComponents: [PathComponent] = []
+        for objectPathComponent in objectPathComponents {
+            let key = objectPathComponent.replacingOccurrences(of: "\\.", with: ".")
+            // Extract the string part and array component part(s) from the key string
+            let components = getArrayPathComponents(from: key)
+
+            // Process string segment
+            if var stringComponent = components.stringComponent {
+                // Check if component is wildcard
+                let isWildcard = stringComponent == "*"
+                if isWildcard {
+                    pathComponents.append(PathComponent(name: stringComponent, isAnyOrder: false, isArray: false, isWildcard: isWildcard))
+                }
+                else {
+                    pathComponents.append(PathComponent(name: stringComponent.replacingOccurrences(of: "\\*", with: "*"), isAnyOrder: false, isArray: false, isWildcard: isWildcard))
+                }
+            }
+
+            // Process array segment(s)
+            for arrayComponent in components.arrayComponents {
+                // Check for array wildcard case
+                if arrayComponent == "[*]" {
+                    pathComponents.append(PathComponent(name: arrayComponent, isAnyOrder: true, isArray: true, isWildcard: true))
+                // indexes represent the "named" child elements of arrays
+                } else {
+                    guard let indexResult = getArrayIndexAndAnyOrder(from: arrayComponent, file: file, line: line) else {
+                        // Test failure emitted by extractIndexAndWildcardStatus
+                        return pathComponents
                     }
-                    let indexString = String(indexResult.index)
-                    current = findOrCreateChildNode(named: indexString)
-                    if indexResult.isWildcard {
-                        current.options[.wildcardMatch] = Config(isActive: true)
-                    }
+                    pathComponents.append(PathComponent(name: String(indexResult.index), isAnyOrder: indexResult.isAnyOrder, isArray: true, isWildcard: false))
                 }
             }
         }
+        return pathComponents
+    }
 
-        func propagateSubtreeOptions(for node: NodeConfig) {
-            let key = pathConfig.optionKey
-            for child in node.children {
-                // Only propagate the subtree value for the specific option key,
-                // otherwise, previously set subtree values will be reset to the default values
-                child.subtreeOptions[key] = node.subtreeOptions[key]
-                propagateSubtreeOptions(for: child)
+    /// Finds or creates a child node, returning the child node. After creation, also handles the assignment to the proper descendants location
+    /// in the current node.
+    private func findOrCreateChild(of node: NodeConfig, named name: String, isWildcard: Bool) -> NodeConfig {
+        if isWildcard {
+            if let existingChild = node.wildcardChildren {
+                return existingChild
+            } else {
+                // Apply subtreeOptions to the child
+                let newChild = NodeConfig(name: name, subtreeOptions: node.subtreeOptions)
+                node.wildcardChildren = newChild
+                return newChild
             }
         }
+        else {
+            if let existingChild = node.children.first(where: { $0.name == name }) {
+                return existingChild
+            }
+            else {
+                // If a wildcard child already exists, use that as the base
+                if let wildcardTemplateChild = wildcardChildren?.deepCopy() {
+                    wildcardTemplateChild.name = name
+                    node.children.insert(wildcardTemplateChild)
+                    return wildcardTemplateChild
+                }
+                else {
+                    // Apply subtreeOptions to the child
+                    let newChild = NodeConfig(name: name, subtreeOptions: node.subtreeOptions)
+                    node.children.insert(newChild)
+                    return newChild
+                }
+            }
+        }
+    }
 
-        // Apply the node option to the final node
+    private func propagateSubtreeOption(for node: NodeConfig, pathConfig: PathConfig) {
         let key = pathConfig.optionKey
-        let config = pathConfig.config
-        let scope = pathConfig.scope
-
-        if scope == .subtree {
-            current.subtreeOptions[key] = config
-            // Propagate this subtree option update to all children
-            propagateSubtreeOptions(for: current)
-        } else {
-            current.options[key] = config
+        node.subtreeOptions[key] = pathConfig.config
+        wildcardChildren?.subtreeOptions[key] = node.subtreeOptions[key]
+        for child in node.children {
+            // Only propagate the subtree value for the current option key,
+            // otherwise, previously set subtree values will be reset to the default values
+            child.subtreeOptions[key] = node.subtreeOptions[key]
+            propagateSubtreeOption(for: child, pathConfig: pathConfig)
         }
     }
 
@@ -383,7 +478,7 @@ public class NodeConfig: Hashable {
         return NodeConfig(name: nil, options: [:], subtreeOptions: subtreeOptions)
     }
 
-    /// Extracts and returns a tuple with a valid index and a flag indicating whether it's a wildcard index from a single path component.
+    /// Extracts and returns a tuple with a valid index and a flag indicating whether it's an `AnyOrder` index from a single array path segment.
     ///
     /// This method considers a key that matches the array access format (ex: `[*123]` or `[123]`).
     /// It identifies an index by optionally checking for the wildcard marker `*`.
@@ -394,29 +489,29 @@ public class NodeConfig: Hashable {
     ///   - line: The line from which the method is called, used for localized assertion failures.
     ///
     /// - Returns: A tuple containing an optional valid `Int` index and a boolean indicating whether it's a wildcard index.
-    ///   Returns nil if no valid index is found.
+    ///   Returns `nil` if no valid index is found.
     ///
     /// - Note:
     ///   Examples of conversions:
-    ///   - `[*123]` -> (123, true)
-    ///   - `[123]` -> (123, false)
+    ///   - `[*123]` -> `(123, true)`
+    ///   - `[123]` -> `(123, false)`
     ///   - `[*ab12]` causes a test failure since "ab12" is not a valid integer.
-    private func extractValidWildcardIndex(pathComponent: String, file: StaticString = #file, line: UInt = #line) -> (index: Int, isWildcard: Bool)? {
+    private func getArrayIndexAndAnyOrder(from pathComponent: String, file: StaticString, line: UInt) -> (index: Int, isAnyOrder: Bool)? {
         let arrayIndexValueRegex = #"^\[(.*?)\]$"#
         guard let arrayIndexValue = getCapturedRegexGroups(text: pathComponent, regexPattern: arrayIndexValueRegex).first else {
             XCTFail("TEST ERROR: unable to find valid index value from path component: \(pathComponent)")
             return nil
         }
 
-        let isWildcard = arrayIndexValue.starts(with: "*")
-        let indexString = isWildcard ? String(arrayIndexValue.dropFirst()) : arrayIndexValue
+        let isAnyOrder = arrayIndexValue.starts(with: "*")
+        let indexString = isAnyOrder ? String(arrayIndexValue.dropFirst()) : arrayIndexValue
 
         guard let validIndex = Int(indexString) else {
             XCTFail("TEST ERROR: Index is not a valid Int: \(indexString)", file: file, line: line)
             return nil
         }
 
-        return (validIndex, isWildcard)
+        return (validIndex, isAnyOrder)
     }
 
     /// Finds all matches of the `regexPattern` in the `text` and for each match, returns the original matched `String`
@@ -466,19 +561,20 @@ public class NodeConfig: Hashable {
         return captureGroups
     }
 
-    /// Extracts and returns the components of a given key path string.
+    /// Breaks a path string into its nested *object* segments. Any trailing *array* style access components are bundled with a
+    /// preceeding object segment (if the object segment exists).
     ///
-    /// The method is designed to handle key paths in a specific style such as "key0\.key1.key2[1][2].key3", which represents
-    /// a nested structure in JSON objects. The method captures each group separated by the `.` character and treats
-    /// the sequence "\." as a part of the key itself (that is, it ignores "\." as a nesting indicator).
+    /// For example, the key path: `"key0\.key1.key2[1][2].key3"`, represents a path to an element in a nested
+    /// JSON structure. The result for the input is: `["key0\.key1", "key2[1][2]", "key3"]`.
     ///
-    /// For example, the input "key0\.key1.key2[1][2].key3" would result in the output: ["key0\.key1", "key2[1][2]", "key3"].
+    /// The method breaks each object path segment separated by the `.` character and escapes
+    /// the sequence `\.` as a part of the key itself (that is, it ignores `\.` as a nesting indicator).
     ///
-    /// - Parameter text: The input key path string that needs to be split into its components.
+    /// - Parameter text: The key path string to be split into its nested object segments.
     ///
     /// - Returns: An array of strings representing the individual components of the key path. If the input `text` is empty,
     /// a list containing an empty string is returned. If no components are found, an empty list is returned.
-    func getKeyPathComponents(from path: String?) -> [String] {
+    func getObjectPathComponents(from path: String?) -> [String] {
         // Handle edge case where input is nil
         guard let path = path else { return [] }
         // Handle edge case where input is empty
@@ -533,7 +629,7 @@ public class NodeConfig: Hashable {
     /// - Returns: An array of `String` path components, where the original path component is divided into individual elements. Valid array format
     ///  components in the original path are extracted as distinct elements, in order. If there are no array format components, the array contains only
     ///  the original path component.
-    func extractArrayFormattedComponents(pathComponent: String) -> (stringComponent: String?, arrayComponents: [String]) {
+    func getArrayPathComponents(from pathComponent: String) -> (stringComponent: String?, arrayComponents: [String]) {
         // Handle edge case where input is empty
         if pathComponent.isEmpty { return (stringComponent: "", arrayComponents: []) }
 
@@ -614,9 +710,10 @@ extension NodeConfig: CustomStringConvertible {
 
         result += "\(indentString)FINAL options:\n"
 
+        result += "\(indentString)Any Order  : \(anyOrderMatch)\n"
         result += "\(indentString)Equal Count: \(collectionEqualCount)\n"
         result += "\(indentString)Exact Match: \(primitiveExactMatch)\n"
-        result += "\(indentString)Wildcard   : \(wildcardMatch)\n"
+        result += "\(indentString)Key Absent : \(keyMustBeAbsent)\n"
 
         // Node options
         // Accumulate options in a temporary string
@@ -648,6 +745,10 @@ extension NodeConfig: CustomStringConvertible {
                 result += child.describeNode(indentation: indentation + 1)
             }
         }
+        if let wildcardChildren = wildcardChildren {
+            result += "\(indentString)Wildcard children:\n"
+            result += wildcardChildren.describeNode(indentation: indentation + 1)
+        }
 
         return result
     }
@@ -669,7 +770,7 @@ public extension NodeConfig.NodeOption {
 
 extension NodeConfig.Config: CustomStringConvertible {
     public var description: String {
-        let isActiveDescription = (isActive ? "TRUE " : "FALSE").padding(toLength: 6, withPad: " ", startingAt: 0)
+        let isActiveDescription = (isActive ? "TRUE " : "F").padding(toLength: 6, withPad: " ", startingAt: 0)
         return "\(isActiveDescription)"
     }
 }
@@ -677,7 +778,7 @@ extension NodeConfig.Config: CustomStringConvertible {
 extension NodeConfig.OptionKey: CustomStringConvertible {
     public var description: String {
         switch self {
-        case .wildcardMatch: return "Wildcard   "
+        case .anyOrderMatch: return "Any Order"
         case .collectionEqualCount: return "Equal Count"
         case .keyMustBeAbsent: return "Key Absent"
         case .primitiveExactMatch: return "Exact Match"

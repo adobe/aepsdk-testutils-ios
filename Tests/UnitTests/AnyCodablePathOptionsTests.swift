@@ -658,7 +658,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         }
         """
 
-        assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key1[0]"), WildcardMatch(paths: "key1[0]"))
+        assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: "key1[0]"), AnyOrderMatch(paths: "key1[0]"))
     }
 
     // MARK: Multi-path tests
@@ -851,7 +851,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         }
         """
         XCTExpectFailure("Validation should fail when key names not provided") {
-            assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "events[*].request.path", scope: .subtree))
+            assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "events[*].request.path"))
         }
     }
 
@@ -1059,6 +1059,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         [2, 1]
         """
 
-        assertExactMatch(expected: expected, actual: actual, pathOptions: WildcardMatch())
+        assertExactMatch(expected: expected, actual: actual, pathOptions: AnyOrderMatch())
     }
 }

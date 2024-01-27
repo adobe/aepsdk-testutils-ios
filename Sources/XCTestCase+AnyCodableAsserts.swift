@@ -68,22 +68,22 @@ extension NetworkRequest: AnyCodableComparable {
 }
 
 public protocol AnyCodableAsserts {
-    /// Asserts exact equality between two `AnyCodable` instances.
-    ///
-    /// In the event of an assertion failure, this function provides a trace of the key path, which includes dictionary keys and array indexes,
-    /// to aid debugging.
+    /// Asserts exact equality between two `AnyCodableComparable` instances.
     ///
     /// - Parameters:
-    ///   - expected: The expected `AnyCodable` to compare.
-    ///   - actual: The actual `AnyCodable` to compare.
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertEqual(expected: AnyCodableComparable?, actual: AnyCodableComparable?, file: StaticString, line: UInt)
 
-    /// Performs a flexible JSON comparison where only the key-value pairs from the expected JSON are required.
-    /// By default, the function validates that both values are of the same type.
+    /// Performs JSON validation where only the values from the `expected` JSON are required.
+    /// By default, the comparison logic uses the value type match option, only validating that both values are of the same type.
     ///
-    /// Alternate mode paths enable switching from the default type matching mode to exact value matching
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// Alternate mode paths enable switching from the default type matching mode to exact matching
     /// mode for specified paths onward.
     ///
     /// For example, given an expected JSON like:
@@ -98,39 +98,141 @@ public protocol AnyCodableAsserts {
     /// ```
     /// An example `exactMatchPaths` path for this JSON would be: `"key2[1].nest2"`.
     ///
-    /// Alternate mode paths must begin from the top level of the expected JSON.
-    /// Multiple paths can be defined. If two paths collide, the shorter one takes priority.
+    /// Alternate mode paths must begin from the top level of the expected JSON. Multiple paths can be defined.
     ///
-    /// Formats for keys:
-    /// - Nested keys: Use dot notation, e.g., "key3.key4".
-    /// - Keys with dots: Escape the dot, e.g., "key\.name".
+    /// Formats for object keys:
+    /// - Standard keys - The key name itself: `"key1"`
+    /// - Nested keys - Use dot notation: `"key3.key4"`.
+    /// - Keys with dots in the name: Escape the dot notation with a backslash: `"key\.name"`.
     ///
     /// Formats for arrays:
-    /// - Index specification: `[<INT>]` (e.g., `[0]`, `[28]`).
-    /// - Keys with array brackets: Escape the brackets, e.g., `key\[123\]`.
+    /// - Standard index - The index integer inside square brackets: `[<INT>]` (e.g., `[0]`, `[28]`).
+    /// - Keys with array brackets in the name - Escape the brackets with backslashes: `key\[123\]`.
     ///
-    /// For wildcard array matching, where position doesn't matter:
-    /// 1. Specific index with wildcard: `[*<INT>]` (ex: `[*0]`, `[*28]`). Only a single wildcard character `*` MUST be placed to the
-    /// left of the index value. The element at the given index in `expected` will use wildcard matching in `actual`.
-    /// 2. Universal wildcard: `[*]`. All elements in `expected` will use wildcard matching in `actual`.
+    /// For any position array element matching:
+    /// 1. Specific index: `[*<INT>]` (ex: `[*0]`, `[*28]`). Only a single `*` character MUST be placed to the
+    /// left of the index value. The element at the given index in `expected` will use any position matching in `actual`.
+    /// 2. All elements: `[*]`. All elements in `expected` will use any position matching in `actual`.
     ///
-    /// In array comparisons, elements are compared in order, up to the last element of the expected array.
-    /// When combining wildcard and standard indexes, regular indexes are validated first.
+    /// When combining any position option indexes and standard indexes, standard indexes are validated first.
     ///
     /// - Parameters:
-    ///   - expected: The expected `AnyCodable` to compare.
-    ///   - actual: The actual `AnyCodable` to compare.
-    ///   - exactMatchPaths: The key paths in the expected JSON that should use exact matching mode, where values require both the same type and literal value.
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - typeMatchPaths: The key paths in the expected JSON that should use value type matching, where values require only the same type (and are non-nil if the expected value is not nil).
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
+    @available(*, deprecated, message: "Use assertTypeMatch with pathOptions for more flexible path configurations.")
     func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, exactMatchPaths: [String], file: StaticString, line: UInt)
 
+    /// Performs JSON validation where only the values from the `expected` JSON are required by default.
+    /// By default, the comparison logic uses the value type match option, only validating that both values are of the same type.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// Path options allow for powerful customizations to the comparison logic; see structs conforming to ``MultiPathConfig``:
+    /// - ``AnyOrderMatch``
+    /// - ``CollectionEqualCount``
+    /// - ``KeyMustBeAbsent``
+    /// - ``ValueExactMatch``, ``ValueTypeMatch``
+    ///
+    /// For example, given an expected JSON like:
+    /// ```
+    /// {
+    ///   "key1": "value1",
+    ///   "key2": [{ "nest1": 1}, {"nest2": 2}],
+    ///   "key3": { "key4": 1 },
+    ///   "key.name": 1,
+    ///   "key[123]": 1
+    /// }
+    /// ```
+    /// An example path for this JSON would be: `"key2[1].nest2"`.
+    ///
+    /// Paths must begin from the top level of the expected JSON. Multiple paths and path options can be used at the same time.
+    /// Path options are applied sequentially. If an option overrides an existing one, the overriding will occur in the order in which
+    /// the path options are specified.
+    ///
+    /// Formats for object keys:
+    /// - Standard keys - The key name itself: `"key1"`
+    /// - Nested keys - Use dot notation: `"key3.key4"`.
+    /// - Keys with dots in the name: Escape the dot notation with a backslash: `"key\.name"`.
+    ///
+    /// Formats for arrays:
+    /// - Standard index - The index integer inside square brackets: `[<INT>]` (e.g., `[0]`, `[28]`).
+    /// - Keys with array brackets in the name - Escape the brackets with backslashes: `key\[123\]`.
+    ///
+    /// Formats for wildcard object key and array index names:
+    /// - Array wildcard - All children elements of the array: `[*]` (ex: `key1[*].key3`)
+    /// - Object wildcard - All children elements of the object: `*` (ex: `key1.*.key3`)
+    /// - Key whose name is asterisk - Escape the asterisk with backslash: `"\*"`
+    /// - Note that wildcard path options also apply to any existing specific nodes at the same level.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - pathOptions: The path options to use in the validation process.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: [MultiPathConfig], file: StaticString, line: UInt)
+
+    /// Performs JSON validation where only the values from the `expected` JSON are required by default.
+    /// By default, the comparison logic uses the value type match option, only validating that both values are of the same type.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// Path options allow for powerful customizations to the comparison logic; see structs conforming to ``MultiPathConfig``:
+    /// - ``AnyOrderMatch``
+    /// - ``CollectionEqualCount``
+    /// - ``KeyMustBeAbsent``
+    /// - ``ValueExactMatch``, ``ValueTypeMatch``
+    ///
+    /// For example, given an expected JSON like:
+    /// ```
+    /// {
+    ///   "key1": "value1",
+    ///   "key2": [{ "nest1": 1}, {"nest2": 2}],
+    ///   "key3": { "key4": 1 },
+    ///   "key.name": 1,
+    ///   "key[123]": 1
+    /// }
+    /// ```
+    /// An example path for this JSON would be: `"key2[1].nest2"`.
+    ///
+    /// Paths must begin from the top level of the expected JSON. Multiple paths and path options can be used at the same time.
+    /// Path options are applied sequentially. If an option overrides an existing one, the overriding will occur in the order in which
+    /// the path options are specified.
+    ///
+    /// Formats for object keys:
+    /// - Standard keys - The key name itself: `"key1"`
+    /// - Nested keys - Use dot notation: `"key3.key4"`.
+    /// - Keys with dots in the name: Escape the dot notation with a backslash: `"key\.name"`.
+    ///
+    /// Formats for arrays:
+    /// - Standard index - The index integer inside square brackets: `[<INT>]` (e.g., `[0]`, `[28]`).
+    /// - Keys with array brackets in the name - Escape the brackets with backslashes: `key\[123\]`.
+    ///
+    /// Formats for wildcard object key and array index names:
+    /// - Array wildcard - All children elements of the array: `[*]` (ex: `key1[*].key3`)
+    /// - Object wildcard - All children elements of the object: `*` (ex: `key1.*.key3`)
+    /// - Key whose name is asterisk - Escape the asterisk with backslash: `"\*"`
+    /// - Note that wildcard path options also apply to any existing specific nodes at the same level.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - pathOptions: The path options to use in the validation process.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: MultiPathConfig..., file: StaticString, line: UInt)
 
-    /// Performs a flexible JSON comparison where only the key-value pairs from the expected JSON are required.
-    /// By default, the function uses exact match mode, validating that both values are of the same type
-    /// and have the same literal value.
+    /// Performs JSON validation where only the values from the `expected` JSON are required.
+    /// By default, the comparison logic uses value exact match mode, validating that both values are of the same type
+    /// **and** have the same literal value.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
     ///
     /// Alternate mode paths enable switching from the default exact matching mode to type matching
     /// mode for specified paths onward.
@@ -147,39 +249,146 @@ public protocol AnyCodableAsserts {
     /// ```
     /// An example `typeMatchPaths` path for this JSON would be: `"key2[1].nest2"`.
     ///
-    /// Alternate mode paths must begin from the top level of the expected JSON.
-    /// Multiple paths can be defined. If two paths collide, the shorter one takes priority.
+    /// Alternate mode paths must begin from the top level of the expected JSON. Multiple paths can be defined.
     ///
-    /// Formats for keys:
-    /// - Nested keys: Use dot notation, e.g., "key3.key4".
-    /// - Keys with dots: Escape the dot, e.g., "key\.name".
+    /// Formats for object keys:
+    /// - Standard keys - The key name itself: `"key1"`
+    /// - Nested keys - Use dot notation: `"key3.key4"`.
+    /// - Keys with dots in the name: Escape the dot notation with a backslash: `"key\.name"`.
     ///
     /// Formats for arrays:
-    /// - Index specification: `[<INT>]` (e.g., `[0]`, `[28]`).
-    /// - Keys with array brackets: Escape the brackets, e.g., `key\[123\]`.
+    /// - Standard index - The index integer inside square brackets: `[<INT>]` (e.g., `[0]`, `[28]`).
+    /// - Keys with array brackets in the name - Escape the brackets with backslashes: `key\[123\]`.
     ///
-    /// For wildcard array matching, where position doesn't matter:
-    /// 1. Specific index with wildcard: `[*<INT>]` (ex: `[*0]`, `[*28]`). Only a single wildcard character `*` MUST be placed to the
-    /// left of the index value. The element at the given index in `expected` will use wildcard matching in `actual`.
-    /// 2. Universal wildcard: `[*]`. All elements in `expected` will use wildcard matching in `actual`.
+    /// For any position array element matching:
+    /// 1. Specific index: `[*<INT>]` (ex: `[*0]`, `[*28]`). Only a single `*` character MUST be placed to the
+    /// left of the index value. The element at the given index in `expected` will use any position matching in `actual`.
+    /// 2. All elements: `[*]`. All elements in `expected` will use any position matching in `actual`.
     ///
-    /// In array comparisons, elements are compared in order, up to the last element of the expected array.
-    /// When combining wildcard and standard indexes, regular indexes are validated first.
+    /// When combining any position option indexes and standard indexes, standard indexes are validated first.
     ///
     /// - Parameters:
-    ///   - expected: The expected `AnyCodable` to compare.
-    ///   - actual: The actual `AnyCodable` to compare.
-    ///   - typeMatchPaths: The key paths in the expected JSON that should use type matching mode, where values require only the same type (and are non-nil if the expected value is not nil).
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - typeMatchPaths: The key paths in the expected JSON that should use value type matching, where values require only the same type (and are non-nil if the expected value is not nil).
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
+    @available(*, deprecated, message: "Use assertExactMatch with pathOptions for more flexible path configurations.")
     func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, typeMatchPaths: [String], file: StaticString, line: UInt)
 
+    /// Performs JSON validation where only the values from the `expected` JSON are required by default.
+    /// By default, the comparison logic uses the value exact match option, validating that both values are of the same type
+    /// **and** have the same literal value.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// Path options allow for powerful customizations to the comparison logic; see structs conforming to ``MultiPathConfig``:
+    /// - ``AnyOrderMatch``
+    /// - ``CollectionEqualCount``
+    /// - ``KeyMustBeAbsent``
+    /// - ``ValueExactMatch``, ``ValueTypeMatch``
+    ///
+    /// For example, given an expected JSON like:
+    /// ```
+    /// {
+    ///   "key1": "value1",
+    ///   "key2": [{ "nest1": 1}, {"nest2": 2}],
+    ///   "key3": { "key4": 1 },
+    ///   "key.name": 1,
+    ///   "key[123]": 1
+    /// }
+    /// ```
+    /// An example path for this JSON would be: `"key2[1].nest2"`.
+    ///
+    /// Paths must begin from the top level of the expected JSON. Multiple paths and path options can be used at the same time.
+    /// Path options are applied sequentially. If an option overrides an existing one, the overriding will occur in the order in which
+    /// the path options are specified.
+    ///
+    /// Formats for object keys:
+    /// - Standard keys - The key name itself: `"key1"`
+    /// - Nested keys - Use dot notation: `"key3.key4"`.
+    /// - Keys with dots in the name: Escape the dot notation with a backslash: `"key\.name"`.
+    ///
+    /// Formats for arrays:
+    /// - Standard index - The index integer inside square brackets: `[<INT>]` (e.g., `[0]`, `[28]`).
+    /// - Keys with array brackets in the name - Escape the brackets with backslashes: `key\[123\]`.
+    ///
+    /// Formats for wildcard object key and array index names:
+    /// - Array wildcard - All children elements of the array: `[*]` (ex: `key1[*].key3`)
+    /// - Object wildcard - All children elements of the object: `*` (ex: `key1.*.key3`)
+    /// - Key whose name is asterisk - Escape the asterisk with backslash: `"\*"`
+    /// - Note that wildcard path options also apply to any existing specific nodes at the same level.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - pathOptions: The path options to use in the validation process.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: [MultiPathConfig], file: StaticString, line: UInt)
+
+    /// Performs JSON validation where only the values from the `expected` JSON are required by default.
+    /// By default, the comparison logic uses the value exact match option, validating that both values are of the same type
+    /// **and** have the same literal value.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// Path options allow for powerful customizations to the comparison logic; see structs conforming to ``MultiPathConfig``:
+    /// - ``AnyOrderMatch``
+    /// - ``CollectionEqualCount``
+    /// - ``KeyMustBeAbsent``
+    /// - ``ValueExactMatch``, ``ValueTypeMatch``
+    ///
+    /// For example, given an expected JSON like:
+    /// ```
+    /// {
+    ///   "key1": "value1",
+    ///   "key2": [{ "nest1": 1}, {"nest2": 2}],
+    ///   "key3": { "key4": 1 },
+    ///   "key.name": 1,
+    ///   "key[123]": 1
+    /// }
+    /// ```
+    /// An example path for this JSON would be: `"key2[1].nest2"`.
+    ///
+    /// Paths must begin from the top level of the expected JSON. Multiple paths and path options can be used at the same time.
+    /// Path options are applied sequentially. If an option overrides an existing one, the overriding will occur in the order in which
+    /// the path options are specified.
+    ///
+    /// Formats for object keys:
+    /// - Standard keys - The key name itself: `"key1"`
+    /// - Nested keys - Use dot notation: `"key3.key4"`.
+    /// - Keys with dots in the name: Escape the dot notation with a backslash: `"key\.name"`.
+    ///
+    /// Formats for arrays:
+    /// - Standard index - The index integer inside square brackets: `[<INT>]` (e.g., `[0]`, `[28]`).
+    /// - Keys with array brackets in the name - Escape the brackets with backslashes: `key\[123\]`.
+    ///
+    /// Formats for wildcard object key and array index names:
+    /// - Array wildcard - All children elements of the array: `[*]` (ex: `key1[*].key3`)
+    /// - Object wildcard - All children elements of the object: `*` (ex: `key1.*.key3`)
+    /// - Key whose name is asterisk - Escape the asterisk with backslash: `"\*"`
+    /// - Note that wildcard path options also apply to any existing specific nodes at the same level.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - pathOptions: The path options to use in the validation process.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: MultiPathConfig..., file: StaticString, line: UInt)
 }
 
 public extension AnyCodableAsserts where Self: XCTestCase {
-    // Exact equality is just a special case of exact match
+    /// Asserts exact equality between two `AnyCodableComparable` instances.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertEqual(expected: AnyCodableComparable?, actual: AnyCodableComparable?, file: StaticString = #file, line: UInt = #line) {
         if expected == nil && actual == nil {
             return
@@ -194,45 +403,377 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             """#, file: file, line: line)
             return
         }
+        // Exact equality is just a special case of exact match
         assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: nil, isActive: true, scope: .subtree), file: file, line: line)
     }
 
     // MARK: Type match
+    /// Performs JSON validation where only the values from the `expected` JSON are required.
+    /// By default, the comparison logic uses the value type match option, only validating that both values are of the same type.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// Alternate mode paths enable switching from the default type matching mode to exact matching
+    /// mode for specified paths onward.
+    ///
+    /// For example, given an expected JSON like:
+    /// ```
+    /// {
+    ///   "key1": "value1",
+    ///   "key2": [{ "nest1": 1}, {"nest2": 2}],
+    ///   "key3": { "key4": 1 },
+    ///   "key.name": 1,
+    ///   "key[123]": 1
+    /// }
+    /// ```
+    /// An example `exactMatchPaths` path for this JSON would be: `"key2[1].nest2"`.
+    ///
+    /// Alternate mode paths must begin from the top level of the expected JSON. Multiple paths can be defined.
+    ///
+    /// Formats for object keys:
+    /// - Standard keys - The key name itself: `"key1"`
+    /// - Nested keys - Use dot notation: `"key3.key4"`.
+    /// - Keys with dots in the name: Escape the dot notation with a backslash: `"key\.name"`.
+    ///
+    /// Formats for arrays:
+    /// - Standard index - The index integer inside square brackets: `[<INT>]` (e.g., `[0]`, `[28]`).
+    /// - Keys with array brackets in the name - Escape the brackets with backslashes: `key\[123\]`.
+    ///
+    /// For any position array element matching:
+    /// 1. Specific index: `[*<INT>]` (ex: `[*0]`, `[*28]`). Only a single `*` character MUST be placed to the
+    /// left of the index value. The element at the given index in `expected` will use any position matching in `actual`.
+    /// 2. All elements: `[*]`. All elements in `expected` will use any position matching in `actual`.
+    ///
+    /// When combining any position option indexes and standard indexes, standard indexes are validated first.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - typeMatchPaths: The key paths in the expected JSON that should use value type matching, where values require only the same type (and are non-nil if the expected value is not nil).
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
+    @available(*, deprecated, message: "Use assertTypeMatch with pathOptions for more flexible path configurations.")
     func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, exactMatchPaths: [String] = [], file: StaticString = #file, line: UInt = #line) {
-        assertTypeMatch(expected: expected, actual: actual, pathOptions: ValueExactMatch(paths: exactMatchPaths, scope: .subtree), file: file, line: line)
-    }
-
-    func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) {
         let treeDefaults: [MultiPathConfig] = [
+            AnyOrderMatch(paths: nil, isActive: false),
             CollectionEqualCount(paths: nil, isActive: false),
             KeyMustBeAbsent(paths: nil, isActive: false),
-            ValueTypeMatch(paths: nil),
-            WildcardMatch(paths: nil, isActive: false)
+            ValueTypeMatch(paths: nil)
         ]
-
-        validate(expected: expected, actual: actual, pathOptions: pathOptions, treeDefaults: treeDefaults, file: file, line: line)
+        validate(
+            expected: expected,
+            actual: actual,
+            pathOptions: [ValueExactMatch(paths: exactMatchPaths, scope: .subtree)],
+            treeDefaults: treeDefaults,
+            isLegacyMode: true,
+            file: file,
+            line: line)
     }
 
+    /// Performs JSON validation where only the values from the `expected` JSON are required by default.
+    /// By default, the comparison logic uses the value type match option, only validating that both values are of the same type.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// Path options allow for powerful customizations to the comparison logic; see structs conforming to ``MultiPathConfig``:
+    /// - ``AnyOrderMatch``
+    /// - ``CollectionEqualCount``
+    /// - ``KeyMustBeAbsent``
+    /// - ``ValueExactMatch``, ``ValueTypeMatch``
+    ///
+    /// For example, given an expected JSON like:
+    /// ```
+    /// {
+    ///   "key1": "value1",
+    ///   "key2": [{ "nest1": 1}, {"nest2": 2}],
+    ///   "key3": { "key4": 1 },
+    ///   "key.name": 1,
+    ///   "key[123]": 1
+    /// }
+    /// ```
+    /// An example path for this JSON would be: `"key2[1].nest2"`.
+    ///
+    /// Paths must begin from the top level of the expected JSON. Multiple paths and path options can be used at the same time.
+    /// Path options are applied sequentially. If an option overrides an existing one, the overriding will occur in the order in which
+    /// the path options are specified.
+    ///
+    /// Formats for object keys:
+    /// - Standard keys - The key name itself: `"key1"`
+    /// - Nested keys - Use dot notation: `"key3.key4"`.
+    /// - Keys with dots in the name: Escape the dot notation with a backslash: `"key\.name"`.
+    ///
+    /// Formats for arrays:
+    /// - Standard index - The index integer inside square brackets: `[<INT>]` (e.g., `[0]`, `[28]`).
+    /// - Keys with array brackets in the name - Escape the brackets with backslashes: `key\[123\]`.
+    ///
+    /// Formats for wildcard object key and array index names:
+    /// - Array wildcard - All children elements of the array: `[*]` (ex: `key1[*].key3`)
+    /// - Object wildcard - All children elements of the object: `*` (ex: `key1.*.key3`)
+    /// - Key whose name is asterisk - Escape the asterisk with backslash: `"\*"`
+    /// - Note that wildcard path options also apply to any existing specific nodes at the same level.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - pathOptions: The path options to use in the validation process.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
+    func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) {
+        let treeDefaults: [MultiPathConfig] = [
+            AnyOrderMatch(paths: nil, isActive: false),
+            CollectionEqualCount(paths: nil, isActive: false),
+            KeyMustBeAbsent(paths: nil, isActive: false),
+            ValueTypeMatch(paths: nil)
+        ]
+
+        validate(
+            expected: expected,
+            actual: actual,
+            pathOptions: pathOptions,
+            treeDefaults: treeDefaults,
+            isLegacyMode: false,
+            file: file,
+            line: line)
+    }
+
+    /// Performs JSON validation where only the values from the `expected` JSON are required by default.
+    /// By default, the comparison logic uses the value type match option, only validating that both values are of the same type.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// Path options allow for powerful customizations to the comparison logic; see structs conforming to ``MultiPathConfig``:
+    /// - ``AnyOrderMatch``
+    /// - ``CollectionEqualCount``
+    /// - ``KeyMustBeAbsent``
+    /// - ``ValueExactMatch``, ``ValueTypeMatch``
+    ///
+    /// For example, given an expected JSON like:
+    /// ```
+    /// {
+    ///   "key1": "value1",
+    ///   "key2": [{ "nest1": 1}, {"nest2": 2}],
+    ///   "key3": { "key4": 1 },
+    ///   "key.name": 1,
+    ///   "key[123]": 1
+    /// }
+    /// ```
+    /// An example path for this JSON would be: `"key2[1].nest2"`.
+    ///
+    /// Paths must begin from the top level of the expected JSON. Multiple paths and path options can be used at the same time.
+    /// Path options are applied sequentially. If an option overrides an existing one, the overriding will occur in the order in which
+    /// the path options are specified.
+    ///
+    /// Formats for object keys:
+    /// - Standard keys - The key name itself: `"key1"`
+    /// - Nested keys - Use dot notation: `"key3.key4"`.
+    /// - Keys with dots in the name: Escape the dot notation with a backslash: `"key\.name"`.
+    ///
+    /// Formats for arrays:
+    /// - Standard index - The index integer inside square brackets: `[<INT>]` (e.g., `[0]`, `[28]`).
+    /// - Keys with array brackets in the name - Escape the brackets with backslashes: `key\[123\]`.
+    ///
+    /// Formats for wildcard object key and array index names:
+    /// - Array wildcard - All children elements of the array: `[*]` (ex: `key1[*].key3`)
+    /// - Object wildcard - All children elements of the object: `*` (ex: `key1.*.key3`)
+    /// - Key whose name is asterisk - Escape the asterisk with backslash: `"\*"`
+    /// - Note that wildcard path options also apply to any existing specific nodes at the same level.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - pathOptions: The path options to use in the validation process.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: MultiPathConfig..., file: StaticString = #file, line: UInt = #line) {
         assertTypeMatch(expected: expected, actual: actual, pathOptions: pathOptions, file: file, line: line)
     }
 
     // MARK: Exact match
+    /// Performs JSON validation where only the values from the `expected` JSON are required.
+    /// By default, the comparison logic uses value exact match mode, validating that both values are of the same type
+    /// **and** have the same literal value.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// Alternate mode paths enable switching from the default exact matching mode to type matching
+    /// mode for specified paths onward.
+    ///
+    /// For example, given an expected JSON like:
+    /// ```
+    /// {
+    ///   "key1": "value1",
+    ///   "key2": [{ "nest1": 1}, {"nest2": 2}],
+    ///   "key3": { "key4": 1 },
+    ///   "key.name": 1,
+    ///   "key[123]": 1
+    /// }
+    /// ```
+    /// An example `typeMatchPaths` path for this JSON would be: `"key2[1].nest2"`.
+    ///
+    /// Alternate mode paths must begin from the top level of the expected JSON. Multiple paths can be defined.
+    ///
+    /// Formats for object keys:
+    /// - Standard keys - The key name itself: `"key1"`
+    /// - Nested keys - Use dot notation: `"key3.key4"`.
+    /// - Keys with dots in the name: Escape the dot notation with a backslash: `"key\.name"`.
+    ///
+    /// Formats for arrays:
+    /// - Standard index - The index integer inside square brackets: `[<INT>]` (e.g., `[0]`, `[28]`).
+    /// - Keys with array brackets in the name - Escape the brackets with backslashes: `key\[123\]`.
+    ///
+    /// For any position array element matching:
+    /// 1. Specific index: `[*<INT>]` (ex: `[*0]`, `[*28]`). Only a single `*` character MUST be placed to the
+    /// left of the index value. The element at the given index in `expected` will use any position matching in `actual`.
+    /// 2. All elements: `[*]`. All elements in `expected` will use any position matching in `actual`.
+    ///
+    /// When combining any position option indexes and standard indexes, standard indexes are validated first.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - typeMatchPaths: The key paths in the expected JSON that should use value type matching, where values require only the same type (and are non-nil if the expected value is not nil).
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
+    @available(*, deprecated, message: "Use assertExactMatch with pathOptions for more flexible path configurations.")
     func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, typeMatchPaths: [String] = [], file: StaticString = #file, line: UInt = #line) {
-        assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: typeMatchPaths, scope: .subtree), file: file, line: line)
-    }
-
-    func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) {
         let treeDefaults: [MultiPathConfig] = [
+            AnyOrderMatch(paths: nil, isActive: false),
             CollectionEqualCount(paths: nil, isActive: false),
             KeyMustBeAbsent(paths: nil, isActive: false),
-            ValueExactMatch(paths: nil),
-            WildcardMatch(paths: nil, isActive: false)
+            ValueExactMatch(paths: nil)
         ]
-
-        validate(expected: expected, actual: actual, pathOptions: pathOptions, treeDefaults: treeDefaults, file: file, line: line)
+        validate(
+            expected: expected,
+            actual: actual,
+            pathOptions: [ValueTypeMatch(paths: typeMatchPaths, scope: .subtree)],
+            treeDefaults: treeDefaults,
+            isLegacyMode: true,
+            file: file,
+            line: line)
     }
 
+    /// Performs JSON validation where only the values from the `expected` JSON are required by default.
+    /// By default, the comparison logic uses the value exact match option, validating that both values are of the same type
+    /// **and** have the same literal value.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// Path options allow for powerful customizations to the comparison logic; see structs conforming to ``MultiPathConfig``:
+    /// - ``AnyOrderMatch``
+    /// - ``CollectionEqualCount``
+    /// - ``KeyMustBeAbsent``
+    /// - ``ValueExactMatch``, ``ValueTypeMatch``
+    ///
+    /// For example, given an expected JSON like:
+    /// ```
+    /// {
+    ///   "key1": "value1",
+    ///   "key2": [{ "nest1": 1}, {"nest2": 2}],
+    ///   "key3": { "key4": 1 },
+    ///   "key.name": 1,
+    ///   "key[123]": 1
+    /// }
+    /// ```
+    /// An example path for this JSON would be: `"key2[1].nest2"`.
+    ///
+    /// Paths must begin from the top level of the expected JSON. Multiple paths and path options can be used at the same time.
+    /// Path options are applied sequentially. If an option overrides an existing one, the overriding will occur in the order in which
+    /// the path options are specified.
+    ///
+    /// Formats for object keys:
+    /// - Standard keys - The key name itself: `"key1"`
+    /// - Nested keys - Use dot notation: `"key3.key4"`.
+    /// - Keys with dots in the name: Escape the dot notation with a backslash: `"key\.name"`.
+    ///
+    /// Formats for arrays:
+    /// - Standard index - The index integer inside square brackets: `[<INT>]` (e.g., `[0]`, `[28]`).
+    /// - Keys with array brackets in the name - Escape the brackets with backslashes: `key\[123\]`.
+    ///
+    /// Formats for wildcard object key and array index names:
+    /// - Array wildcard - All children elements of the array: `[*]` (ex: `key1[*].key3`)
+    /// - Object wildcard - All children elements of the object: `*` (ex: `key1.*.key3`)
+    /// - Key whose name is asterisk - Escape the asterisk with backslash: `"\*"`
+    /// - Note that wildcard path options also apply to any existing specific nodes at the same level.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - pathOptions: The path options to use in the validation process.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
+    func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) {
+        let treeDefaults: [MultiPathConfig] = [
+            AnyOrderMatch(paths: nil, isActive: false),
+            CollectionEqualCount(paths: nil, isActive: false),
+            KeyMustBeAbsent(paths: nil, isActive: false),
+            ValueExactMatch(paths: nil)
+        ]
+
+        validate(
+            expected: expected,
+            actual: actual,
+            pathOptions: pathOptions,
+            treeDefaults: treeDefaults,
+            isLegacyMode: false,
+            file: file,
+            line: line)
+    }
+
+    /// Performs JSON validation where only the values from the `expected` JSON are required by default.
+    /// By default, the comparison logic uses the value exact match option, validating that both values are of the same type
+    /// **and** have the same literal value.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// Path options allow for powerful customizations to the comparison logic; see structs conforming to ``MultiPathConfig``:
+    /// - ``AnyOrderMatch``
+    /// - ``CollectionEqualCount``
+    /// - ``KeyMustBeAbsent``
+    /// - ``ValueExactMatch``, ``ValueTypeMatch``
+    ///
+    /// For example, given an expected JSON like:
+    /// ```
+    /// {
+    ///   "key1": "value1",
+    ///   "key2": [{ "nest1": 1}, {"nest2": 2}],
+    ///   "key3": { "key4": 1 },
+    ///   "key.name": 1,
+    ///   "key[123]": 1
+    /// }
+    /// ```
+    /// An example path for this JSON would be: `"key2[1].nest2"`.
+    ///
+    /// Paths must begin from the top level of the expected JSON. Multiple paths and path options can be used at the same time.
+    /// Path options are applied sequentially. If an option overrides an existing one, the overriding will occur in the order in which
+    /// the path options are specified.
+    ///
+    /// Formats for object keys:
+    /// - Standard keys - The key name itself: `"key1"`
+    /// - Nested keys - Use dot notation: `"key3.key4"`.
+    /// - Keys with dots in the name: Escape the dot notation with a backslash: `"key\.name"`.
+    ///
+    /// Formats for arrays:
+    /// - Standard index - The index integer inside square brackets: `[<INT>]` (e.g., `[0]`, `[28]`).
+    /// - Keys with array brackets in the name - Escape the brackets with backslashes: `key\[123\]`.
+    ///
+    /// Formats for wildcard object key and array index names:
+    /// - Array wildcard - All children elements of the array: `[*]` (ex: `key1[*].key3`)
+    /// - Object wildcard - All children elements of the object: `*` (ex: `key1.*.key3`)
+    /// - Key whose name is asterisk - Escape the asterisk with backslash: `"\*"`
+    /// - Note that wildcard path options also apply to any existing specific nodes at the same level.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - pathOptions: The path options to use in the validation process.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: MultiPathConfig..., file: StaticString = #file, line: UInt = #line) {
         assertExactMatch(expected: expected, actual: actual, pathOptions: pathOptions, file: file, line: line)
     }
@@ -242,15 +783,21 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         actual: AnyCodableComparable?,
         pathOptions: [MultiPathConfig],
         treeDefaults: [MultiPathConfig],
-        file: StaticString = #file,
-        line: UInt = #line) {
+        isLegacyMode: Bool,
+        file: StaticString,
+        line: UInt) {
         guard let expected = expected.toAnyCodable() else {
             XCTFail("Expected is nil. If nil is expected, use XCTAssertNil instead.", file: file, line: line)
             return
         }
         let actual = actual?.toAnyCodable()
 
-        let nodeTree = generateNodeTree(pathOptions: pathOptions, treeDefaults: treeDefaults, file: file, line: line)
+        let nodeTree = generateNodeTree(
+            pathOptions: pathOptions,
+            treeDefaults: treeDefaults,
+            isLegacyMode: isLegacyMode,
+            file: file,
+            line: line)
         _ = validateActual(actual: actual, nodeTree: nodeTree, file: file, line: line)
         validateJSON(expected: expected, actual: actual, nodeTree: nodeTree, file: file, line: line)
     }
@@ -427,10 +974,13 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         //   - see resolveOption for precedence
         var expectedIndexes = (0..<expected.count).reduce(into: [String: NodeConfig.Config]()) { result, index in
             let indexString = String(index)
-            result[indexString] = NodeConfig.resolveOption(.wildcardMatch, for: nodeTree.getChild(named: indexString), parent: nodeTree)
+            result[indexString] = NodeConfig.resolveOption(
+                .anyOrderMatch,
+                for: nodeTree.getChild(named: indexString),
+                parent: nodeTree)
         }
-        let wildcardIndexes = expectedIndexes.filter({ $0.value.isActive })
-        wildcardIndexes.forEach { key, _ in
+        let anyOrderIndexes = expectedIndexes.filter({ $0.value.isActive })
+        anyOrderIndexes.forEach { key, _ in
             expectedIndexes.removeValue(forKey: key)
         }
 
@@ -446,12 +996,14 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 expected: expected[intIndex],
                 actual: actual[intIndex],
                 keyPath: keyPath + [intIndex],
-                nodeTree: nodeTree.getChild(named: index) ?? nodeTree.asFinalNode(),
+                nodeTree: nodeTree.getNextNode(for: index),
                 shouldAssert: shouldAssert,
-                file: file, line: line) && validationResult
+                file: file, 
+                line: line)
+            && validationResult
         }
 
-        for (index, config) in wildcardIndexes {
+        for (index, config) in anyOrderIndexes {
             let intIndex = Int(index)!
 
             guard let actualIndex = availableWildcardActualIndexes.first(where: {
@@ -459,7 +1011,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                     expected: expected[intIndex],
                     actual: actual[Int($0)!],
                     keyPath: keyPath + [intIndex],
-                    nodeTree: nodeTree.getChild(named: index) ?? nodeTree.asFinalNode(),
+                    nodeTree: nodeTree.getNextNode(for: index),
                     shouldAssert: false)
             }) else {
                 if shouldAssert {
@@ -547,11 +1099,11 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 expected: value,
                 actual: actual[key],
                 keyPath: keyPath + [key],
-                nodeTree: nodeTree.getChild(named: key) ?? nodeTree.asFinalNode(),
+                nodeTree: nodeTree.getNextNode(for: key),
                 shouldAssert: shouldAssert,
                 file: file,
                 line: line)
-                && validationResult
+            && validationResult
         }
         return validationResult
     }
@@ -657,10 +1209,10 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             validationResult = validateActual(
                 actual: element,
                 keyPath: keyPath + [index],
-                nodeTree: nodeTree.getChild(named: String(index)) ?? nodeTree.asFinalNode(),
+                nodeTree: nodeTree.getNextNode(for: index),
                 file: file,
-                line: line
-            ) && validationResult
+                line: line)
+            && validationResult
         }
 
         return validationResult
@@ -709,10 +1261,10 @@ public extension AnyCodableAsserts where Self: XCTestCase {
             validationResult = validateActual(
                 actual: value,
                 keyPath: keyPath + [key],
-                nodeTree: nodeTree.getChild(named: key) ?? nodeTree.asFinalNode(),
+                nodeTree: nodeTree.getNextNode(for: key),
                 file: file,
-                line: line
-            ) && validationResult
+                line: line)
+            && validationResult
         }
         return validationResult
     }
@@ -730,7 +1282,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
     ///
     /// - Returns: A tree-like dictionary structure representing the nested structure of the provided paths. Returns `nil` if the
     /// resulting tree is empty.
-    private func generateNodeTree(pathOptions: [MultiPathConfig], treeDefaults: [MultiPathConfig], file: StaticString = #file, line: UInt = #line) -> NodeConfig {
+    private func generateNodeTree(pathOptions: [MultiPathConfig], treeDefaults: [MultiPathConfig], isLegacyMode: Bool, file: StaticString, line: UInt) -> NodeConfig {
         // 1. creates the first node using the incoming defaults
         // using the first node it passes the path to the node to create the child nodes and just loops through all the paths passing them
 
@@ -743,7 +1295,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         let rootNode = NodeConfig(name: nil, subtreeOptions: subtreeOptions)
 
         for pathConfig in pathOptions {
-            rootNode.createOrUpdateNode(using: pathConfig)
+            rootNode.createOrUpdateNode(with: pathConfig, isLegacyMode: isLegacyMode, file: file, line: line)
         }
 
         return rootNode
