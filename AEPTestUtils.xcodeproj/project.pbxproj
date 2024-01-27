@@ -39,6 +39,7 @@
 		4C0293BF2AE1D4550093CCBA /* RealNetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293AE2AE1D4550093CCBA /* RealNetworkService.swift */; };
 		4C0293C02AE1D4550093CCBA /* TestableNetworkRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293AF2AE1D4550093CCBA /* TestableNetworkRequest.swift */; };
 		4C0293C22AE1D9AD0093CCBA /* XCTestCase+AnyCodableAsserts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293C12AE1D9AD0093CCBA /* XCTestCase+AnyCodableAsserts.swift */; };
+		4C1111682B64A8F400024172 /* MockExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1111672B64A8F400024172 /* MockExtension.swift */; };
 		4C7043472AF45A98008CF67D /* EventSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7043462AF45A98008CF67D /* EventSpec.swift */; };
 		4C7043492AF45B05008CF67D /* URL+Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7043482AF45B05008CF67D /* URL+Testable.swift */; };
 		4C70434C2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */; };
@@ -103,6 +104,7 @@
 		4C0293AE2AE1D4550093CCBA /* RealNetworkService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealNetworkService.swift; sourceTree = "<group>"; };
 		4C0293AF2AE1D4550093CCBA /* TestableNetworkRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestableNetworkRequest.swift; sourceTree = "<group>"; };
 		4C0293C12AE1D9AD0093CCBA /* XCTestCase+AnyCodableAsserts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCTestCase+AnyCodableAsserts.swift"; sourceTree = "<group>"; };
+		4C1111672B64A8F400024172 /* MockExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockExtension.swift; sourceTree = "<group>"; };
 		4C7043462AF45A98008CF67D /* EventSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSpec.swift; sourceTree = "<group>"; };
 		4C7043482AF45B05008CF67D /* URL+Testable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Testable.swift"; sourceTree = "<group>"; };
 		4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCodableAssertsParameterizedTests.swift; sourceTree = "<group>"; };
@@ -184,6 +186,7 @@
 				4C0293A02AE1D4540093CCBA /* InstrumentedExtension.swift */,
 				4C0293AD2AE1D4550093CCBA /* MockDataQueue.swift */,
 				4C0293AC2AE1D4550093CCBA /* MockDataStore.swift */,
+				4C1111672B64A8F400024172 /* MockExtension.swift */,
 				4C0293A42AE1D4540093CCBA /* MockHitProcessor.swift */,
 				4C02939F2AE1D4540093CCBA /* MockNetworkService.swift */,
 				4C0293A72AE1D4540093CCBA /* NetworkRequestHelper.swift */,
@@ -464,6 +467,7 @@
 				4C0293B72AE1D4550093CCBA /* TestableExtensionRuntime.swift in Sources */,
 				4C0293B22AE1D4550093CCBA /* FileManager+Testable.swift in Sources */,
 				4CE14ECC2AFDC7F100969B36 /* NodeConfig.swift in Sources */,
+				4C1111682B64A8F400024172 /* MockExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
