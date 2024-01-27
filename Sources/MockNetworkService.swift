@@ -138,7 +138,7 @@ public class MockNetworkService: Networking {
     /// Immediately returns all sent network requests (if any) **without awaiting**.
     ///
     /// Note: To await network responses for a given request, make sure to set an expectation
-    /// using ``setExpectationForNetworkRequest(url:httpMethod:expectedCount:file:line:)`` 
+    /// using ``setExpectationForNetworkRequest(url:httpMethod:expectedCount:file:line:)``
     /// then await the expectation using ``assertAllNetworkRequestExpectations(ignoreUnexpectedRequests:file:line:)``.
     public func getNetworkRequests() -> [NetworkRequest] {
         return helper.orderedNetworkRequests

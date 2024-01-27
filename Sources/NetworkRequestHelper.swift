@@ -191,7 +191,7 @@ class NetworkRequestHelper {
                 _ = expectedRequest.await(timeout: TestConstants.Defaults.WAIT_NETWORK_REQUEST_TIMEOUT)
                 let expectedCount: Int32 = expectedRequest.getInitialCount()
                 let receivedCount: Int32 = expectedRequest.getInitialCount() - expectedRequest.getCurrentCount()
-                XCTAssertEqual(expectedCount, receivedCount, 
+                XCTAssertEqual(expectedCount, receivedCount,
                                """
                                Expected \(expectedCount) network request(s) for URL \(sentRequestURL) and HTTPMethod \(sentRequestHTTPMethod),
                                but received \(receivedCount)
@@ -205,7 +205,7 @@ class NetworkRequestHelper {
             }
         }
 
-        XCTAssertEqual(0, unexpectedRequestsCount, 
+        XCTAssertEqual(0, unexpectedRequestsCount,
                        """
                        Received \(unexpectedRequestsCount) unexpected network request(s): \(unexpectedRequestsAsString)
                        """, file: file, line: line)
