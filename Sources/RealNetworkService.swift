@@ -17,6 +17,14 @@ import XCTest
 /// Overriding NetworkService used for tests that require real outgoing network requests
 public class RealNetworkService: NetworkService {
     private let helper: NetworkRequestHelper = NetworkRequestHelper()
+    /// Flag that indicates if the ``connectAsync(networkRequest:completionHandler:)`` method was called.
+    /// Note that this property does not await and returns the status immediately.
+    public var connectAsyncCalled: Bool {
+        // Depends on `helper.orderedNetworkRequests` always being populated by `connectAsync` via
+        // `helper.recordSentNetworkRequest`.
+        // If this assumption changes, this flag logic will need to be updated.
+        !helper.orderedNetworkRequests.isEmpty
+    }
 
     public override init() {}
 
@@ -33,12 +41,13 @@ public class RealNetworkService: NetworkService {
 
     /// Immediately returns the associated responses (if any) for the provided network request **without awaiting**.
     ///
-    /// Note: To properly await network responses for a given request, make sure to set an expectation
-    /// using `setExpectation(for:)` then await the expectation using `assertAllNetworkRequestExpectations()`.
+    /// Note: To await network responses for a given request, make sure to set an expectation
+    /// using ``setExpectation(for:expectedCount:file:line:)`` then await the expectation using
+    /// ``assertAllNetworkRequestExpectations(ignoreUnexpectedRequests:file:line:)``.
     ///
     /// - Parameter networkRequest: The `NetworkRequest` for which the response should be returned.
     /// - Returns: The array of `HttpConnection` responses for the given request or `nil` if not found.
-    /// - seeAlso: ``assertAllNetworkRequestExpectations``
+    /// - seeAlso: ``assertAllNetworkRequestExpectations(ignoreUnexpectedRequests:file:line:)``
     public func getResponses(for networkRequest: NetworkRequest) -> [HttpConnection]? {
         return helper.getResponses(for: networkRequest)
     }
@@ -48,11 +57,65 @@ public class RealNetworkService: NetworkService {
     /// - Parameters:
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
-    /// - SeeAlso: ``setExpectation(for:)``
-    public func assertAllNetworkRequestExpectations(file: StaticString = #file, line: UInt = #line) {
-        helper.assertAllNetworkRequestExpectations(file: file, line: line)
+    /// - SeeAlso: ``setExpectation(for:expectedCount:file:line:)``
+    public func assertAllNetworkRequestExpectations(ignoreUnexpectedRequests: Bool = true, file: StaticString = #file, line: UInt = #line) {
+        helper.assertAllNetworkRequestExpectations(ignoreUnexpectedRequests: ignoreUnexpectedRequests, file: file, line: line)
     }
 
+    /// Immediately returns all sent network requests (if any) **without awaiting**.
+    ///
+    /// Note: To await network responses for a given request, make sure to set an expectation
+    /// using ``setExpectation(for:expectedCount:file:line:)`` then await the expectation using
+    /// ``assertAllNetworkRequestExpectations(ignoreUnexpectedRequests:file:line:)``.
+    public func getNetworkRequests() -> [NetworkRequest] {
+        return helper.orderedNetworkRequests
+    }
+
+    /// Returns the network request(s) sent through the Core NetworkService, or empty if none was found.
+    ///
+    /// Use this method after calling ``setExpectationForNetworkRequest(url:httpMethod:expectedCount:file:line:)`` to wait for expected requests.
+    ///
+    /// - Parameters:
+    ///   - url: The URL `String` of the `NetworkRequest` to get.
+    ///   - httpMethod: The HTTP method of the `NetworkRequest` to get.
+    ///   - expectationTimeout: The duration (in seconds) to wait for **expected network requests** before failing, with a default of
+    ///    ``TestConstants/Defaults/WAIT_NETWORK_REQUEST_TIMEOUT``. Otherwise waits for ``TestConstants/Defaults/WAIT_TIMEOUT``
+    ///     without failing.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
+    /// - Returns: An array of `NetworkRequest`s that match the provided `url` and `httpMethod`. Returns an empty array if no matching requests were dispatched.
+    ///
+    /// - SeeAlso:
+    ///     - ``setExpectationForNetworkRequest(url:httpMethod:expectedCount:file:line:)``
+    public func getNetworkRequestsWith(url: String, httpMethod: HttpMethod, expectationTimeout: TimeInterval = TestConstants.Defaults.WAIT_NETWORK_REQUEST_TIMEOUT, file: StaticString = #file, line: UInt = #line) -> [NetworkRequest] {
+        guard let url = URL(string: url) else {
+            return []
+        }
+        return getNetworkRequestsWith(url: url, httpMethod: httpMethod, expectationTimeout: expectationTimeout, file: file, line: line)
+    }
+
+    /// Returns the network request(s) sent through the Core NetworkService, or empty if none was found.
+    ///
+    /// Use this method after calling ``setExpectationForNetworkRequest(url:httpMethod:expectedCount:file:line:)`` to wait for expected
+    /// requests.
+    ///
+    /// - Parameters:
+    ///   - url: The URL `String` of the `NetworkRequest` to get.
+    ///   - httpMethod: The HTTP method of the `NetworkRequest` to get.
+    ///   - expectationTimeout: The duration (in seconds) to wait for **expected network requests** before failing, with a default of
+    ///    ``TestConstants/Defaults/WAIT_NETWORK_REQUEST_TIMEOUT``. Otherwise waits for ``TestConstants/Defaults/WAIT_TIMEOUT``
+    ///     without failing.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
+    /// - Returns: An array of `NetworkRequest`s that match the provided `url` and `httpMethod`. Returns an empty array if no matching requests were dispatched.
+    ///
+    /// - SeeAlso:
+    ///     - ``setExpectationForNetworkRequest(url:httpMethod:expectedCount:file:line:)``
+    public func getNetworkRequestsWith(url: URL, httpMethod: HttpMethod, expectationTimeout: TimeInterval = TestConstants.Defaults.WAIT_NETWORK_REQUEST_TIMEOUT, file: StaticString = #file, line: UInt = #line) -> [NetworkRequest] {
+        return helper.getNetworkRequestsWith(url: url, httpMethod: httpMethod, expectationTimeout: expectationTimeout, file: file, line: line)
+    }
+
+    /// Resets all stored network request elements and expectations.
     public func reset() {
         helper.reset()
     }
