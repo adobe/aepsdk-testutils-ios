@@ -21,6 +21,7 @@ import XCTest
 ///    - ``MockNetworkService``
 ///    - ``RealNetworkService``
 class NetworkRequestHelper {
+    private(set) var orderedNetworkRequests: [NetworkRequest] = []
     private var sentNetworkRequests: [TestableNetworkRequest: [NetworkRequest]] = [:]
     /// Matches sent `NetworkRequest`s with their corresponding `HttpConnection` responses.
     private(set) var networkResponses: [TestableNetworkRequest: [HttpConnection]] = [:]
@@ -28,6 +29,11 @@ class NetworkRequestHelper {
 
     func recordSentNetworkRequest(_ networkRequest: NetworkRequest) {
         TestBase.log("Received connectAsync to URL \(networkRequest.url.absoluteString) and HTTPMethod \(networkRequest.httpMethod.toString())")
+
+        // Add to ordered list
+        orderedNetworkRequests.append(networkRequest)
+
+        // Add to grouped collection
         let testableNetworkRequest = TestableNetworkRequest(from: networkRequest)
         if let equalNetworkRequest = sentNetworkRequests.first(where: { key, _ in
             key == testableNetworkRequest
@@ -39,6 +45,7 @@ class NetworkRequestHelper {
     }
 
     func reset() {
+        orderedNetworkRequests.removeAll()
         expectedNetworkRequests.removeAll()
         sentNetworkRequests.removeAll()
         networkResponses.removeAll()
@@ -186,9 +193,9 @@ class NetworkRequestHelper {
                 let receivedCount: Int32 = expectedRequest.getInitialCount() - expectedRequest.getCurrentCount()
                 XCTAssertEqual(expectedCount, receivedCount,
                                """
-                                Expected \(expectedCount) network request(s) for URL \(sentRequestURL) and HTTPMethod
-                                \(sentRequestHTTPMethod), but received \(receivedCount)
-                                """, file: file, line: line)
+                               Expected \(expectedCount) network request(s) for URL \(sentRequestURL) and HTTPMethod \(sentRequestHTTPMethod),
+                               but received \(receivedCount)
+                               """, file: file, line: line)
             }
             // Check for requests that don't have expectations set
             else {
@@ -198,7 +205,10 @@ class NetworkRequestHelper {
             }
         }
 
-        XCTAssertEqual(0, unexpectedRequestsCount, "Received \(unexpectedRequestsCount) unexpected network request(s): \(unexpectedRequestsAsString)", file: file, line: line)
+        XCTAssertEqual(0, unexpectedRequestsCount,
+                       """
+                       Received \(unexpectedRequestsCount) unexpected network request(s): \(unexpectedRequestsAsString)
+                       """, file: file, line: line)
     }
 
     /// Returns the network request(s) sent through the Core NetworkService, or empty if none was found.

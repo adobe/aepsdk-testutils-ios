@@ -18,6 +18,14 @@ import XCTest
 public class MockNetworkService: Networking {
     private let helper: NetworkRequestHelper = NetworkRequestHelper()
     private var responseDelay: UInt32
+    /// Flag that indicates if the ``connectAsync(networkRequest:completionHandler:)`` method was called.
+    /// Note that this property does not await and returns the status immediately.
+    public var connectAsyncCalled: Bool {
+        // Depends on `helper.orderedNetworkRequests` always being populated by `connectAsync` via
+        // `helper.recordSentNetworkRequest`.
+        // If this assumption changes, this flag logic will need to be updated.
+        !helper.orderedNetworkRequests.isEmpty
+    }
 
     // Public initializer
     public init(responseDelay: UInt32 = 0) {
@@ -25,6 +33,8 @@ public class MockNetworkService: Networking {
     }
 
     public func connectAsync(networkRequest: NetworkRequest, completionHandler: ((HttpConnection) -> Void)? = nil) {
+        helper.recordSentNetworkRequest(networkRequest)
+
         if self.responseDelay > 0 {
             sleep(self.responseDelay)
         }
@@ -54,6 +64,7 @@ public class MockNetworkService: Networking {
         helper.countDownExpected(networkRequest: networkRequest)
     }
 
+    /// Resets all stored network request elements and expectations. Also resets `responseDelay` to 0.
     public func reset() {
         responseDelay = 0
         helper.reset()
@@ -126,6 +137,15 @@ public class MockNetworkService: Networking {
         helper.assertAllNetworkRequestExpectations(ignoreUnexpectedRequests: ignoreUnexpectedRequests, file: file, line: line)
     }
 
+    /// Immediately returns all sent network requests (if any) **without awaiting**.
+    ///
+    /// Note: To await network responses for a given request, make sure to set an expectation
+    /// using ``setExpectationForNetworkRequest(url:httpMethod:expectedCount:file:line:)``
+    /// then await the expectation using ``assertAllNetworkRequestExpectations(ignoreUnexpectedRequests:file:line:)``.
+    public func getNetworkRequests() -> [NetworkRequest] {
+        return helper.orderedNetworkRequests
+    }
+
     /// Returns the network request(s) sent through the Core NetworkService, or empty if none was found.
     ///
     /// Use this method after calling `setExpectationForNetworkRequest(url:httpMethod:expectedCount:file:line:)` to wait for expected requests.
@@ -133,7 +153,9 @@ public class MockNetworkService: Networking {
     /// - Parameters:
     ///   - url: The URL `String` of the `NetworkRequest` to get.
     ///   - httpMethod: The HTTP method of the `NetworkRequest` to get.
-    ///   - expectationTimeout: The duration (in seconds) to wait for **expected network requests** before failing, with a default of ``WAIT_NETWORK_REQUEST_TIMEOUT``. Otherwise waits for ``WAIT_TIMEOUT`` without failing.
+    ///   - expectationTimeout: The duration (in seconds) to wait for **expected network requests** before failing, with a default of
+    ///    ``TestConstants/Defaults/WAIT_NETWORK_REQUEST_TIMEOUT``. Otherwise waits for ``TestConstants/Defaults/WAIT_TIMEOUT``
+    ///     without failing.
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
     /// - Returns: An array of `NetworkRequest`s that match the provided `url` and `httpMethod`. Returns an empty array if no matching requests were dispatched.
@@ -154,7 +176,9 @@ public class MockNetworkService: Networking {
     /// - Parameters:
     ///   - url: The URL `String` of the `NetworkRequest` to get.
     ///   - httpMethod: The HTTP method of the `NetworkRequest` to get.
-    ///   - expectationTimeout: The duration (in seconds) to wait for **expected network requests** before failing, with a default of ``WAIT_NETWORK_REQUEST_TIMEOUT``. Otherwise waits for ``WAIT_TIMEOUT`` without failing.
+    ///   - expectationTimeout: The duration (in seconds) to wait for **expected network requests** before failing, with a default of
+    ///    ``TestConstants/Defaults/WAIT_NETWORK_REQUEST_TIMEOUT``. Otherwise waits for ``TestConstants/Defaults/WAIT_TIMEOUT``
+    ///     without failing.
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
     /// - Returns: An array of `NetworkRequest`s that match the provided `url` and `httpMethod`. Returns an empty array if no matching requests were dispatched.
