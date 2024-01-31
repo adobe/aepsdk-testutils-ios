@@ -39,8 +39,6 @@ public class MockNetworkService: Networking {
             sleep(self.responseDelay)
         }
 
-        helper.recordSentNetworkRequest(networkRequest)
-
         if let response = self.getMockResponse(for: networkRequest) {
             completionHandler?(response)
         } else {
