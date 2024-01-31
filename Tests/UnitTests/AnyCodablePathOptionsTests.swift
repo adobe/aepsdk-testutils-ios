@@ -833,6 +833,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
         }
     }
 
+    // TODO: Wildcard keyname/index functionality
     func testKeyMustBeAbsent_WithInnerPath_CorrectlyFails() {
         let expected = """
         {}
