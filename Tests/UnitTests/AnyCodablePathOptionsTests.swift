@@ -834,27 +834,27 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
     }
 
     // TODO: Wildcard keyname/index functionality
-    //    func testKeyMustBeAbsent_WithInnerPath_CorrectlyFails() {
-    //        let expected = """
-    //        {}
-    //        """
-    //
-    //        let actual = """
-    //        {
-    //          "events": [
-    //            {
-    //              "request": {
-    //                "path": "something"
-    //              }
-    //            }
-    //          ],
-    //          "path": "top level"
-    //        }
-    //        """
-    //        XCTExpectFailure("Validation should fail when key names not provided") {
-    //            assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "events[*].request.path", scope: .subtree))
-    //        }
-    //    }
+    func testKeyMustBeAbsent_WithInnerPath_CorrectlyFails() {
+        let expected = """
+        {}
+        """
+
+        let actual = """
+        {
+          "events": [
+            {
+              "request": {
+                "path": "something"
+              }
+            }
+          ],
+          "path": "top level"
+        }
+        """
+        XCTExpectFailure("Validation should fail when key names not provided") {
+            assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "events[0].request.path", scope: .subtree))
+        }
+    }
 
     func testKeyMustBeAbsent_WithSinglePath_Passes() {
         let expected = """
