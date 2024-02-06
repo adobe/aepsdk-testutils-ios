@@ -40,7 +40,7 @@ public extension FileManager {
 
         for cacheItem in cacheItems {
             do {
-                try self.removeItem(at: URL(fileURLWithPath: "Library/Caches/\(cacheItem.name)", isDirectory: cacheItem.isDirectory))
+                try self.removeItem(at: URL(fileURLWithPath: "\(url.relativePath)/\(cacheItem.name)", isDirectory: cacheItem.isDirectory))
                 if let dqService = ServiceProvider.shared.dataQueueService as? DataQueueService {
                     _ = dqService.threadSafeDictionary.removeValue(forKey: cacheItem.name)
                 }
