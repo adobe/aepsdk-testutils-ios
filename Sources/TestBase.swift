@@ -45,7 +45,7 @@ open class TestBase: XCTestCase {
         EventHub.reset()
         UserDefaults.clearAll()
         FileManager.default.clearCache()
-        FileManager.default.removeAdobeCacheDirectory()
+        FileManager.default.clearDirectory()
     }
 
     /// Reset event expectations and drop the items received until this point

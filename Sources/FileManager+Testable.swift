@@ -54,10 +54,10 @@ public extension FileManager {
     /// if no app group is provided.
     ///
     /// - Parameters:
-    ///   - directoryName: A `String` specifying the name of the directory to remove. Defaults to `"com.adobe.aep.datastore"` if not specified.
+    ///   - name: A `String` specifying the name of the directory to remove. Defaults to `"com.adobe.aep.datastore"` if not specified.
     ///   - appGroup: An optional `String` representing the app group identifier. If provided, the method will look for the directory within the app group container. If `nil`, the method will search in the current application's library directory.
     /// - Requires: Before calling this method, ensure that the caller has the appropriate permissions to access and modify the file system, especially if working with app group directories.
-    func removeAdobeCacheDirectory(_ directoryName: String = "com.adobe.aep.datastore", with appGroup: String? = nil) {
+    func clearDirectory(_ name: String = "com.adobe.aep.datastore", inAppGroup appGroup: String? = nil) {
         let LOG_TAG = "FileManager"
         let fileManager = FileManager.default
 
@@ -65,14 +65,14 @@ public extension FileManager {
         var directoryUrl: URL?
         if let appGroup = appGroup {
             directoryUrl = fileManager.containerURL(forSecurityApplicationGroupIdentifier: appGroup)?
-                .appendingPathComponent(directoryName, isDirectory: true)
+                .appendingPathComponent(name, isDirectory: true)
         } else {
             directoryUrl = fileManager.urls(for: .libraryDirectory, in: .allDomainsMask).first?
-                .appendingPathComponent(directoryName, isDirectory: true)
+                .appendingPathComponent(name, isDirectory: true)
         }
 
         guard let directoryUrl = directoryUrl else {
-            Log.error(label: LOG_TAG, "Could not compute the directory URL for \(directoryName) for removal.")
+            Log.error(label: LOG_TAG, "Could not compute the directory URL for \(name) for removal.")
             return
         }
 

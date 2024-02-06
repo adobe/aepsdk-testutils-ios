@@ -20,6 +20,6 @@ public extension NamedCollectionDataStore {
     static func clear() {
         UserDefaults.clearAll()
         FileManager.default.clearCache()
-        FileManager.default.removeAdobeCacheDirectory()
+        FileManager.default.clearDirectory()
     }
 }
