@@ -234,7 +234,7 @@ public class NodeConfig: Hashable {
          options: [OptionKey: Config] = [:],
          subtreeOptions: [OptionKey: Config],
          children: Set<NodeConfig> = [],
-         wildcardChild: NodeConfig? = nil) {
+         wildcardChildren: NodeConfig? = nil) {
         // Validate subtreeOptions has every option defined
         var validatedSubtreeOptions = subtreeOptions
         for key in OptionKey.allCases {
@@ -249,7 +249,7 @@ public class NodeConfig: Hashable {
         self.options = options
         self.subtreeOptions = validatedSubtreeOptions
         self.children = children
-        self.wildcardChildren = wildcardChild
+        self.wildcardChildren = wildcardChildren
     }
 
     // Implementation of Hashable
@@ -278,7 +278,7 @@ public class NodeConfig: Hashable {
         return children.first(where: { $0.name == name })
     }
 
-    func getChild(named index: Int?) -> NodeConfig? {
+    func getChild(indexed index: Int?) -> NodeConfig? {
         guard let index = index else { return nil }
         let indexString = String(index)
         return children.first(where: { $0.name == indexString })
@@ -289,7 +289,7 @@ public class NodeConfig: Hashable {
     }
 
     func getNextNode(for index: Int?) -> NodeConfig {
-        return getChild(named: index) ?? wildcardChildren ?? asFinalNode()
+        return getChild(indexed: index) ?? wildcardChildren ?? asFinalNode()
     }
 
     /// Resolves a given node's option using the following precedence:
