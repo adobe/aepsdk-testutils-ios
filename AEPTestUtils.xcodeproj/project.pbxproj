@@ -23,8 +23,8 @@
 /* Begin PBXBuildFile section */
 		4C0293B02AE1D4550093CCBA /* MockNetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C02939F2AE1D4540093CCBA /* MockNetworkService.swift */; };
 		4C0293B12AE1D4550093CCBA /* InstrumentedExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293A02AE1D4540093CCBA /* InstrumentedExtension.swift */; };
-		4C0293B22AE1D4550093CCBA /* FileManager+Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293A12AE1D4540093CCBA /* FileManager+Testable.swift */; };
-		4C0293B32AE1D4550093CCBA /* EventHub+Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293A22AE1D4540093CCBA /* EventHub+Test.swift */; };
+		4C0293B22AE1D4550093CCBA /* FileManager+TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293A12AE1D4540093CCBA /* FileManager+TestHelper.swift */; };
+		4C0293B32AE1D4550093CCBA /* EventHub+TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293A22AE1D4540093CCBA /* EventHub+TestHelper.swift */; };
 		4C0293B42AE1D4550093CCBA /* CountDownLatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293A32AE1D4540093CCBA /* CountDownLatch.swift */; };
 		4C0293B52AE1D4550093CCBA /* MockHitProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293A42AE1D4540093CCBA /* MockHitProcessor.swift */; };
 		4C0293B62AE1D4550093CCBA /* TestUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293A52AE1D4540093CCBA /* TestUtils.swift */; };
@@ -32,7 +32,7 @@
 		4C0293B82AE1D4550093CCBA /* NetworkRequestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293A72AE1D4540093CCBA /* NetworkRequestHelper.swift */; };
 		4C0293B92AE1D4550093CCBA /* AnyCodable+Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293A82AE1D4540093CCBA /* AnyCodable+Array.swift */; };
 		4C0293BA2AE1D4550093CCBA /* TestBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293A92AE1D4540093CCBA /* TestBase.swift */; };
-		4C0293BB2AE1D4550093CCBA /* UserDefaults+Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293AA2AE1D4550093CCBA /* UserDefaults+Test.swift */; };
+		4C0293BB2AE1D4550093CCBA /* UserDefaults+TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293AA2AE1D4550093CCBA /* UserDefaults+TestHelper.swift */; };
 		4C0293BC2AE1D4550093CCBA /* TestConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293AB2AE1D4550093CCBA /* TestConstants.swift */; };
 		4C0293BD2AE1D4550093CCBA /* MockDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293AC2AE1D4550093CCBA /* MockDataStore.swift */; };
 		4C0293BE2AE1D4550093CCBA /* MockDataQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293AD2AE1D4550093CCBA /* MockDataQueue.swift */; };
@@ -41,12 +41,12 @@
 		4C0293C22AE1D9AD0093CCBA /* XCTestCase+AnyCodableAsserts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293C12AE1D9AD0093CCBA /* XCTestCase+AnyCodableAsserts.swift */; };
 		4C1111682B64A8F400024172 /* MockExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1111672B64A8F400024172 /* MockExtension.swift */; };
 		4C7043472AF45A98008CF67D /* EventSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7043462AF45A98008CF67D /* EventSpec.swift */; };
-		4C7043492AF45B05008CF67D /* URL+Testable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7043482AF45B05008CF67D /* URL+Testable.swift */; };
+		4C7043492AF45B05008CF67D /* URL+TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7043482AF45B05008CF67D /* URL+TestHelper.swift */; };
 		4C70434C2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */; };
 		4C70434D2AFB0D4F008CF67D /* AnyCodableAssertsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsTests.swift */; };
 		4C84194A2B2BD690007AA163 /* AnyCodablePathOptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8419492B2BD690007AA163 /* AnyCodablePathOptionsTests.swift */; };
 		4C9CF7C82AE20A7300EB88D4 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C9CF7C72AE20A7300EB88D4 /* XCTest.framework */; };
-		4CBE65F42B69CD7100EF4600 /* NamedCollectionDataStore+Test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBE65F32B69CD7100EF4600 /* NamedCollectionDataStore+Test.swift */; };
+		4CBE65F42B69CD7100EF4600 /* NamedCollectionDataStore+TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBE65F32B69CD7100EF4600 /* NamedCollectionDataStore+TestHelper.swift */; };
 		4CE14ECC2AFDC7F100969B36 /* NodeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CE14ECB2AFDC7F100969B36 /* NodeConfig.swift */; };
 		72EC4ED272DA96D1B2F44F4D /* Pods_UnitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E05720B5778E784DC19DA9C /* Pods_UnitTests.framework */; };
 		D4ABABAE251A7D95008076BF /* AEPTestUtils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D444995F2519506B0093B364 /* AEPTestUtils.framework */; };
@@ -89,8 +89,8 @@
 		34C185B9927DF9E0701D766B /* Pods_AEPTestUtils.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AEPTestUtils.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C02939F2AE1D4540093CCBA /* MockNetworkService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockNetworkService.swift; sourceTree = "<group>"; };
 		4C0293A02AE1D4540093CCBA /* InstrumentedExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstrumentedExtension.swift; sourceTree = "<group>"; };
-		4C0293A12AE1D4540093CCBA /* FileManager+Testable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FileManager+Testable.swift"; sourceTree = "<group>"; };
-		4C0293A22AE1D4540093CCBA /* EventHub+Test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "EventHub+Test.swift"; sourceTree = "<group>"; };
+		4C0293A12AE1D4540093CCBA /* FileManager+TestHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FileManager+TestHelper.swift"; sourceTree = "<group>"; };
+		4C0293A22AE1D4540093CCBA /* EventHub+TestHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "EventHub+TestHelper.swift"; sourceTree = "<group>"; };
 		4C0293A32AE1D4540093CCBA /* CountDownLatch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CountDownLatch.swift; sourceTree = "<group>"; };
 		4C0293A42AE1D4540093CCBA /* MockHitProcessor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockHitProcessor.swift; sourceTree = "<group>"; };
 		4C0293A52AE1D4540093CCBA /* TestUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestUtils.swift; sourceTree = "<group>"; };
@@ -98,7 +98,7 @@
 		4C0293A72AE1D4540093CCBA /* NetworkRequestHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkRequestHelper.swift; sourceTree = "<group>"; };
 		4C0293A82AE1D4540093CCBA /* AnyCodable+Array.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AnyCodable+Array.swift"; sourceTree = "<group>"; };
 		4C0293A92AE1D4540093CCBA /* TestBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestBase.swift; sourceTree = "<group>"; };
-		4C0293AA2AE1D4550093CCBA /* UserDefaults+Test.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UserDefaults+Test.swift"; sourceTree = "<group>"; };
+		4C0293AA2AE1D4550093CCBA /* UserDefaults+TestHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UserDefaults+TestHelper.swift"; sourceTree = "<group>"; };
 		4C0293AB2AE1D4550093CCBA /* TestConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestConstants.swift; sourceTree = "<group>"; };
 		4C0293AC2AE1D4550093CCBA /* MockDataStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockDataStore.swift; sourceTree = "<group>"; };
 		4C0293AD2AE1D4550093CCBA /* MockDataQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockDataQueue.swift; sourceTree = "<group>"; };
@@ -107,12 +107,12 @@
 		4C0293C12AE1D9AD0093CCBA /* XCTestCase+AnyCodableAsserts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCTestCase+AnyCodableAsserts.swift"; sourceTree = "<group>"; };
 		4C1111672B64A8F400024172 /* MockExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockExtension.swift; sourceTree = "<group>"; };
 		4C7043462AF45A98008CF67D /* EventSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSpec.swift; sourceTree = "<group>"; };
-		4C7043482AF45B05008CF67D /* URL+Testable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Testable.swift"; sourceTree = "<group>"; };
+		4C7043482AF45B05008CF67D /* URL+TestHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+TestHelper.swift"; sourceTree = "<group>"; };
 		4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCodableAssertsParameterizedTests.swift; sourceTree = "<group>"; };
 		4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCodableAssertsTests.swift; sourceTree = "<group>"; };
 		4C8419492B2BD690007AA163 /* AnyCodablePathOptionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCodablePathOptionsTests.swift; sourceTree = "<group>"; };
 		4C9CF7C72AE20A7300EB88D4 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
-		4CBE65F32B69CD7100EF4600 /* NamedCollectionDataStore+Test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NamedCollectionDataStore+Test.swift"; sourceTree = "<group>"; };
+		4CBE65F32B69CD7100EF4600 /* NamedCollectionDataStore+TestHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NamedCollectionDataStore+TestHelper.swift"; sourceTree = "<group>"; };
 		4CE14ECB2AFDC7F100969B36 /* NodeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeConfig.swift; sourceTree = "<group>"; };
 		D444995F2519506B0093B364 /* AEPTestUtils.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AEPTestUtils.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4967534251130D3001F5F95 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -182,16 +182,16 @@
 			children = (
 				4C0293A82AE1D4540093CCBA /* AnyCodable+Array.swift */,
 				4C0293A32AE1D4540093CCBA /* CountDownLatch.swift */,
-				4C0293A22AE1D4540093CCBA /* EventHub+Test.swift */,
+				4C0293A22AE1D4540093CCBA /* EventHub+TestHelper.swift */,
 				4C7043462AF45A98008CF67D /* EventSpec.swift */,
-				4C0293A12AE1D4540093CCBA /* FileManager+Testable.swift */,
+				4C0293A12AE1D4540093CCBA /* FileManager+TestHelper.swift */,
 				4C0293A02AE1D4540093CCBA /* InstrumentedExtension.swift */,
 				4C0293AD2AE1D4550093CCBA /* MockDataQueue.swift */,
 				4C0293AC2AE1D4550093CCBA /* MockDataStore.swift */,
 				4C1111672B64A8F400024172 /* MockExtension.swift */,
 				4C0293A42AE1D4540093CCBA /* MockHitProcessor.swift */,
 				4C02939F2AE1D4540093CCBA /* MockNetworkService.swift */,
-				4CBE65F32B69CD7100EF4600 /* NamedCollectionDataStore+Test.swift */,
+				4CBE65F32B69CD7100EF4600 /* NamedCollectionDataStore+TestHelper.swift */,
 				4C0293A72AE1D4540093CCBA /* NetworkRequestHelper.swift */,
 				4CE14ECB2AFDC7F100969B36 /* NodeConfig.swift */,
 				4C0293AE2AE1D4550093CCBA /* RealNetworkService.swift */,
@@ -200,8 +200,8 @@
 				4C0293A92AE1D4540093CCBA /* TestBase.swift */,
 				4C0293AB2AE1D4550093CCBA /* TestConstants.swift */,
 				4C0293A52AE1D4540093CCBA /* TestUtils.swift */,
-				4C7043482AF45B05008CF67D /* URL+Testable.swift */,
-				4C0293AA2AE1D4550093CCBA /* UserDefaults+Test.swift */,
+				4C7043482AF45B05008CF67D /* URL+TestHelper.swift */,
+				4C0293AA2AE1D4550093CCBA /* UserDefaults+TestHelper.swift */,
 				4C0293C12AE1D9AD0093CCBA /* XCTestCase+AnyCodableAsserts.swift */,
 				D4967534251130D3001F5F95 /* Info.plist */,
 			);
@@ -450,12 +450,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C0293BC2AE1D4550093CCBA /* TestConstants.swift in Sources */,
-				4C0293BB2AE1D4550093CCBA /* UserDefaults+Test.swift in Sources */,
+				4C0293BB2AE1D4550093CCBA /* UserDefaults+TestHelper.swift in Sources */,
 				4C0293BF2AE1D4550093CCBA /* RealNetworkService.swift in Sources */,
-				4C7043492AF45B05008CF67D /* URL+Testable.swift in Sources */,
+				4C7043492AF45B05008CF67D /* URL+TestHelper.swift in Sources */,
 				4C0293BA2AE1D4550093CCBA /* TestBase.swift in Sources */,
 				4C0293B52AE1D4550093CCBA /* MockHitProcessor.swift in Sources */,
-				4CBE65F42B69CD7100EF4600 /* NamedCollectionDataStore+Test.swift in Sources */,
+				4CBE65F42B69CD7100EF4600 /* NamedCollectionDataStore+TestHelper.swift in Sources */,
 				4C0293B42AE1D4550093CCBA /* CountDownLatch.swift in Sources */,
 				4C0293C22AE1D9AD0093CCBA /* XCTestCase+AnyCodableAsserts.swift in Sources */,
 				4C0293B82AE1D4550093CCBA /* NetworkRequestHelper.swift in Sources */,
@@ -465,11 +465,11 @@
 				4C0293C02AE1D4550093CCBA /* TestableNetworkRequest.swift in Sources */,
 				4C0293B12AE1D4550093CCBA /* InstrumentedExtension.swift in Sources */,
 				4C0293B62AE1D4550093CCBA /* TestUtils.swift in Sources */,
-				4C0293B32AE1D4550093CCBA /* EventHub+Test.swift in Sources */,
+				4C0293B32AE1D4550093CCBA /* EventHub+TestHelper.swift in Sources */,
 				4C0293BD2AE1D4550093CCBA /* MockDataStore.swift in Sources */,
 				4C7043472AF45A98008CF67D /* EventSpec.swift in Sources */,
 				4C0293B72AE1D4550093CCBA /* TestableExtensionRuntime.swift in Sources */,
-				4C0293B22AE1D4550093CCBA /* FileManager+Testable.swift in Sources */,
+				4C0293B22AE1D4550093CCBA /* FileManager+TestHelper.swift in Sources */,
 				4CE14ECC2AFDC7F100969B36 /* NodeConfig.swift in Sources */,
 				4C1111682B64A8F400024172 /* MockExtension.swift in Sources */,
 			);
