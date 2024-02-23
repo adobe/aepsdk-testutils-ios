@@ -24,8 +24,7 @@ open class TestBase: XCTestCase {
     // Runs once per test suite
     open class override func setUp() {
         super.setUp()
-        UserDefaults.clearAll()
-        FileManager.default.clearCache()
+        NamedCollectionDataStore.clear()
         MobileCore.setLogLevel(LogLevel.trace)
     }
 
@@ -43,9 +42,7 @@ open class TestBase: XCTestCase {
         resetTestExpectations()
         TestBase.isFirstRun = false
         EventHub.reset()
-        UserDefaults.clearAll()
-        FileManager.default.clearCache()
-        FileManager.default.clearDirectory()
+        NamedCollectionDataStore.clear()
     }
 
     /// Reset event expectations and drop the items received until this point
