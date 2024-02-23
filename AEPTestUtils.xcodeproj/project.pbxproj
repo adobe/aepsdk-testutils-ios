@@ -43,7 +43,7 @@
 		4C7043472AF45A98008CF67D /* EventSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7043462AF45A98008CF67D /* EventSpec.swift */; };
 		4C7043492AF45B05008CF67D /* URL+TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7043482AF45B05008CF67D /* URL+TestHelper.swift */; };
 		4C70434C2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */; };
-		4C70434D2AFB0D4F008CF67D /* AnyCodableAssertsLegacyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsLegacyTests.swift */; };
+		4C70434D2AFB0D4F008CF67D /* AnyCodableAssertsDeprecatedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsDeprecatedTests.swift */; };
 		4C84194A2B2BD690007AA163 /* AnyCodablePathOptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8419492B2BD690007AA163 /* AnyCodablePathOptionsTests.swift */; };
 		4C9CF7C82AE20A7300EB88D4 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C9CF7C72AE20A7300EB88D4 /* XCTest.framework */; };
 		4CBE65F42B69CD7100EF4600 /* NamedCollectionDataStore+TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBE65F32B69CD7100EF4600 /* NamedCollectionDataStore+TestHelper.swift */; };
@@ -109,7 +109,7 @@
 		4C7043462AF45A98008CF67D /* EventSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSpec.swift; sourceTree = "<group>"; };
 		4C7043482AF45B05008CF67D /* URL+TestHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+TestHelper.swift"; sourceTree = "<group>"; };
 		4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCodableAssertsParameterizedTests.swift; sourceTree = "<group>"; };
-		4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsLegacyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCodableAssertsLegacyTests.swift; sourceTree = "<group>"; };
+		4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsDeprecatedTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCodableAssertsDeprecatedTests.swift; sourceTree = "<group>"; };
 		4C8419492B2BD690007AA163 /* AnyCodablePathOptionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCodablePathOptionsTests.swift; sourceTree = "<group>"; };
 		4C9CF7C72AE20A7300EB88D4 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		4CBE65F32B69CD7100EF4600 /* NamedCollectionDataStore+TestHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NamedCollectionDataStore+TestHelper.swift"; sourceTree = "<group>"; };
@@ -212,7 +212,7 @@
 			isa = PBXGroup;
 			children = (
 				4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */,
-				4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsLegacyTests.swift */,
+				4C70434B2AFB0D4F008CF67D /* AnyCodableAssertsDeprecatedTests.swift */,
 				4C8419492B2BD690007AA163 /* AnyCodablePathOptionsTests.swift */,
 				D4D5B5252432599B00CAB6E4 /* Info.plist */,
 			);
@@ -480,7 +480,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C70434C2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift in Sources */,
-				4C70434D2AFB0D4F008CF67D /* AnyCodableAssertsLegacyTests.swift in Sources */,
+				4C70434D2AFB0D4F008CF67D /* AnyCodableAssertsDeprecatedTests.swift in Sources */,
 				4C84194A2B2BD690007AA163 /* AnyCodablePathOptionsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -519,7 +519,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Sources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -530,10 +530,12 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.adobe.aep.testutils;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,3";
+				TVOS_DEPLOYMENT_TARGET = 12.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -556,7 +558,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Sources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -567,9 +569,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.adobe.aep.testutils;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,3";
+				TVOS_DEPLOYMENT_TARGET = 12.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -650,7 +654,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -706,7 +709,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -726,7 +728,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = FKGEE875K4;
 				INFOPLIST_FILE = Tests/UnitTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -734,10 +736,12 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.adobe.UnitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TVOS_DEPLOYMENT_TARGET = 10.0;
+				TARGETED_DEVICE_FAMILY = "1,2,3";
+				TVOS_DEPLOYMENT_TARGET = 12.0;
 			};
 			name = Debug;
 		};
@@ -750,7 +754,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = FKGEE875K4;
 				INFOPLIST_FILE = Tests/UnitTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -758,9 +762,11 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.adobe.UnitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TVOS_DEPLOYMENT_TARGET = 10.0;
+				TARGETED_DEVICE_FAMILY = "1,2,3";
+				TVOS_DEPLOYMENT_TARGET = 12.0;
 			};
 			name = Release;
 		};
