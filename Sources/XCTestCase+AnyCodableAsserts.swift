@@ -77,6 +77,22 @@ public protocol AnyCodableAsserts {
     ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertEqual(expected: AnyCodableComparable?, actual: AnyCodableComparable?, file: StaticString, line: UInt)
 
+    // Create a no-path-option version of the API the compiler will favor so that the deprecation
+    // message is not applied to all base usages of the API
+
+    /// Performs JSON validation where only the values from the `expected` JSON are required.
+    /// By default, the comparison logic uses the value type match option, only validating that both values are of the same type.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
+    func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, file: StaticString, line: UInt)
+
     /// Performs JSON validation where only the values from the `expected` JSON are required.
     /// By default, the comparison logic uses the value type match option, only validating that both values are of the same type.
     ///
@@ -226,6 +242,23 @@ public protocol AnyCodableAsserts {
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: MultiPathConfig..., file: StaticString, line: UInt)
+
+    // Create a no-path-option version of the API the compiler will favor so that the deprecation
+    // message is not applied to all base usages of the API
+
+    /// Performs JSON validation where only the values from the `expected` JSON are required by default.
+    /// By default, the comparison logic uses the value exact match option, validating that both values are of the same type
+    /// **and** have the same literal value.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
+    func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, file: StaticString, line: UInt)
 
     /// Performs JSON validation where only the values from the `expected` JSON are required.
     /// By default, the comparison logic uses value exact match mode, validating that both values are of the same type
@@ -405,6 +438,35 @@ public extension AnyCodableAsserts where Self: XCTestCase {
         }
         // Exact equality is just a special case of exact match
         assertExactMatch(expected: expected, actual: actual, pathOptions: CollectionEqualCount(paths: nil, isActive: true, scope: .subtree), file: file, line: line)
+    }
+
+    /// Performs JSON validation where only the values from the `expected` JSON are required.
+    /// By default, the comparison logic uses the value type match option, only validating that both values are of the same type.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
+    func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, file: StaticString = #file, line: UInt = #line) {
+        let treeDefaults: [MultiPathConfig] = [
+            AnyOrderMatch(paths: nil, isActive: false),
+            CollectionEqualCount(paths: nil, isActive: false),
+            KeyMustBeAbsent(paths: nil, isActive: false),
+            ValueTypeMatch(paths: nil)
+        ]
+
+        validate(
+            expected: expected,
+            actual: actual,
+            pathOptions: [],
+            treeDefaults: treeDefaults,
+            isLegacyMode: false,
+            file: file,
+            line: line)
     }
 
     // MARK: Type match
@@ -589,6 +651,35 @@ public extension AnyCodableAsserts where Self: XCTestCase {
     ///   - line: The line from which the method is called, used for localized assertion failures.
     func assertTypeMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, pathOptions: MultiPathConfig..., file: StaticString = #file, line: UInt = #line) {
         assertTypeMatch(expected: expected, actual: actual, pathOptions: pathOptions, file: file, line: line)
+    }
+
+    /// Performs JSON validation where only the values from the `expected` JSON are required by default.
+    /// By default, the comparison logic uses the value exact match option, validating that both values are of the same type
+    /// **and** have the same literal value.
+    ///
+    /// Both objects and arrays use extensible collections by default, meaning that only the elements in `expected` are
+    /// validated.
+    ///
+    /// - Parameters:
+    ///   - expected: The expected `AnyCodableComparable` to compare.
+    ///   - actual: The actual `AnyCodableComparable` to compare.
+    ///   - file: The file from which the method is called, used for localized assertion failures.
+    ///   - line: The line from which the method is called, used for localized assertion failures.
+    func assertExactMatch(expected: AnyCodableComparable, actual: AnyCodableComparable?, file: StaticString = #file, line: UInt = #line) {
+        let treeDefaults: [MultiPathConfig] = [
+            AnyOrderMatch(paths: nil, isActive: false),
+            CollectionEqualCount(paths: nil, isActive: false),
+            KeyMustBeAbsent(paths: nil, isActive: false),
+            ValueExactMatch(paths: nil)
+        ]
+        validate(
+            expected: expected,
+            actual: actual,
+            pathOptions: [],
+            treeDefaults: treeDefaults,
+            isLegacyMode: false,
+            file: file,
+            line: line)
     }
 
     // MARK: Exact match
