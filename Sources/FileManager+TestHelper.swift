@@ -32,7 +32,7 @@ public extension FileManager {
                                         (name: "com.adobe.edge.identity", isDirectory: false),
                                         (name: "com.adobe.eventHistory", isDirectory: false),
                                         (name: "com.adobe.mobile.diskcache", isDirectory: true),
-                                        (name: "com.adobe.module.signal", isDirectory: false),]
+                                        (name: "com.adobe.module.signal", isDirectory: false) ]
         guard let url = self.urls(for: .cachesDirectory, in: .userDomainMask).first else {
             Log.warning(label: LOG_TAG, "Unable to find valid cache directory path.")
             return

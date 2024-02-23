@@ -1089,9 +1089,9 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 keyPath: keyPath + [intIndex],
                 nodeTree: nodeTree.getNextNode(for: index),
                 shouldAssert: shouldAssert,
-                file: file, 
+                file: file,
                 line: line)
-            && validationResult
+                && validationResult
         }
 
         for (index, config) in anyOrderIndexes {
@@ -1194,7 +1194,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 shouldAssert: shouldAssert,
                 file: file,
                 line: line)
-            && validationResult
+                && validationResult
         }
         return validationResult
     }
@@ -1303,7 +1303,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 nodeTree: nodeTree.getNextNode(for: index),
                 file: file,
                 line: line)
-            && validationResult
+                && validationResult
         }
 
         return validationResult
@@ -1355,7 +1355,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                 nodeTree: nodeTree.getNextNode(for: key),
                 file: file,
                 line: line)
-            && validationResult
+                && validationResult
         }
         return validationResult
     }

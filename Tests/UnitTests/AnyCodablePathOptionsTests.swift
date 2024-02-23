@@ -1011,7 +1011,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
             actual: actual,
             pathOptions:
                 ValueTypeMatch(paths: "key0-1"),
-                ValueTypeMatch(paths: "key0-0", scope: .subtree))
+            ValueTypeMatch(paths: "key0-0", scope: .subtree))
     }
 
     // MARK: WildcardMatch

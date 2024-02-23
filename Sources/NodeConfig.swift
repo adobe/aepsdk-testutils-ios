@@ -386,8 +386,7 @@ public class NodeConfig: Hashable {
                 // Apply the option to the parent level so it applies to all children
                 if pathComponentName == "[*]" {
                     node.options[.anyOrderMatch] = Config(isActive: true)
-                }
-                else {
+                } else {
                     child.options[.anyOrderMatch] = Config(isActive: true)
                 }
             }
@@ -410,8 +409,7 @@ public class NodeConfig: Hashable {
                 let isWildcard = stringComponent == "*"
                 if isWildcard {
                     pathComponents.append(PathComponent(name: stringComponent, isAnyOrder: false, isArray: false, isWildcard: isWildcard))
-                }
-                else {
+                } else {
                     pathComponents.append(PathComponent(name: stringComponent.replacingOccurrences(of: "\\*", with: "*"), isAnyOrder: false, isArray: false, isWildcard: isWildcard))
                 }
             }
@@ -421,7 +419,7 @@ public class NodeConfig: Hashable {
                 // Check for array wildcard case
                 if arrayComponent == "[*]" {
                     pathComponents.append(PathComponent(name: arrayComponent, isAnyOrder: true, isArray: true, isWildcard: true))
-                // indexes represent the "named" child elements of arrays
+                    // indexes represent the "named" child elements of arrays
                 } else {
                     guard let indexResult = getArrayIndexAndAnyOrder(from: arrayComponent, file: file, line: line) else {
                         // Test failure emitted by extractIndexAndWildcardStatus
@@ -446,19 +444,16 @@ public class NodeConfig: Hashable {
                 node.wildcardChildren = newChild
                 return newChild
             }
-        }
-        else {
+        } else {
             if let existingChild = node.children.first(where: { $0.name == name }) {
                 return existingChild
-            }
-            else {
+            } else {
                 // If a wildcard child already exists, use that as the base
                 if let wildcardTemplateChild = wildcardChildren?.deepCopy() {
                     wildcardTemplateChild.name = name
                     node.children.insert(wildcardTemplateChild)
                     return wildcardTemplateChild
-                }
-                else {
+                } else {
                     // Apply subtreeOptions to the child
                     let newChild = NodeConfig(name: name, subtreeOptions: node.subtreeOptions)
                     node.children.insert(newChild)
@@ -734,8 +729,7 @@ extension NodeConfig: CustomStringConvertible {
         // Append FINAL options to the result
         if finalOptionsDescriptions.isEmpty {
             result += "\(indentString)FINAL options: none active\n"
-        }
-        else {
+        } else {
             result += "\(indentString)FINAL options:\n"
             result += finalOptionsDescriptions.joined(separator: "\n") + "\n"
         }
