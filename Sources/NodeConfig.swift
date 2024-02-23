@@ -372,6 +372,7 @@ public class NodeConfig: Hashable {
         let pathComponent = pathComponents.removeFirst()
         var nextNodes: [NodeConfig] = []
         for node in nodes {
+            // Note: the `[*]` case is processed as name = "[*]" not name is nil
             guard let pathComponentName = pathComponent.name else { continue }
 
             let child = findOrCreateChild(of: node, named: pathComponentName, isWildcard: pathComponent.isWildcard)
@@ -381,7 +382,14 @@ public class NodeConfig: Hashable {
                 nextNodes.append(contentsOf: node.children)
             }
             if isLegacyMode && pathComponent.isAnyOrder {
-                node.options[.anyOrderMatch] = Config(isActive: true)
+                // This is the legacy AnyOrder that should apply to all children
+                // Apply the option to the parent level so it applies to all children
+                if pathComponentName == "[*]" {
+                    node.options[.anyOrderMatch] = Config(isActive: true)
+                }
+                else {
+                    child.options[.anyOrderMatch] = Config(isActive: true)
+                }
             }
         }
         updateTree(nodes: nextNodes, with: pathConfig, pathComponents: pathComponents, isLegacyMode: isLegacyMode)
