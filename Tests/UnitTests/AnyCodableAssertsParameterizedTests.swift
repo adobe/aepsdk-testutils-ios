@@ -247,6 +247,9 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
         }
         for (index, (path, expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should not fail because of alternate path: [\(index)]: test with path=\(path), expected=\(expected), actual=\(actual)") { _ in
+                assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: path))
+                assertTypeMatch(expected: expected, actual: actual, pathOptions: ValueExactMatch(paths: path))
+                // Deprecated APIs
                 assertExactMatch(expected: expected, actual: actual, typeMatchPaths: [path])
                 assertTypeMatch(expected: expected, actual: actual, exactMatchPaths: [path])
             }
@@ -279,6 +282,9 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
         }
         for (index, (path, expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should not fail because of alternate path: [\(index)]: test with path=\(path), expected=\(expected), actual=\(actual)") { _ in
+                assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: path))
+                assertTypeMatch(expected: expected, actual: actual, pathOptions: ValueExactMatch(paths: path))
+                // Deprecated APIs
                 assertExactMatch(expected: expected, actual: actual, typeMatchPaths: [path])
                 assertTypeMatch(expected: expected, actual: actual, exactMatchPaths: [path])
             }
@@ -299,9 +305,15 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
         }
         for (index, (path, expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should apply alternate path to matching logic: [\(index)]: test with path=\(path), expected=\(expected), actual=\(actual)") { _ in
+                assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: path))
+                XCTExpectFailure("Validation should fail when using a path without a match") {
+                    assertTypeMatch(expected: expected, actual: actual, pathOptions: ValueExactMatch(paths: path))
+                }
+                // Deprecated APIs
                 assertExactMatch(expected: expected, actual: actual, typeMatchPaths: [path])
                 XCTExpectFailure("Validation should fail when using a path without a match") {
                     assertTypeMatch(expected: expected, actual: actual, exactMatchPaths: [path])
+
                 }
             }
         }
@@ -327,6 +339,11 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
         }
         for (index, (path, expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should apply alternate path to matching logic: [\(index)]: test with path=\(path), expected=\(expected), actual=\(actual)") { _ in
+                assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: path))
+                XCTExpectFailure("Validation should fail when using a path without a match") {
+                    assertTypeMatch(expected: expected, actual: actual, pathOptions: ValueExactMatch(paths: path))
+                }
+                // Deprecated APIs
                 assertExactMatch(expected: expected, actual: actual, typeMatchPaths: [path])
                 XCTExpectFailure("Validation should fail when using a path without a match") {
                     assertTypeMatch(expected: expected, actual: actual, exactMatchPaths: [path])
@@ -370,6 +387,11 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
         }
         for (index, (path, expected, actual)) in testCases.enumerated() {
             XCTContext.runActivity(named: "should handle special keys in alternate paths: [\(index)]: test with path=\(path), expected=\(expected), actual=\(actual)") { _ in
+                assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: path))
+                XCTExpectFailure("Validation should fail when using a path without a match") {
+                    assertTypeMatch(expected: expected, actual: actual, pathOptions: ValueExactMatch(paths: path))
+                }
+                // Deprecated APIs
                 assertExactMatch(expected: expected, actual: actual, typeMatchPaths: [path])
                 XCTExpectFailure("Validation should fail when using a path without a match") {
                     assertTypeMatch(expected: expected, actual: actual, exactMatchPaths: [path])
@@ -396,6 +418,13 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
                     assertEqual(expected: expected, actual: actual)
                 }
                 XCTExpectFailure("Validation should fail when expected array size is larger") {
+                    assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: paths))
+                }
+                XCTExpectFailure("Validation should fail when expected array size is larger") {
+                    assertTypeMatch(expected: expected, actual: actual, pathOptions: ValueExactMatch(paths: paths))
+                }
+                // Deprecated APIs
+                XCTExpectFailure("Validation should fail when expected array size is larger") {
                     assertExactMatch(expected: expected, actual: actual, typeMatchPaths: paths)
                 }
                 XCTExpectFailure("Validation should fail when expected array size is larger") {
@@ -421,6 +450,13 @@ class AnyCodableAssertsParameterizedTests: XCTestCase, AnyCodableAsserts {
                 XCTExpectFailure("Validation should fail when expected dictionary size is larger") {
                     assertEqual(expected: expected, actual: actual)
                 }
+                XCTExpectFailure("Validation should fail when expected dictionary size is larger") {
+                    assertExactMatch(expected: expected, actual: actual, pathOptions: ValueTypeMatch(paths: paths))
+                }
+                XCTExpectFailure("Validation should fail when expected dictionary size is larger") {
+                    assertTypeMatch(expected: expected, actual: actual, pathOptions: ValueExactMatch(paths: paths))
+                }
+                // Deprecated APIs
                 XCTExpectFailure("Validation should fail when expected dictionary size is larger") {
                     assertExactMatch(expected: expected, actual: actual, typeMatchPaths: paths)
                 }
