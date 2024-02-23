@@ -902,7 +902,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
 
     /// This test validates an edge case where the `KeyMustBeAbsent` option is used on a part of the `actual` JSON hierarchy that `expected`
     /// does **not** traverse.
-    func testKeyMustBeAbsent_Fails_WhenKeyInDifferentHierarchy() {
+    func testKeyMustBeAbsent_worksWhenKeyInDifferentHierarchy() {
         let expected = """
         {
           "key1": 1
@@ -922,41 +922,6 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
             assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: "key2.key3"))
         }
     }
-
-//    func testKeyMustBeAbsent_SubtreeOptionPropagates_WithDictionary() {
-//        let expected = """
-//        {
-//          "key0-0": {
-//            "key1-0": {
-//              "key2-0":{
-//                "key3-0": 1
-//              }
-//            }
-//          }
-//        }
-//        """
-//
-//        let actual = """
-//        {
-//          "key0-0": {
-//            "key1-0": {
-//              "key2-0":{
-//                "key3-0": 1,
-//                "disallowed-key": 1
-//              },
-//              "disallowed-key": 1
-//            }
-//          }
-//        }
-//        """
-//
-//        XCTExpectFailure("Validation should fail when path option is not satisfied") {
-//            assertExactMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "disallowed-key", scope: .subtree))
-//        }
-//        XCTExpectFailure("Validation should fail when path option is not satisfied") {
-//            assertTypeMatch(expected: expected, actual: actual, pathOptions: KeyMustBeAbsent(paths: nil, keyNames: "disallowed-key", scope: .subtree))
-//        }
-//    }
 
     // MARK: ValueExactMatch
     func testValueExactMatch_WithDefaultPathsInit_CorrectlyFails() {
@@ -1046,7 +1011,7 @@ class AnyCodablePathOptionsTests: XCTestCase, AnyCodableAsserts {
             actual: actual,
             pathOptions:
                 ValueTypeMatch(paths: "key0-1"),
-            ValueTypeMatch(paths: "key0-0", scope: .subtree))
+                ValueTypeMatch(paths: "key0-0", scope: .subtree))
     }
 
     // MARK: WildcardMatch
