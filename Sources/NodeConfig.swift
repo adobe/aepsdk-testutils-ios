@@ -710,39 +710,56 @@ extension NodeConfig: CustomStringConvertible {
     }
 
     private func describeNode(indentation: Int) -> String {
-        var result = ""
+        var result = indentation == 0 ? "\n" : ""
         let indentString = String(repeating: "  ", count: indentation) // Two spaces per indentation level
 
         // Node name
         result += "\(indentString)Name: \(name ?? "<Unnamed>")\n"
 
-        result += "\(indentString)FINAL options:\n"
+        var finalOptionsDescriptions: [String] = []
 
-        result += "\(indentString)Any Order  : \(anyOrderMatch)\n"
-        result += "\(indentString)Equal Count: \(collectionEqualCount)\n"
-        result += "\(indentString)Exact Match: \(primitiveExactMatch)\n"
-        result += "\(indentString)Key Absent : \(keyMustBeAbsent)\n"
+        if anyOrderMatch.isActive {
+            finalOptionsDescriptions.append("\(indentString)Any Order  : \(anyOrderMatch)")
+        }
+        if collectionEqualCount.isActive {
+            finalOptionsDescriptions.append("\(indentString)Equal Count: \(collectionEqualCount)")
+        }
+        if primitiveExactMatch.isActive {
+            finalOptionsDescriptions.append("\(indentString)Exact Match: \(primitiveExactMatch)")
+        }
+        if keyMustBeAbsent.isActive {
+            finalOptionsDescriptions.append("\(indentString)Key Absent : \(keyMustBeAbsent)")
+        }
 
-        // Node options
-        // Accumulate options in a temporary string
-        let sortedOptions = options.sorted { $0.key < $1.key }
+        // Append FINAL options to the result
+        if finalOptionsDescriptions.isEmpty {
+            result += "\(indentString)FINAL options: none active\n"
+        }
+        else {
+            result += "\(indentString)FINAL options:\n"
+            result += finalOptionsDescriptions.joined(separator: "\n") + "\n"
+        }
+
+        // Node options - Only include options where config is TRUE
+        let filteredOptions = options.filter { $1.isActive }
+        let sortedOptions = filteredOptions.sorted { $0.key < $1.key }
         var optionsDescription = sortedOptions.map { key, config in
             "\(indentString)  \(key): \(config)"
         }.joined(separator: "\n")
 
-        // Append options to the result if there are any
+        // Append filtered options to the result if there are any
         if !optionsDescription.isEmpty {
             result += "\(indentString)Options:\n" + optionsDescription + "\n"
         }
 
-        // Subtree
-        // Accumulate options in a temporary string
-        let sortedSubtreeOptions = subtreeOptions.sorted { $0.key < $1.key }
+        // Subtree options - Only include options where config is TRUE
+        let filteredSubtreeOptions = subtreeOptions.filter { $1.isActive }
+        let sortedSubtreeOptions = filteredSubtreeOptions.sorted { $0.key < $1.key }
         var subtreeOptionsDescription = sortedSubtreeOptions.map { key, config in
             "\(indentString)  \(key): \(config)"
         }.joined(separator: "\n")
 
-        // Append options to the result if there are any
+        // Append filtered subtree options to the result if there are any
         if !subtreeOptionsDescription.isEmpty {
             result += "\(indentString)Subtree options:\n" + subtreeOptionsDescription + "\n"
         }
