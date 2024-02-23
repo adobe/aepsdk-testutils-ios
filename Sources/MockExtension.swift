@@ -14,7 +14,7 @@ import Foundation
 
 @testable import AEPCore
 
-public class MockExtension: Extension {
+public class MockExtension: NSObject, Extension {
     public var name = "com.adobe.mockExtension"
     public var friendlyName = "mockExtension"
     public static var extensionVersion = "0.0.1"
