@@ -45,14 +45,14 @@ public class CountDownLatch {
         if getCurrentCount() == 0 {
             return .success
         }
-        
+
         return self.waitSemaphore.wait(timeout: (DispatchTime.now() + timeout))
     }
 
     public func countDown() {
         queue.sync {
             self.currentCount -= 1
-            
+
             if self.currentCount == 0 {
                 self.waitSemaphore.signal()
             }

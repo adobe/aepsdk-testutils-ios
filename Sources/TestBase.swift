@@ -104,12 +104,17 @@ open class TestBase: XCTestCase {
                            """
                             Timed out waiting for event type \(expectedEvent.key.type) and source \(expectedEvent.key.source),
                             expected \(expectedCount), but received \(receivedCount)
-                            """, file: (file), line: line)
-            XCTAssertEqual(expectedCount, receivedCount,
+                            """,
+                           file: (file),
+                           line: line)
+            XCTAssertEqual(expectedCount,
+                           receivedCount,
                            """
                            Expected \(expectedCount) event(s) of type \(expectedEvent.key.type) and source \(expectedEvent.key.source),
                            but received \(receivedCount)
-                           """, file: (file), line: line)
+                           """,
+                           file: (file),
+                           line: line)
         }
 
         guard ignoreUnexpectedEvents == false else { return }
@@ -131,11 +136,14 @@ open class TestBase: XCTestCase {
                 _ = expectedEvent.await(timeout: TestConstants.Defaults.WAIT_EVENT_TIMEOUT)
                 let expectedCount: Int32 = expectedEvent.getInitialCount()
                 let receivedCount: Int32 = expectedEvent.getInitialCount() - expectedEvent.getCurrentCount()
-                XCTAssertEqual(expectedCount, receivedCount,
+                XCTAssertEqual(expectedCount,
+                               receivedCount,
                                """
                                Expected \(expectedCount) events of type \(receivedEvent.key.type) and source \(receivedEvent.key.source),
                                but received \(receivedCount)
-                               """, file: (file), line: line)
+                               """,
+                               file: (file),
+                               line: line)
             }
             // check for events that don't have expectations set
             else {

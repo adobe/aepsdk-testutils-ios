@@ -45,13 +45,16 @@ public class InstrumentedExtension: NSObject, Extension {
 
     // MARK: Event Processors
     func wildcardListenerProcessor(_ event: Event) {
-        if event.type.lowercased() == TestConstants.EventType.INSTRUMENTED_EXTENSION.lowercased() {
+        let type = event.type
+        let source = event.source
+
+        if type.lowercased() == TestConstants.EventType.INSTRUMENTED_EXTENSION.lowercased() {
             // process the shared state request event
-            if event.source.lowercased() == TestConstants.EventSource.SHARED_STATE_REQUEST.lowercased() {
+            if source.lowercased() == TestConstants.EventSource.SHARED_STATE_REQUEST.lowercased() {
                 processSharedStateRequest(event)
             }
             // process the unregister extension event
-            else if event.source.lowercased() == TestConstants.EventSource.UNREGISTER_EXTENSION.lowercased() {
+            else if source.lowercased() == TestConstants.EventSource.UNREGISTER_EXTENSION.lowercased() {
                 unregisterExtension()
             }
 
@@ -59,21 +62,23 @@ public class InstrumentedExtension: NSObject, Extension {
         }
 
         // save this event in the receivedEvents dictionary
-        if InstrumentedExtension.receivedEvents[EventSpec(type: event.type, source: event.source)] != nil {
-            InstrumentedExtension.receivedEvents[EventSpec(type: event.type, source: event.source)]?.append(event)
+        if InstrumentedExtension.receivedEvents[EventSpec(type: type, source: source)] != nil {
+            InstrumentedExtension.receivedEvents[EventSpec(type: type, source: source)]?.append(event)
         } else {
-            InstrumentedExtension.receivedEvents[EventSpec(type: event.type, source: event.source)] = [event]
+            InstrumentedExtension.receivedEvents[EventSpec(type: type, source: source)] = [event]
         }
 
         // count down if this is an expected event
-        if InstrumentedExtension.expectedEvents[EventSpec(type: event.type, source: event.source)] != nil {
-            InstrumentedExtension.expectedEvents[EventSpec(type: event.type, source: event.source)]?.countDown()
+        if InstrumentedExtension.expectedEvents[EventSpec(type: type, source: source)] != nil {
+            InstrumentedExtension.expectedEvents[EventSpec(type: type, source: source)]?.countDown()
         }
 
-        if event.source == EventSource.sharedState {
-            Log.debug(label: InstrumentedExtension.logTag, "Received event with type \(event.type) and source \(event.source), state owner \(event.data?["stateowner"] ?? "unknown")")
+        if source == EventSource.sharedState {
+
+            let stateOwner = event.data?["stateowner"] ?? "unknown"
+            Log.debug(label: InstrumentedExtension.logTag, "Received event with type \(type) and source \(source), state owner \(stateOwner)")
         } else {
-            Log.debug(label: InstrumentedExtension.logTag, "Received event with type \(event.type) and source \(event.source)")
+            Log.debug(label: InstrumentedExtension.logTag, "Received event with type \(type) and source \(source)")
         }
     }
 
