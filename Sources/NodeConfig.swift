@@ -614,7 +614,7 @@ public class NodeConfig: Hashable { // swiftlint:disable:this type_body_length
         segments.append(String(path[startIndex...]))
 
         // Handle edge case where input ends with a dot (but not an escaped dot)
-        if path.hasSuffix(".") && !path.hasSuffix("\\.") && (segments.last ?? "").isEmpty {
+        if path.hasSuffix(".") && !path.hasSuffix("\\.") && !(segments.last ?? "").isEmpty {
             segments.append("")
         }
 
