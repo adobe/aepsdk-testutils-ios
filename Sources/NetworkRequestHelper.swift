@@ -31,7 +31,9 @@ class NetworkRequestHelper {
     func recordSentNetworkRequest(_ networkRequest: NetworkRequest) {
         TestBase.log("Received connectAsync to URL \(networkRequest.url.absoluteString) and HTTPMethod \(networkRequest.httpMethod.toString())")
 
-        queue.sync {
+        queue.async { [weak self] in
+
+            guard let self = self else { return }
             // Add to ordered list
             orderedNetworkRequests.append(networkRequest)
 
@@ -48,7 +50,10 @@ class NetworkRequestHelper {
     }
 
     func reset() {
-        queue.sync {
+        queue.async { [weak self] in
+
+            guard let self = self else { return }
+
             orderedNetworkRequests.removeAll()
             expectedNetworkRequests.removeAll()
             sentNetworkRequests.removeAll()
@@ -60,7 +65,10 @@ class NetworkRequestHelper {
     ///
     /// - Parameter networkRequest: The `NetworkRequest` for which the expectation count should be decremented.
     func countDownExpected(networkRequest: NetworkRequest) {
-        queue.sync {
+        queue.async { [weak self] in
+
+            guard let self = self else { return }
+
             for expectedNetworkRequest in expectedNetworkRequests where expectedNetworkRequest.key == TestableNetworkRequest(from: networkRequest) {
                 expectedNetworkRequest.value.countDown()
             }
@@ -125,7 +133,10 @@ class NetworkRequestHelper {
     /// - Parameters:
     ///   - networkRequest: The `NetworkRequest` for which to remove all responses.
     func removeAllResponses(for networkRequest: NetworkRequest) {
-        queue.sync {
+        queue.async { [weak self] in
+
+            guard let self = self else { return }
+
             let testableNetworkRequest = TestableNetworkRequest(from: networkRequest)
             networkResponses[testableNetworkRequest] = nil
         }
