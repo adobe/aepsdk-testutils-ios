@@ -1070,7 +1070,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                         Actual: \#(actual)
 
                         Key path: \#(keyPathAsString(keyPath))
-                """#,
+                    """#,
                     file: file,
                     line: line)
             }
@@ -1137,7 +1137,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                             Actual (remaining unmatched elements): \#(availableWildcardActualIndexes.map({ actual[Int($0)!] }))
 
                             Key path: \#(keyPathAsString(keyPath))
-                    """#,
+                        """#,
                         file: file,
                         line: line)
                 }
@@ -1185,7 +1185,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                         Actual: \#(String(describing: actual))
 
                         Key path: \#(keyPathAsString(keyPath))
-                """#,
+                    """#,
                     file: file,
                     line: line)
             }
@@ -1205,7 +1205,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                         Actual: \#(actual)
 
                         Key path: \#(keyPathAsString(keyPath))
-                """#,
+                    """#,
                     file: file,
                     line: line)
             }
@@ -1377,7 +1377,7 @@ public extension AnyCodableAsserts where Self: XCTestCase {
                         Actual: \#(actual)
 
                         Key path: \#(keyPathAsString(keyPath))
-                """#,
+                    """#,
                     file: file,
                     line: line)
                 validationResult = false

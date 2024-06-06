@@ -80,7 +80,7 @@ class NetworkRequestHelper {
             for expectedNetworkRequest in expectedNetworkRequests where expectedNetworkRequest.key == TestableNetworkRequest(from: networkRequest) {
                 return expectedNetworkRequest.value.await(timeout: timeout)
             }
-            
+
             return nil
         }
     }
@@ -96,7 +96,7 @@ class NetworkRequestHelper {
             for request in sentNetworkRequests where request.key == TestableNetworkRequest(from: networkRequest) {
                 return request.value
             }
-            
+
             return []
         }
     }
