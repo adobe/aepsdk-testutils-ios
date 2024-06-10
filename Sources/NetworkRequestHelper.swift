@@ -22,11 +22,29 @@ import XCTest
 ///    - ``RealNetworkService``
 class NetworkRequestHelper {
     private let queue: DispatchQueue = .init(label: "com.adobe.testutils.networkrequesthelper.queue")
-    private(set) var orderedNetworkRequests: [NetworkRequest] = []
-    private var sentNetworkRequests: [TestableNetworkRequest: [NetworkRequest]] = [:]
+
+    private var _orderedNetworkRequests: [NetworkRequest] = []
     /// Matches sent `NetworkRequest`s with their corresponding `HttpConnection` responses.
-    private(set) var networkResponses: [TestableNetworkRequest: [HttpConnection]] = [:]
+    private var _networkResponses: [TestableNetworkRequest: [HttpConnection]] = [:]
+
+    private var sentNetworkRequests: [TestableNetworkRequest: [NetworkRequest]] = [:]
     private var expectedNetworkRequests: [TestableNetworkRequest: CountDownLatch] = [:]
+
+    var orderedNetworkRequests: [NetworkRequest] {
+        return queue.sync {
+            return _orderedNetworkRequests.map { $0.deepCopy() }
+        }
+    }
+
+    var networkResponses: [TestableNetworkRequest: [HttpConnection]] {
+        return queue.sync {
+            var copiedResponses: [TestableNetworkRequest: [HttpConnection]] = [:]
+            for (key, value) in _networkResponses {
+                copiedResponses[key] = value.map { $0.deepCopy() }
+            }
+            return copiedResponses
+        }
+    }
 
     func recordSentNetworkRequest(_ networkRequest: NetworkRequest) {
         TestBase.log("Received connectAsync to URL \(networkRequest.url.absoluteString) and HTTPMethod \(networkRequest.httpMethod.toString())")
@@ -35,7 +53,7 @@ class NetworkRequestHelper {
 
             guard let self = self else { return }
             // Add to ordered list
-            orderedNetworkRequests.append(networkRequest)
+            _orderedNetworkRequests.append(networkRequest)
 
             // Add to grouped collection
             let testableNetworkRequest = TestableNetworkRequest(from: networkRequest)
@@ -54,10 +72,10 @@ class NetworkRequestHelper {
 
             guard let self = self else { return }
 
-            orderedNetworkRequests.removeAll()
+            _orderedNetworkRequests.removeAll()
+            _networkResponses.removeAll()
             expectedNetworkRequests.removeAll()
             sentNetworkRequests.removeAll()
-            networkResponses.removeAll()
         }
     }
 
@@ -120,9 +138,9 @@ class NetworkRequestHelper {
 
         queue.sync {
             if networkResponses[testableNetworkRequest] != nil {
-                networkResponses[testableNetworkRequest]?.append(responseConnection)
+                _networkResponses[testableNetworkRequest]?.append(responseConnection)
             } else {
-                networkResponses[testableNetworkRequest] = [responseConnection]
+                _networkResponses[testableNetworkRequest] = [responseConnection]
             }
         }
 
@@ -138,7 +156,7 @@ class NetworkRequestHelper {
             guard let self = self else { return }
 
             let testableNetworkRequest = TestableNetworkRequest(from: networkRequest)
-            networkResponses[testableNetworkRequest] = nil
+            _networkResponses[testableNetworkRequest] = nil
         }
     }
 
