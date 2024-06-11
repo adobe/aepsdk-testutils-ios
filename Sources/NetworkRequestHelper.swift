@@ -38,11 +38,9 @@ class NetworkRequestHelper {
 
     var networkResponses: [TestableNetworkRequest: [HttpConnection]] {
         return queue.sync {
-            var copiedResponses: [TestableNetworkRequest: [HttpConnection]] = [:]
-            for (key, value) in _networkResponses {
-                copiedResponses[key] = value.map { $0.deepCopy() }
+            return _networkResponses.mapValues { value in
+                return value.map { $0.deepCopy() }
             }
-            return copiedResponses
         }
     }
 
@@ -137,7 +135,7 @@ class NetworkRequestHelper {
         let testableNetworkRequest = TestableNetworkRequest(from: networkRequest)
 
         queue.sync {
-            if networkResponses[testableNetworkRequest] != nil {
+            if _networkResponses[testableNetworkRequest] != nil {
                 _networkResponses[testableNetworkRequest]?.append(responseConnection)
             } else {
                 _networkResponses[testableNetworkRequest] = [responseConnection]
@@ -166,7 +164,7 @@ class NetworkRequestHelper {
     /// - Returns: The array of `HttpConnection` responses associated with the provided `NetworkRequest`, or `nil` if no response was found.
     func getResponses(for networkRequest: NetworkRequest) -> [HttpConnection]? {
         queue.sync {
-            return networkResponses[TestableNetworkRequest(from: networkRequest)]
+            return _networkResponses[TestableNetworkRequest(from: networkRequest)]?.map { $0.deepCopy() }
         }
     }
 
