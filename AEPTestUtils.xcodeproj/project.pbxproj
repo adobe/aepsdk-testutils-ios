@@ -21,6 +21,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		2E94F8782C179658004BA50D /* NetworkRequest+DeepCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E94F8772C179658004BA50D /* NetworkRequest+DeepCopy.swift */; };
+		2E94F87A2C179679004BA50D /* HttpConnection+DeepCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E94F8792C179679004BA50D /* HttpConnection+DeepCopy.swift */; };
 		4C0293B02AE1D4550093CCBA /* MockNetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C02939F2AE1D4540093CCBA /* MockNetworkService.swift */; };
 		4C0293B12AE1D4550093CCBA /* InstrumentedExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293A02AE1D4540093CCBA /* InstrumentedExtension.swift */; };
 		4C0293B22AE1D4550093CCBA /* FileManager+TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293A12AE1D4540093CCBA /* FileManager+TestHelper.swift */; };
@@ -86,6 +88,8 @@
 /* Begin PBXFileReference section */
 		12C2D99438B3AFCC415CE05C /* Pods-AEPTestUtils.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AEPTestUtils.debug.xcconfig"; path = "Target Support Files/Pods-AEPTestUtils/Pods-AEPTestUtils.debug.xcconfig"; sourceTree = "<group>"; };
 		1E05720B5778E784DC19DA9C /* Pods_UnitTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UnitTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2E94F8772C179658004BA50D /* NetworkRequest+DeepCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NetworkRequest+DeepCopy.swift"; sourceTree = "<group>"; };
+		2E94F8792C179679004BA50D /* HttpConnection+DeepCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HttpConnection+DeepCopy.swift"; sourceTree = "<group>"; };
 		34C185B9927DF9E0701D766B /* Pods_AEPTestUtils.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AEPTestUtils.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C02939F2AE1D4540093CCBA /* MockNetworkService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockNetworkService.swift; sourceTree = "<group>"; };
 		4C0293A02AE1D4540093CCBA /* InstrumentedExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstrumentedExtension.swift; sourceTree = "<group>"; };
@@ -185,6 +189,7 @@
 				4C0293A22AE1D4540093CCBA /* EventHub+TestHelper.swift */,
 				4C7043462AF45A98008CF67D /* EventSpec.swift */,
 				4C0293A12AE1D4540093CCBA /* FileManager+TestHelper.swift */,
+				2E94F8792C179679004BA50D /* HttpConnection+DeepCopy.swift */,
 				4C0293A02AE1D4540093CCBA /* InstrumentedExtension.swift */,
 				4C0293AD2AE1D4550093CCBA /* MockDataQueue.swift */,
 				4C0293AC2AE1D4550093CCBA /* MockDataStore.swift */,
@@ -193,6 +198,7 @@
 				4C02939F2AE1D4540093CCBA /* MockNetworkService.swift */,
 				4CBE65F32B69CD7100EF4600 /* NamedCollectionDataStore+TestHelper.swift */,
 				4C0293A72AE1D4540093CCBA /* NetworkRequestHelper.swift */,
+				2E94F8772C179658004BA50D /* NetworkRequest+DeepCopy.swift */,
 				4CE14ECB2AFDC7F100969B36 /* NodeConfig.swift */,
 				4C0293AE2AE1D4550093CCBA /* RealNetworkService.swift */,
 				4C0293A62AE1D4540093CCBA /* TestableExtensionRuntime.swift */,
@@ -404,6 +410,7 @@
 		};
 		D42F36B7251BEBF100490C0D /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -418,7 +425,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [[ -z ${ADB_SKIP_LINT} || ${ADB_SKIP_LINT} -ne \"YES\" ]]; then\n    if which swiftlint >/dev/null; then\n        ./Pods/SwiftLint/swiftlint lint --config ${SRCROOT}/.swiftlint.yml Sources\n    else\n        echo \"warning: SwiftLint is not installed, please run the pod install command from the project root directory.\"\n    fi\nelse\n    echo \"Skipping linting build phase as ADB_SKIP_LINT flag is YES.\"\nfi\n";
+			shellScript = "if [[ -z ${ADB_SKIP_LINT} || ${ADB_SKIP_LINT} -ne \"YES\" ]]; then\n    if which ${PODS_ROOT}/SwiftLint/swiftlint >/dev/null; then\n        ${PODS_ROOT}/SwiftLint/swiftlint lint --config ${SRCROOT}/.swiftlint.yml Sources\n    else\n        echo \"warning: SwiftLint is not installed, please run the pod install command from the project root directory.\"\n    fi\nelse\n    echo \"Skipping linting build phase as ADB_SKIP_LINT flag is YES.\"\nfi\n";
 		};
 		DD86A7F0C226895410FBB282 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -459,11 +466,13 @@
 				4C0293B42AE1D4550093CCBA /* CountDownLatch.swift in Sources */,
 				4C0293C22AE1D9AD0093CCBA /* XCTestCase+AnyCodableAsserts.swift in Sources */,
 				4C0293B82AE1D4550093CCBA /* NetworkRequestHelper.swift in Sources */,
+				2E94F87A2C179679004BA50D /* HttpConnection+DeepCopy.swift in Sources */,
 				4C0293B92AE1D4550093CCBA /* AnyCodable+Array.swift in Sources */,
 				4C0293BE2AE1D4550093CCBA /* MockDataQueue.swift in Sources */,
 				4C0293B02AE1D4550093CCBA /* MockNetworkService.swift in Sources */,
 				4C0293C02AE1D4550093CCBA /* TestableNetworkRequest.swift in Sources */,
 				4C0293B12AE1D4550093CCBA /* InstrumentedExtension.swift in Sources */,
+				2E94F8782C179658004BA50D /* NetworkRequest+DeepCopy.swift in Sources */,
 				4C0293B62AE1D4550093CCBA /* TestUtils.swift in Sources */,
 				4C0293B32AE1D4550093CCBA /* EventHub+TestHelper.swift in Sources */,
 				4C0293BD2AE1D4550093CCBA /* MockDataStore.swift in Sources */,

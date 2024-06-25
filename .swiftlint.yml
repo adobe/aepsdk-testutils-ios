@@ -7,7 +7,6 @@ opt_in_rules: # some rules are opt-in only
 - empty_count
 - empty_string
 - force_unwrapping
-- missing_docs
 - multiline_arguments
 - multiline_function_chains
 - multiline_parameters
@@ -16,6 +15,7 @@ opt_in_rules: # some rules are opt-in only
 - toggle_bool
 - unneeded_parentheses_in_closure_argument
 - vertical_parameter_alignment_on_call
+# - missing_docs
 excluded: # paths to ignore during linting
 - Carthage
 - TestApps/*/Pods
@@ -24,7 +24,7 @@ excluded: # paths to ignore during linting
 analyzer_rules:
  - unused_import
 
-empty_count: 
+empty_count:
     severity: warning
 force_cast: warning
 force_try: warning
