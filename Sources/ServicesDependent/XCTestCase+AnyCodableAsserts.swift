@@ -10,7 +10,6 @@
 // governing permissions and limitations under the License.
 //
 
-import AEPCore
 import AEPServices
 import Foundation
 import XCTest
@@ -49,12 +48,6 @@ extension String: AnyCodableComparable {
 extension AnyCodable: AnyCodableComparable {
     public func toAnyCodable() -> AnyCodable? {
         return self
-    }
-}
-
-extension Event: AnyCodableComparable {
-    public func toAnyCodable() -> AnyCodable? {
-        return self.data?.toAnyCodable()
     }
 }
 
