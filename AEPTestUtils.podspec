@@ -21,14 +21,14 @@ Pod::Spec.new do |s|
 
   s.frameworks   = 'XCTest'
 
-  s.default_subspec = 'CoreDependency'
+  s.default_subspec = 'CoreDependent'
 
-  s.subspec 'ServicesDependency' do |sd|
-    sd.source_files = 'Sources/ServicesDependency/**/*.swift'
+  s.subspec 'ServicesDependent' do |sd|
+    sd.source_files = 'Sources/ServicesDependent/**/*.swift'
     sd.dependency 'AEPServices', '>= 5.2.0'
   end
 
-  s.subspec 'CoreDependency' do |cd|
+  s.subspec 'CoreDependent' do |cd|
     cd.source_files = 'Sources/**/*.swift'
     cd.dependency 'AEPCore', '>= 5.2.0'
     cd.dependency 'AEPServices', '>= 5.2.0'
