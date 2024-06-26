@@ -43,6 +43,8 @@
 		4C0293C22AE1D9AD0093CCBA /* XCTestCase+AnyCodableAsserts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C0293C12AE1D9AD0093CCBA /* XCTestCase+AnyCodableAsserts.swift */; };
 		4C1111682B64A8F400024172 /* MockExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C1111672B64A8F400024172 /* MockExtension.swift */; };
 		4C3F237B2C2B90B70034A729 /* Event+AnyCodableComparable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3F237A2C2B90B70034A729 /* Event+AnyCodableComparable.swift */; };
+		4C3F237D2C2B91600034A729 /* Event+Timestamp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3F237C2C2B91600034A729 /* Event+Timestamp.swift */; };
+		4C3F237F2C2B91860034A729 /* MockEventHistoryDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C3F237E2C2B91860034A729 /* MockEventHistoryDatabase.swift */; };
 		4C7043472AF45A98008CF67D /* EventSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7043462AF45A98008CF67D /* EventSpec.swift */; };
 		4C7043492AF45B05008CF67D /* URL+TestHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C7043482AF45B05008CF67D /* URL+TestHelper.swift */; };
 		4C70434C2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */; };
@@ -112,6 +114,8 @@
 		4C0293C12AE1D9AD0093CCBA /* XCTestCase+AnyCodableAsserts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCTestCase+AnyCodableAsserts.swift"; sourceTree = "<group>"; };
 		4C1111672B64A8F400024172 /* MockExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockExtension.swift; sourceTree = "<group>"; };
 		4C3F237A2C2B90B70034A729 /* Event+AnyCodableComparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Event+AnyCodableComparable.swift"; sourceTree = "<group>"; };
+		4C3F237C2C2B91600034A729 /* Event+Timestamp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Event+Timestamp.swift"; sourceTree = "<group>"; };
+		4C3F237E2C2B91860034A729 /* MockEventHistoryDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockEventHistoryDatabase.swift; sourceTree = "<group>"; };
 		4C7043462AF45A98008CF67D /* EventSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventSpec.swift; sourceTree = "<group>"; };
 		4C7043482AF45B05008CF67D /* URL+TestHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+TestHelper.swift"; sourceTree = "<group>"; };
 		4C70434A2AFB0D4F008CF67D /* AnyCodableAssertsParameterizedTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnyCodableAssertsParameterizedTests.swift; sourceTree = "<group>"; };
@@ -167,6 +171,8 @@
 			isa = PBXGroup;
 			children = (
 				4C3F237A2C2B90B70034A729 /* Event+AnyCodableComparable.swift */,
+				4C3F237C2C2B91600034A729 /* Event+Timestamp.swift */,
+				4C3F237E2C2B91860034A729 /* MockEventHistoryDatabase.swift */,
 				4C0293A22AE1D4540093CCBA /* EventHub+TestHelper.swift */,
 				4C0293A02AE1D4540093CCBA /* InstrumentedExtension.swift */,
 				4C1111672B64A8F400024172 /* MockExtension.swift */,
@@ -492,8 +498,10 @@
 				4C0293B02AE1D4550093CCBA /* MockNetworkService.swift in Sources */,
 				4C0293C02AE1D4550093CCBA /* TestableNetworkRequest.swift in Sources */,
 				4C0293B12AE1D4550093CCBA /* InstrumentedExtension.swift in Sources */,
+				4C3F237D2C2B91600034A729 /* Event+Timestamp.swift in Sources */,
 				2E94F8782C179658004BA50D /* NetworkRequest+DeepCopy.swift in Sources */,
 				4C0293B62AE1D4550093CCBA /* TestUtils.swift in Sources */,
+				4C3F237F2C2B91860034A729 /* MockEventHistoryDatabase.swift in Sources */,
 				4C0293B32AE1D4550093CCBA /* EventHub+TestHelper.swift in Sources */,
 				4C0293BD2AE1D4550093CCBA /* MockDataStore.swift in Sources */,
 				4C7043472AF45A98008CF67D /* EventSpec.swift in Sources */,
