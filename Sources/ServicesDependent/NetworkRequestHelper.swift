@@ -45,7 +45,7 @@ class NetworkRequestHelper {
     }
 
     func recordSentNetworkRequest(_ networkRequest: NetworkRequest) {
-        TestBase.log("Received connectAsync to URL \(networkRequest.url.absoluteString) and HTTPMethod \(networkRequest.httpMethod.toString())")
+        print("Received connectAsync to URL \(networkRequest.url.absoluteString) and HTTPMethod \(networkRequest.httpMethod.toString())")
 
         queue.async { [weak self] in
 
