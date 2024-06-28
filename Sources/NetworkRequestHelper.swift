@@ -44,8 +44,30 @@ class NetworkRequestHelper {
         }
     }
 
+    func recordSentNetworkRequest(_ networkRequest: NetworkRequest) {
+        TestBase.log("Received connectAsync to URL \(networkRequest.url.absoluteString) and HTTPMethod \(networkRequest.httpMethod.toString())")
+
+        queue.async { [weak self] in
+
+            guard let self = self else { return }
+            // Add to ordered list
+            _orderedNetworkRequests.append(networkRequest)
+
+            // Add to grouped collection
+            let testableNetworkRequest = TestableNetworkRequest(from: networkRequest)
+            if let equalNetworkRequest = sentNetworkRequests.first(where: { key, _ in
+                key == testableNetworkRequest
+            }) {
+                sentNetworkRequests[equalNetworkRequest.key]?.append(networkRequest)
+            } else {
+                sentNetworkRequests[testableNetworkRequest] = [networkRequest]
+            }
+        }
+    }
+
     func reset() {
         queue.async { [weak self] in
+
             guard let self = self else { return }
 
             _orderedNetworkRequests.removeAll()
@@ -55,31 +77,34 @@ class NetworkRequestHelper {
         }
     }
 
-    func recordSentNetworkRequest(_ networkRequest: NetworkRequest) {
-        TestBase.log("Received connectAsync to URL \(networkRequest.url.absoluteString) and HTTPMethod \(networkRequest.httpMethod.toString())")
-
-        queue.async { [weak self] in
-            guard let self = self else { return }
-            // Add to ordered list
-            _orderedNetworkRequests.append(networkRequest)
-
-            // Add to in-order collection
-            let testableNetworkRequest = TestableNetworkRequest(from: networkRequest)
-            sentNetworkRequests[testableNetworkRequest, default: []].append(networkRequest)
-        }
-    }
-
     /// Decrements the expectation count for a given network request.
     ///
     /// - Parameter networkRequest: The `NetworkRequest` for which the expectation count should be decremented.
     func countDownExpected(networkRequest: NetworkRequest) {
         queue.async { [weak self] in
+
             guard let self = self else { return }
 
             for expectedNetworkRequest in expectedNetworkRequests where expectedNetworkRequest.key == TestableNetworkRequest(from: networkRequest) {
                 expectedNetworkRequest.value.countDown()
             }
         }
+    }
+
+    /// Starts the expectation timer for the given network request, validating that all expected responses are received within
+    /// the provided `timeout` duration.
+    ///
+    /// - Parameters:
+    ///   - networkRequest: The `NetworkRequest` for which the expectation timer should be started.
+    ///   - timeout: The maximum duration (in seconds) to wait for the expected responses before timing out.
+    ///
+    /// - Returns: A `DispatchTimeoutResult` with the result of the wait operation, or `nil` if the `NetworkRequest` does not match any expected request.
+    private func awaitFor(networkRequest: NetworkRequest, timeout: TimeInterval) -> DispatchTimeoutResult? {
+        for expectedNetworkRequest in expectedNetworkRequests where expectedNetworkRequest.key == TestableNetworkRequest(from: networkRequest) {
+            return expectedNetworkRequest.value.await(timeout: timeout)
+        }
+
+        return nil
     }
 
     ///  Returns all sent network requests that match the provided network request using the
@@ -204,7 +229,6 @@ class NetworkRequestHelper {
     func assertUnexpectedRequests(file: StaticString = #file, line: UInt = #line) {
         var unexpectedRequestsCount = 0
         var unexpectedRequestsAsString = ""
-
         for (sentRequest, requests) in sentNetworkRequests {
             let sentRequestURL = sentRequest.url.absoluteString
             let sentRequestHTTPMethod = sentRequest.httpMethod.toString()
@@ -281,22 +305,6 @@ class NetworkRequestHelper {
         awaitRequest(networkRequest, expectationTimeout: expectationTimeout)
 
         return getSentRequests(matching: networkRequest)
-    }
-
-    /// Starts the expectation timer for the given network request, validating that all expected responses are received within
-    /// the provided `timeout` duration.
-    ///
-    /// - Parameters:
-    ///   - networkRequest: The `NetworkRequest` for which the expectation timer should be started.
-    ///   - timeout: The maximum duration (in seconds) to wait for the expected responses before timing out.
-    ///
-    /// - Returns: A `DispatchTimeoutResult` with the result of the wait operation, or `nil` if the `NetworkRequest` does not match any expected request.
-    private func awaitFor(networkRequest: NetworkRequest, timeout: TimeInterval) -> DispatchTimeoutResult? {
-        for expectedNetworkRequest in expectedNetworkRequests where expectedNetworkRequest.key == TestableNetworkRequest(from: networkRequest) {
-            return expectedNetworkRequest.value.await(timeout: timeout)
-        }
-
-        return nil
     }
 
     /// Waits for a specific network request expectation to be fulfilled within the provided timeout interval.
