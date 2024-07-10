@@ -100,13 +100,11 @@ class NetworkRequestHelper {
     ///
     /// - Returns: A `DispatchTimeoutResult` with the result of the wait operation, or `nil` if the `NetworkRequest` does not match any expected request.
     private func awaitFor(networkRequest: NetworkRequest, timeout: TimeInterval) -> DispatchTimeoutResult? {
-        queue.sync {
-            for expectedNetworkRequest in expectedNetworkRequests where expectedNetworkRequest.key == TestableNetworkRequest(from: networkRequest) {
-                return expectedNetworkRequest.value.await(timeout: timeout)
-            }
-
-            return nil
+        for expectedNetworkRequest in expectedNetworkRequests where expectedNetworkRequest.key == TestableNetworkRequest(from: networkRequest) {
+            return expectedNetworkRequest.value.await(timeout: timeout)
         }
+
+        return nil
     }
 
     ///  Returns all sent network requests that match the provided network request using the
@@ -195,79 +193,74 @@ class NetworkRequestHelper {
     /// - SeeAlso:
     ///     - ``setExpectationForNetworkRequest(url:httpMethod:)``
     func assertAllNetworkRequestExpectations(ignoreUnexpectedRequests: Bool = true, file: StaticString = #file, line: UInt = #line) {
-        queue.sync {
-            if expectedNetworkRequests.isEmpty {
-                if !ignoreUnexpectedRequests {
-                    assertUnexpectedRequests(file: file, line: line)
-                }
-                return
+        if expectedNetworkRequests.isEmpty {
+            if !ignoreUnexpectedRequests {
+                assertUnexpectedRequests(file: file, line: line)
             }
-
-            for expectedRequest in expectedNetworkRequests {
-                let waitResult = expectedRequest.value.await(timeout: 10)
-                let expectedCount: Int32 = expectedRequest.value.getInitialCount()
-                let receivedCount: Int32 = expectedRequest.value.getInitialCount() - expectedRequest.value.getCurrentCount()
-
-                XCTAssertFalse(waitResult == DispatchTimeoutResult.timedOut,
-                               """
-                           Timed out waiting for network request(s) with URL \(expectedRequest.key.url.absoluteString) and HTTPMethod
-                           \(expectedRequest.key.httpMethod.toString()), expected \(expectedCount) but received \(receivedCount)
-                           """,
-                               file: file,
-                               line: line)
-
-                XCTAssertEqual(expectedCount,
-                               receivedCount,
-                               """
-                           Expected \(expectedCount) network request(s) for URL \(expectedRequest.key.url.absoluteString) and HTTPMethod
-                           \(expectedRequest.key.httpMethod.toString()), but received \(receivedCount)
-                           """,
-                               file: file,
-                               line: line)
-            }
-            if ignoreUnexpectedRequests { return }
-            assertUnexpectedRequests()
+            return
         }
+
+        for expectedRequest in expectedNetworkRequests {
+            let waitResult = expectedRequest.value.await(timeout: 10)
+            let expectedCount: Int32 = expectedRequest.value.getInitialCount()
+            let receivedCount: Int32 = expectedRequest.value.getInitialCount() - expectedRequest.value.getCurrentCount()
+
+            XCTAssertFalse(waitResult == DispatchTimeoutResult.timedOut,
+                           """
+                       Timed out waiting for network request(s) with URL \(expectedRequest.key.url.absoluteString) and HTTPMethod
+                       \(expectedRequest.key.httpMethod.toString()), expected \(expectedCount) but received \(receivedCount)
+                       """,
+                           file: file,
+                           line: line)
+
+            XCTAssertEqual(expectedCount,
+                           receivedCount,
+                           """
+                       Expected \(expectedCount) network request(s) for URL \(expectedRequest.key.url.absoluteString) and HTTPMethod
+                       \(expectedRequest.key.httpMethod.toString()), but received \(receivedCount)
+                       """,
+                           file: file,
+                           line: line)
+        }
+        if ignoreUnexpectedRequests { return }
+        assertUnexpectedRequests()
     }
 
     func assertUnexpectedRequests(file: StaticString = #file, line: UInt = #line) {
         var unexpectedRequestsCount = 0
         var unexpectedRequestsAsString = ""
-        queue.sync {
-
-            for (sentRequest, requests) in sentNetworkRequests {
-                let sentRequestURL = sentRequest.url.absoluteString
-                let sentRequestHTTPMethod = sentRequest.httpMethod.toString()
-                // Check if request is expected and it is over the expected count
-                if let expectedRequest = expectedNetworkRequests[sentRequest] {
-                    _ = expectedRequest.await(timeout: TestConstants.Defaults.WAIT_NETWORK_REQUEST_TIMEOUT)
-                    let expectedCount: Int32 = expectedRequest.getInitialCount()
-                    let receivedCount: Int32 = expectedRequest.getInitialCount() - expectedRequest.getCurrentCount()
-                    XCTAssertEqual(expectedCount,
-                                   receivedCount,
-                                   """
-                               Expected \(expectedCount) network request(s) for URL \(sentRequestURL) and HTTPMethod \(sentRequestHTTPMethod),
-                               but received \(receivedCount)
-                               """,
-                                   file: file,
-                                   line: line)
-                }
-                // Check for requests that don't have expectations set
-                else {
-                    unexpectedRequestsCount += requests.count
-                    unexpectedRequestsAsString.append("(\(sentRequestURL), \(sentRequestHTTPMethod), \(requests.count)),")
-                    print("NetworkRequestHelper - Received unexpected network request with URL: \(sentRequestURL) and HTTPMethod: \(sentRequestHTTPMethod)")
-                }
+        for (sentRequest, requests) in sentNetworkRequests {
+            let sentRequestURL = sentRequest.url.absoluteString
+            let sentRequestHTTPMethod = sentRequest.httpMethod.toString()
+            // Check if request is expected and it is over the expected count
+            if let expectedRequest = expectedNetworkRequests[sentRequest] {
+                _ = expectedRequest.await(timeout: TestConstants.Defaults.WAIT_NETWORK_REQUEST_TIMEOUT)
+                let expectedCount: Int32 = expectedRequest.getInitialCount()
+                let receivedCount: Int32 = expectedRequest.getInitialCount() - expectedRequest.getCurrentCount()
+                XCTAssertEqual(expectedCount,
+                               receivedCount,
+                               """
+                           Expected \(expectedCount) network request(s) for URL \(sentRequestURL) and HTTPMethod \(sentRequestHTTPMethod),
+                           but received \(receivedCount)
+                           """,
+                               file: file,
+                               line: line)
             }
+            // Check for requests that don't have expectations set
+            else {
+                unexpectedRequestsCount += requests.count
+                unexpectedRequestsAsString.append("(\(sentRequestURL), \(sentRequestHTTPMethod), \(requests.count)),")
+                print("NetworkRequestHelper - Received unexpected network request with URL: \(sentRequestURL) and HTTPMethod: \(sentRequestHTTPMethod)")
+            }
+        }
 
-            XCTAssertEqual(0,
-                           unexpectedRequestsCount,
-                           """
+        XCTAssertEqual(0,
+                       unexpectedRequestsCount,
+                       """
                        Received \(unexpectedRequestsCount) unexpected network request(s): \(unexpectedRequestsAsString)
                        """,
-                           file: file,
-                           line: line)
-        }
+                       file: file,
+                       line: line)
     }
 
     /// Returns the network request(s) sent through the Core NetworkService, or empty if none was found.
