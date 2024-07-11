@@ -14,7 +14,7 @@
 import Foundation
 import XCTest
 
-/// Overriding NetworkService used for tests that require real outgoing network requests
+/// Overriding `NetworkService` used for tests that require real outgoing network requests.
 public class RealNetworkService: NetworkService {
     private let helper: NetworkRequestHelper = NetworkRequestHelper()
     /// Flag that indicates if the ``connectAsync(networkRequest:completionHandler:)`` method was called.
