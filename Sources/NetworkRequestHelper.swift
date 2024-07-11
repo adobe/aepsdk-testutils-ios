@@ -192,7 +192,7 @@ class NetworkRequestHelper {
     ///   - timeout: The time interval to wait for network requests before timing out. Defaults to ``TestConstants/Defaults/WAIT_NETWORK_REQUEST_TIMEOUT``.
     ///   - file: The file from which the method is called, used for localized assertion failures.
     ///   - line: The line from which the method is called, used for localized assertion failures.
-    /// - SeeAlso: ``setExpectationForNetworkRequest(url:httpMethod:)``
+    /// - SeeAlso: ``setExpectation(for:expectedCount:file:line:)``
     func assertAllNetworkRequestExpectations(ignoreUnexpectedRequests: Bool = true, timeout: TimeInterval = TestConstants.Defaults.WAIT_NETWORK_REQUEST_TIMEOUT, file: StaticString = #file, line: UInt = #line) {
         if expectedNetworkRequests.isEmpty {
             if !ignoreUnexpectedRequests {
