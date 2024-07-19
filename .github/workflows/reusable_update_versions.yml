@@ -11,6 +11,10 @@ on:
         description: 'Branch to be used when updating versions'
         required: true
 
+      libraries:
+        description: 'Semicolon-separated string of libraries and their dependencies. Example: "Core:AEPRulesEngine 1.2.3, AEPServices 1.5.2; Identity:AEPCore 1.5.2"'
+        required: true
+
 jobs:
   update-versions:
     runs-on: macos-latest
@@ -30,12 +34,19 @@ jobs:
 
     - name: Update Libraries
       run: |
-        IFS=',' read -ra LIBRARIES <<< "${LIBRARIES}"
-        for lib in "${LIBRARIES[@]}"; do
-          IFS=':' read -ra PARTS <<< "$lib"
-          NAME=${PARTS[0]}
+        IFS=';' read -ra LIBRARY_ENTRIES <<< "${{ github.event.inputs.libraries }}"
+        for entry in "${LIBRARY_ENTRIES[@]}"; do
+          IFS=':' read -ra PARTS <<< "$entry"
+          LIBRARY_NAME=${PARTS[0]}
           DEPENDENCIES=${PARTS[1]}
-          sh ./Script/update-versions.sh -n "$NAME" -v ${{ github.event.inputs.version }} -d "$DEPENDENCIES"
+          
+          DEP_ARGS=""
+          IFS=',' read -ra DEP_ARRAY <<< "$DEPENDENCIES"
+          for dep in "${DEP_ARRAY[@]}"; do
+            DEP_ARGS="${DEP_ARGS} ${dep},"
+          done
+
+          sh ./Script/update-versions.sh -n "$LIBRARY_NAME" -v "${{ github.event.inputs.version }}" -d "${DEP_ARGS%,}"
         done
       working-directory: ./caller-repo
 
@@ -51,6 +62,6 @@ jobs:
         branch_name="version-${{ github.event.inputs.version }}-update"
         git checkout -b $branch_name
         git add .
-        git commit -m "Updating TestUtils version to ${{ github.event.inputs.version }}."
+        git commit -m "Updating version to ${{ github.event.inputs.version }}."
         git push origin $branch_name
-        gh pr create --base ${{ github.event.inputs.branch }} --head $branch_name --title "Updating TestUtils version to ${{ github.event.inputs.version }}" --body "Updating TestUtils version to ${{ github.event.inputs.version }}"
+        gh pr create --base ${{ github.event.inputs.branch }} --head $branch_name --title "Updating version to ${{ github.event.inputs.version }}" --body "Updating version to ${{ github.event.inputs.version }}"
