@@ -16,13 +16,13 @@ jobs:
     runs-on: macos-latest
     steps:
     - name: Checkout called workflow repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4.1.7
       with:
         repository: adobe/aepsdk-testutils-ios
         ref: test-reusable-workflows
 
     - name: Checkout caller workflow repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4.1.7
       with:
         path: caller-repo
         repository: ${{ github.repository }}
