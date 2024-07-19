@@ -1,0 +1,56 @@
+name: Reusable Update Versions
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'New version to use for the extension.  Example: 1.5.2'
+        required: true
+        
+      branch:
+        description: 'Branch to be used when updating versions'
+        required: true
+
+jobs:
+  update-versions:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout called workflow repository
+      uses: actions/checkout@v3
+      with:
+        repository: adobe/aepsdk-testutils-ios
+        ref: test-reusable-workflows
+
+    - name: Checkout caller workflow repository
+      uses: actions/checkout@v3
+      with:
+        path: caller-repo
+        repository: ${{ github.repository }}
+        ref: ${{ github.event.inputs.branch }}
+
+    - name: Update Libraries
+      run: |
+        IFS=',' read -ra LIBRARIES <<< "${LIBRARIES}"
+        for lib in "${LIBRARIES[@]}"; do
+          IFS=':' read -ra PARTS <<< "$lib"
+          NAME=${PARTS[0]}
+          DEPENDENCIES=${PARTS[1]}
+          sh ./Script/update-versions.sh -n "$NAME" -v ${{ github.event.inputs.version }} -d "$DEPENDENCIES"
+        done
+      working-directory: ./caller-repo
+
+    - name: Configure Git
+      run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+
+    - name: Create Pull Request
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        branch_name="version-${{ github.event.inputs.version }}-update"
+        git checkout -b $branch_name
+        git add .
+        git commit -m "Updating TestUtils version to ${{ github.event.inputs.version }}."
+        git push origin $branch_name
+        gh pr create --base ${{ github.event.inputs.branch }} --head $branch_name --title "Updating TestUtils version to ${{ github.event.inputs.version }}" --body "Updating TestUtils version to ${{ github.event.inputs.version }}"
