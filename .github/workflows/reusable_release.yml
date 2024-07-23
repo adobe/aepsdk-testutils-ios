@@ -9,7 +9,7 @@ on:
         type: string
 
       run_full_release:
-        description: 'Run full release process ("no" to skip)'
+        description: 'Run full release process (`no` to skip)'
         required: true
         default: 'yes'
         type: choice
