@@ -12,19 +12,13 @@ on:
         description: 'Run full release process (`no` to skip)'
         required: true
         default: 'yes'
-        type: choice
-        options:
-          - yes
-          - no
+        type: string
 
       release_pod:
         description: 'Release to Cocoapods'
         required: true
         default: 'yes'
-        type: choice
-        options:
-          - yes
-          - no
+        type: string
 
       library_name:
         description: 'Library name to be released (ex: AEPEdge)'
