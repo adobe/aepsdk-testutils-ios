@@ -51,20 +51,19 @@ jobs:
         echo Target version: ${{ inputs.tag }}
         make check-version VERSION=${{ inputs.tag }}
 
-    # TEST: temp disable to speed up testing other steps
-    # - name: SPM Integration Test
-    #   if: ${{ inputs.run_full_release == 'yes' }}
-    #   run: |
-    #     set -eo pipefail
-    #     echo SPM integration test starts:
-    #     make test-SPM-integration
+    - name: SPM Integration Test
+      if: ${{ inputs.run_full_release == 'yes' }}
+      run: |
+        set -eo pipefail
+        echo SPM integration test starts:
+        make test-SPM-integration
 
-    # - name: Podspec File Verification
-    #   if: ${{ inputs.run_full_release == 'yes' }}
-    #   run: |
-    #     set -eo pipefail
-    #     echo podspec file verification starts:
-    #     make test-podspec
+    - name: Podspec File Verification
+      if: ${{ inputs.run_full_release == 'yes' }}
+      run: |
+        set -eo pipefail
+        echo podspec file verification starts:
+        make test-podspec
         
     - name: Build Artifacts
       if: ${{ inputs.run_full_release == 'yes' }}
@@ -80,7 +79,7 @@ jobs:
         gh release create ${{ inputs.tag }} \
           --verify-tag \
           --generate-notes \
-          --title "Release v${{ inputs.tag }}" \
+          --title "v${{ inputs.tag }}" \
           ./build/${{ inputs.library_name }}.xcframework.zip#${{ inputs.library_name }}-${{ inputs.tag }}.xcframework.zip
 
     - name: Publish Pods - Library
