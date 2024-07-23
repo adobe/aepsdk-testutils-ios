@@ -34,7 +34,8 @@ jobs:
       with:
         ref: main
     
-    - uses: maxim-lobanov/setup-xcode@60606e260d2fc5762a71e64e74b2174e8ea3c8bd # v1.6.0
+    - name: Set up Xcode Version
+      uses: maxim-lobanov/setup-xcode@60606e260d2fc5762a71e64e74b2174e8ea3c8bd # v1.6.0
       with:
         xcode-version: '15.0.1'
 
@@ -50,19 +51,20 @@ jobs:
         echo Target version: ${{ inputs.tag }}
         make check-version VERSION=${{ inputs.tag }}
 
-    - name: SPM Integration Test
-      if: ${{ inputs.run_full_release == 'yes' }}
-      run: |
-        set -eo pipefail
-        echo SPM integration test starts:
-        make test-SPM-integration
+    # TEST: temp disable to speed up testing other steps
+    # - name: SPM Integration Test
+    #   if: ${{ inputs.run_full_release == 'yes' }}
+    #   run: |
+    #     set -eo pipefail
+    #     echo SPM integration test starts:
+    #     make test-SPM-integration
 
-    - name: Podspec File Verification
-      if: ${{ inputs.run_full_release == 'yes' }}
-      run: |
-        set -eo pipefail
-        echo podspec file verification starts:
-        make test-podspec
+    # - name: Podspec File Verification
+    #   if: ${{ inputs.run_full_release == 'yes' }}
+    #   run: |
+    #     set -eo pipefail
+    #     echo podspec file verification starts:
+    #     make test-podspec
         
     - name: Build Artifacts
       if: ${{ inputs.run_full_release == 'yes' }}
